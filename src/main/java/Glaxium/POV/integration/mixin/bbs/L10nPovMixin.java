@@ -26,7 +26,7 @@ public class L10nPovMixin {
       at = {@At("RETURN")}
    )
    private void bbsPov$onReload(String lang, AssetProvider provider, CallbackInfo info) {
-      L10n l10n = (L10n)this;
+      L10n l10n = (L10n)(Object)(Object)this;
 
       for (Entry<String, String> entry : BBS_POV$STRINGS.entrySet()) {
          LangKey key = (LangKey)l10n.getStrings().get(entry.getKey());

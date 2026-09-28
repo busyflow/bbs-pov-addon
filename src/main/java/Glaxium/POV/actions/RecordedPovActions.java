@@ -104,7 +104,7 @@ public final class RecordedPovActions extends Clips {
    }
 
    public void clearAll() {
-      for (Clip clip : new ArrayList(this.get())) {
+      for (Clip clip : new ArrayList<Clip>(this.get())) {
          this.remove(clip);
       }
 
@@ -114,7 +114,7 @@ public final class RecordedPovActions extends Clips {
    public void trimForRecordingRange(int startTick, int endTick) {
       List<Clip> toAdd = new ArrayList<>();
 
-      for (Clip c : new ArrayList(this.get())) {
+      for (Clip c : new ArrayList<Clip>(this.get())) {
          int start = (Integer)c.tick.get();
          int duration = (Integer)c.duration.get();
          int end = start + duration;

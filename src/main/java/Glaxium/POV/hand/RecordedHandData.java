@@ -198,15 +198,15 @@ public final class RecordedHandData {
       };
    }
 
-   private static void addEndKeyframeUntyped(KeyframeChannel<?> channel, int tick) {
-      Object value = channel.interpolate((float)tick, null);
+   private static <T> void addEndKeyframeUntyped(KeyframeChannel<T> channel, int tick) {
+      T value = channel.interpolate((float)tick, null);
       if (value != null) {
          if (value instanceof Pose pose) {
-            value = pose.copy();
+            value = (T)pose.copy();
          } else if (value instanceof Transform transform) {
-            value = transform.copy();
+            value = (T)transform.copy();
          } else if (value instanceof Color color) {
-            value = color.copy();
+            value = (T)color.copy();
          }
 
          channel.insert((float)tick, value);

@@ -65,7 +65,7 @@ public abstract class UIFilmPanelPovMixin implements UIFilmPanelPovAccess {
       at = {@At("RETURN")}
    )
    private void bbsPov$installEditor(UIDashboard dashboard, CallbackInfo info) {
-      UIFilmPanel panel = (UIFilmPanel)this;
+      UIFilmPanel panel = (UIFilmPanel)(Object)this;
       this.bbsPov$editor = new UIPovEditor(panel);
       this.bbsPov$replayKeyframeEditor = panel.replayEditor.keyframeEditor;
       this.bbsPov$editor.full(this.cameraEditor);
@@ -307,7 +307,7 @@ public abstract class UIFilmPanelPovMixin implements UIFilmPanelPovAccess {
       at = {@At("HEAD")}
    )
    private void bbsPov$stopGizmoBeforeEditorSwitch(UIElement panel, CallbackInfo info) {
-      UIFilmPanel filmPanel = (UIFilmPanel)this;
+      UIFilmPanel filmPanel = (UIFilmPanel)(Object)this;
       if (this.bbsPov$editor != null && (panel == this.bbsPov$editor || this.bbsPov$editor.isVisible())) {
          filmPanel.getController().stopGizmoInteraction();
          Gizmo.INSTANCE.stop();
@@ -317,7 +317,7 @@ public abstract class UIFilmPanelPovMixin implements UIFilmPanelPovAccess {
    @Unique
    private void bbsPov$syncNativeKeyframeEditor(boolean povActive) {
       if (this.bbsPov$editor != null && this.bbsPov$replayKeyframeEditor != null) {
-         UIFilmPanel panel = (UIFilmPanel)this;
+         UIFilmPanel panel = (UIFilmPanel)(Object)this;
          panel.replayEditor.keyframeEditor = povActive ? this.bbsPov$editor.keyframeEditor : this.bbsPov$replayKeyframeEditor;
       }
    }
@@ -334,7 +334,7 @@ public abstract class UIFilmPanelPovMixin implements UIFilmPanelPovAccess {
 
    @Unique
    private void bbsPov$syncPovMode(boolean povActive) {
-      UIFilmPanel panel = (UIFilmPanel)this;
+      UIFilmPanel panel = (UIFilmPanel)(Object)this;
       if (panel.replayEditor != null) {
          if (panel.replayEditor.replaysList instanceof UIReplaysListPanelPovAccess access) {
             access.bbsPov$setPovMode(povActive);

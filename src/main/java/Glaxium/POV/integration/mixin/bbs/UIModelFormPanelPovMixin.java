@@ -29,9 +29,9 @@ public class UIModelFormPanelPovMixin {
          UIPovHandEditor editor = UIPovHandEditor.getActive();
          boolean isRoot = editor != null && form == editor.getRootForm();
          if (isRoot) {
-            if (((UIModelFormPanel)this).shapeKeysSection != null) {
-               ((UIModelFormPanel)this).shapeKeysSection.removeFromParent();
-               ((UIModelFormPanel)this).options.resize();
+            if (((UIModelFormPanel)(Object)this).shapeKeysSection != null) {
+               ((UIModelFormPanel)(Object)this).shapeKeysSection.removeFromParent();
+               ((UIModelFormPanel)(Object)this).options.resize();
             }
 
             UIPovHandEditor.filterModelPoseEditor(this.poseEditor, form);

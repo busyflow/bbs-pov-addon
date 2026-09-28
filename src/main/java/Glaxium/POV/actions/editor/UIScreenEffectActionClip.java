@@ -125,9 +125,9 @@ public class UIScreenEffectActionClip extends UIPovActionClip<ScreenEffectPovAct
          ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(effectId);
          String title = preset != null ? preset.name : effectId.toUpperCase();
          int folderColor = UIKeyframeEditor.COLORS[colorIdx++ % UIKeyframeEditor.COLORS.length];
-         String section = effectId.toLowerCase();
+         String effectKey = effectId.toLowerCase();
 
-         Icon sectionIcon = switch (section) {
+         Icon sectionIcon = switch (effectKey) {
             case "vignette" -> Icons.OUTLINE_SPHERE;
             case "night_vision" -> Icons.LIGHT;
             case "blindness" -> Icons.INVISIBLE;

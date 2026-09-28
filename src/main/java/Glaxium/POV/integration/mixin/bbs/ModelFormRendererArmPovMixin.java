@@ -90,11 +90,11 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
       cancellable = true
    )
    private void bbsPov$captureModelState(MatrixStack matrices, int light, Hand hand, CallbackInfoReturnable<Boolean> info) {
-      ((ModelFormRenderer)this).ensureAnimator(0.0F);
+      ((ModelFormRenderer)(Object)this).ensureAnimator(0.0F);
       if (PovHandPlayback.isActive() && !PovHandPlayback.shouldRenderModelHand(hand)) {
          info.setReturnValue(true);
       } else {
-         ModelInstance instance = ((ModelFormRenderer)this).getModel();
+         ModelInstance instance = ((ModelFormRenderer)(Object)this).getModel();
          if (instance != null && instance.getModel() != null) {
             this.bbsPov$armModel = instance;
             this.bbsPov$renderedHand = hand;
@@ -167,7 +167,7 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
                model.resetPose();
                Pose pose = PovHandPlayback.getRenderPose();
                if (pose == null && UIPovHandEditor.isActive()) {
-                  pose = ((ModelFormRenderer)this).getPose();
+                  pose = ((ModelFormRenderer)(Object)this).getPose();
                }
 
                if (pose != null) {
@@ -201,7 +201,7 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
       } else {
          StencilMap map = PovHandPicking.getStencilMap();
          if (PovHandPicking.isStencilPass() && map != null) {
-            ModelFormRenderer renderer = (ModelFormRenderer)this;
+            ModelFormRenderer renderer = (ModelFormRenderer)(Object)this;
             ModelInstance instance = renderer.getModel();
             if (instance != null && instance.getModel() != null && PovHandPicking.beginModelMapping(instance)) {
                instance.fillStencilMap(map, renderer.getForm());
@@ -271,7 +271,7 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
             this.bbsPov$renderedHand == Hand.MAIN_HAND ? instance.getFpMain() : instance.getFpOffhand(),
             renderBase,
             cache,
-            ((ModelFormRenderer)this).getPose()
+            ((ModelFormRenderer)(Object)this).getPose()
          );
       }
 
@@ -314,13 +314,13 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
    private void bbsPov$renderBothArmsInHandEditor(FormRenderingContext context, CallbackInfo info) {
       if (UIPovHandEditor.isActive()) {
          UIPovHandEditor editor = UIPovHandEditor.getActive();
-         if (editor == null || editor.getRootForm() == null || ((ModelFormRenderer)this).getForm() != editor.getRootForm()) {
+         if (editor == null || editor.getRootForm() == null || ((ModelFormRenderer)(Object)this).getForm() != editor.getRootForm()) {
             return;
          }
 
          info.cancel();
          this.bbsPov$editorSceneBase = new Matrix4f(context.stack.peek().getPositionMatrix());
-         ModelFormRenderer self = (ModelFormRenderer)this;
+         ModelFormRenderer self = (ModelFormRenderer)(Object)this;
          self.ensureAnimator(0.0F);
          this.bbsPov$activeFormContext = context;
          this.bbsPov$activeBaseTarget = context.isPicking() && context.stencilMap != null ? context.getPickingIndex() : 0;
@@ -434,7 +434,7 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
    private void bbsPov$cancelNativeBodyPartsInHandEditor(FormRenderingContext context, CallbackInfo info) {
       if (UIPovHandEditor.isActive()) {
          UIPovHandEditor editor = UIPovHandEditor.getActive();
-         if (editor != null && editor.getRootForm() != null && ((ModelFormRenderer)this).getForm() == editor.getRootForm()) {
+         if (editor != null && editor.getRootForm() != null && ((ModelFormRenderer)(Object)this).getForm() == editor.getRootForm()) {
             if (this.bones != null) {
                this.bones.clear();
             }
@@ -457,19 +457,19 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
       matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(200.0F));
       matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * -135.0F));
       matrices.translate(f * 5.6F, 0.0F, 0.0F);
-      ((ModelFormRenderer)this).renderArm(matrices, LightmapTextureManager.pack(15, 15), null, hand);
+      ((ModelFormRenderer)(Object)this).renderArm(matrices, LightmapTextureManager.pack(15, 15), null, hand);
       matrices.pop();
    }
 
    @Override
    public void bbsPov$renderBodyParts(int light, StencilMap stencilMap) {
-      if (!UIPovHandEditor.isActive() && this.form != null && ((ModelForm)this.form).parts != null) {
+      if (!UIPovHandEditor.isActive() && this.form != null && ((ModelForm)(Object)this.form).parts != null) {
          int partIndex = 0;
          boolean prevSuppress = PovHandPlayback.suppressFormTransform;
          PovHandPlayback.suppressFormTransform = true;
 
          try {
-            for (BodyPart part : ((ModelForm)this.form).parts.getAllTyped()) {
+            for (BodyPart part : ((ModelForm)(Object)this.form).parts.getAllTyped()) {
                Form partForm = part.getForm();
                if (partForm != null && (Boolean)partForm.visible.get()) {
                   MatrixStack stack = new MatrixStack();

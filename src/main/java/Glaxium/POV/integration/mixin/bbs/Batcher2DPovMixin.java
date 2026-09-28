@@ -21,7 +21,7 @@ public abstract class Batcher2DPovMixin {
    )
    private void bbsPov$onIcon(Icon icon, int color, float x, float y, float ax, float ay, CallbackInfo info) {
       if (icon == Icons.CURSOR && PovSettings.cursorTexture != null && PovSettings.cursorTexture.get() != null) {
-         Batcher2D batcher = (Batcher2D)this;
+         Batcher2D batcher = (Batcher2D)(Object)this;
          x -= (float)icon.w * ax;
          y -= (float)icon.h * ay;
          batcher.getContext().getMatrices().push();

@@ -26,7 +26,7 @@ public abstract class AnimatedResultButtonPovMixin {
    private void bbsPov$preventZeroDivideCrash(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
       List<Recipe<?>> results = this.getResults();
       if (results == null || results.isEmpty()) {
-         ((AnimatedResultButton)this).visible = false;
+         ((AnimatedResultButton)(Object)this).visible = false;
          info.cancel();
       }
    }

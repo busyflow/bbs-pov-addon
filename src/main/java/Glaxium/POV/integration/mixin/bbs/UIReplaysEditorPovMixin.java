@@ -44,9 +44,9 @@ public class UIReplaysEditorPovMixin {
    )
    private void bbsPov$selectOwnerReplayOnPick(Form form, String bone, boolean insert, CallbackInfo info) {
       if (form != null && this.filmPanel != null && this.filmPanel.getData() != null) {
-         UIReplaysEditor self = (UIReplaysEditor)this;
+         UIReplaysEditor self = (UIReplaysEditor)(Object)this;
          Form root = FormUtils.getRoot(form);
-         Film film = (Film)this.filmPanel.getData();
+         Film film = (Film)(Object)this.filmPanel.getData();
 
          for (Replay r : film.replays.getList()) {
             if (r != null && r.form.get() != null) {

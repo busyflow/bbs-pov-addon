@@ -61,7 +61,7 @@ public abstract class UIFormEditorPovMixin {
          UIPovHandEditor handEditor = UIPovHandEditor.getActive();
          if (handEditor != null) {
             if (this.isBodyPartGizmoMode() && this.formsList != null) {
-               FormEntry entry = (FormEntry)this.formsList.getCurrentFirst();
+               FormEntry entry = (FormEntry)(Object)this.formsList.getCurrentFirst();
                if (entry != null && entry.part != null) {
                   int partIndex = UIPovHandEditor.findBodyPartIndex(entry.part.getForm());
                   String formPath = FormUtils.getPath(entry.part.getForm());
@@ -210,8 +210,8 @@ public abstract class UIFormEditorPovMixin {
                   bbsPov$configureBodyPartDrag(dragx, dragOriginx);
                   Matrix4f fallbackMatrixx = capturedx == null ? new Matrix4f().translation(0.0F, 0.0F, -1.0F) : new Matrix4f(capturedx);
                   Supplier<Matrix4f> matrixx = () -> {
-                     Matrix4f value = PovHandMatrices.evaluateFull(bone, baseline, transform);
-                     return value == null ? new Matrix4f(fallbackMatrix) : value;
+                     Matrix4f value = PovHandMatrices.evaluateFull(bone, baselinex, transformx);
+                     return value == null ? new Matrix4f(fallbackMatrixx) : value;
                   };
                   TransformSpace spacex = modelForm.getGizmoSpace();
                   Matrix3f displayedBasisx = PovHandMatrices.getBasisForSpace(bone, spacex);
@@ -225,7 +225,7 @@ public abstract class UIFormEditorPovMixin {
                   }
 
                   dragx.setRotateAxes(GizmoDrag.computeRotateAxes(transformx, matrixx));
-                  dragx.setJacobian(GizmoDrag.computeTranslateJacobian(transformx, () -> matrix.get().getTranslation(new Vector3f())));
+                  dragx.setJacobian(GizmoDrag.computeTranslateJacobian(transformx, () -> matrixx.get().getTranslation(new Vector3f())));
                   dragx.setFrameAxes(PovHandMatrices.getForSpace(bone, TransformSpace.LOCAL), PovHandMatrices.getForSpace(bone, TransformSpace.PARENT));
                   info.setReturnValue(dragx);
                } else if (modelForm.form != null) {
@@ -282,20 +282,20 @@ public abstract class UIFormEditorPovMixin {
                   bbsPov$configureBodyPartDrag(dragxx, dragOriginxx);
                   Matrix4f fallbackMatrixxx = capturedxx == null ? new Matrix4f().translation(0.0F, 0.0F, -1.0F) : new Matrix4f(capturedxx);
                   Supplier<Matrix4f> matrixxx = () -> {
-                     Matrix4f value = PovHandMatrices.evaluateFull(key, baseline, transform);
-                     if (value == null && !fallbackKey1.equals(key)) {
-                        value = PovHandMatrices.evaluateFull(fallbackKey1, baseline, transform);
+                     Matrix4f value = PovHandMatrices.evaluateFull(keyx, baselinexx, transformxx);
+                     if (value == null && !fallbackKey1x.equals(keyx)) {
+                        value = PovHandMatrices.evaluateFull(fallbackKey1x, baselinexx, transformxx);
                      }
 
-                     if (value == null && !fallbackKey2.equals(key)) {
-                        value = PovHandMatrices.evaluateFull(fallbackKey2, baseline, transform);
+                     if (value == null && !fallbackKey2x.equals(keyx)) {
+                        value = PovHandMatrices.evaluateFull(fallbackKey2x, baselinexx, transformxx);
                      }
 
                      if (value == null) {
-                        value = UIPovHandEditor.evaluateBodyPartBoneMatrix(bodyPartModelForm, bone, baseline, transform, bodyPartBase);
+                        value = UIPovHandEditor.evaluateBodyPartBoneMatrix(bodyPartModelForm, bone, baselinexx, transformxx, bodyPartBase);
                      }
 
-                     return value == null ? new Matrix4f(fallbackMatrix) : value;
+                     return value == null ? new Matrix4f(fallbackMatrixxx) : value;
                   };
                   TransformSpace spacexx = modelForm.getGizmoSpace();
                   Matrix3f displayedBasisxx = PovHandMatrices.getBasisForSpace(keyx, spacexx);
@@ -325,7 +325,7 @@ public abstract class UIFormEditorPovMixin {
                   }
 
                   dragxx.setRotateAxes(GizmoDrag.computeRotateAxes(transformxx, matrixxx));
-                  dragxx.setJacobian(GizmoDrag.computeTranslateJacobian(transformxx, () -> matrix.get().getTranslation(new Vector3f())));
+                  dragxx.setJacobian(GizmoDrag.computeTranslateJacobian(transformxx, () -> matrixxx.get().getTranslation(new Vector3f())));
                   Matrix4f localMatx = PovHandMatrices.getForSpace(keyx, TransformSpace.LOCAL);
                   if (localMatx == null && !fallbackKey1x.equals(keyx)) {
                      localMatx = PovHandMatrices.getForSpace(fallbackKey1x, TransformSpace.LOCAL);
@@ -374,7 +374,7 @@ public abstract class UIFormEditorPovMixin {
    )
    private void bbsPov$getBodyPartGizmoOrigin(float transition, CallbackInfoReturnable<Matrix4f> info) {
       if (UIPovHandEditor.isActive() && this.isBodyPartGizmoMode() && this.formsList != null) {
-         FormEntry entry = (FormEntry)this.formsList.getCurrentFirst();
+         FormEntry entry = (FormEntry)(Object)this.formsList.getCurrentFirst();
          if (entry != null && entry.part != null) {
             Matrix4f base = UIPovHandEditor.getBodyPartBase(entry.part);
             info.setReturnValue(new Matrix4f(base));
@@ -389,7 +389,7 @@ public abstract class UIFormEditorPovMixin {
    )
    private void bbsPov$getBodyPartGizmoOriginMatrix(float transition, CallbackInfoReturnable<Matrix4f> info) {
       if (UIPovHandEditor.isActive() && this.isBodyPartGizmoMode() && this.formsList != null) {
-         FormEntry entry = (FormEntry)this.formsList.getCurrentFirst();
+         FormEntry entry = (FormEntry)(Object)this.formsList.getCurrentFirst();
          if (entry != null && entry.part != null) {
             Matrix4f base = UIPovHandEditor.getBodyPartBase(entry.part);
             info.setReturnValue(new Matrix4f(base));
@@ -404,7 +404,7 @@ public abstract class UIFormEditorPovMixin {
    )
    private void bbsPov$getBodyPartGizmoParentOriginMatrix(float transition, CallbackInfoReturnable<Matrix4f> info) {
       if (UIPovHandEditor.isActive() && this.isBodyPartGizmoMode() && this.formsList != null) {
-         FormEntry entry = (FormEntry)this.formsList.getCurrentFirst();
+         FormEntry entry = (FormEntry)(Object)this.formsList.getCurrentFirst();
          if (entry != null && entry.part != null) {
             Matrix4f parent = UIPovHandEditor.getBodyPartParent(entry.part);
             info.setReturnValue(new Matrix4f(parent));

@@ -346,7 +346,7 @@ public final class CreativeGuiRenderer implements GuiRenderer, GuiScreenChrome {
             GuiItemRenderer.ensureItemGroupsPopulated();
             ItemGroup searchTab = ItemGroups.getSearchGroup();
 
-            for (ItemStack stack : searchTab == null ? List.of() : searchTab.getSearchTabStacks()) {
+            for (ItemStack stack : searchTab == null ? List.<ItemStack>of() : searchTab.getSearchTabStacks()) {
                if (stack != null && !stack.isEmpty() && itemMatchesQuery(stack, lowered)) {
                   fallback.add(stack);
                }

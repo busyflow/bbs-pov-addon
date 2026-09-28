@@ -28,7 +28,7 @@ public abstract class MinecraftClientPovInputMixin {
       at = {@At("HEAD")}
    )
    private void bbsPov$detachLiveUseState(CallbackInfo info) {
-      MinecraftClient client = (MinecraftClient)this;
+      MinecraftClient client = (MinecraftClient)(Object)this;
       if (PovPlaybackContext.getActive() != null || PovPlaybackInput.isLocked()) {
          if (client.currentScreen instanceof HandledScreen
             || client.currentScreen instanceof BookScreen
@@ -54,7 +54,7 @@ public abstract class MinecraftClientPovInputMixin {
       at = {@At("TAIL")}
    )
    private void bbsPov$keepRecordingOpenGuis(CallbackInfo info) {
-      MinecraftClient client = (MinecraftClient)this;
+      MinecraftClient client = (MinecraftClient)(Object)this;
       if (client.isPaused()) {
          Screen screen = client.currentScreen;
          if (screen instanceof BookScreen

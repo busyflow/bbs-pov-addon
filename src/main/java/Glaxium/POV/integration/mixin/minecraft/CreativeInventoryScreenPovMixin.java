@@ -39,7 +39,7 @@ public abstract class CreativeInventoryScreenPovMixin {
          selectedTab,
          this.scrollPosition,
          box == null ? "" : box.getText(),
-         ((CreativeGuiExtensions)this).fabric_currentPage(),
+         ((CreativeGuiExtensions)(Object)this).fabric_currentPage(),
          box != null && box.isVisible() && box.isFocused(),
          selStart,
          selEnd

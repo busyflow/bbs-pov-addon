@@ -22,7 +22,7 @@ public abstract class AnvilScreenPovMixin {
       at = {@At("HEAD")}
    )
    private void bbsPov$captureAnvil(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
-      AnvilScreen screen = (AnvilScreen)this;
+      AnvilScreen screen = (AnvilScreen)(Object)this;
       AnvilScreenHandler handler = (AnvilScreenHandler)screen.getScreenHandler();
       Slot input = handler.getSlot(0);
       Slot addition = handler.getSlot(1);
@@ -31,7 +31,7 @@ public abstract class AnvilScreenPovMixin {
       int selStart = 0;
       int selEnd = 0;
       if (this.nameField != null) {
-         TextFieldWidgetPovAccessor access = (TextFieldWidgetPovAccessor)this.nameField;
+         TextFieldWidgetPovAccessor access = (TextFieldWidgetPovAccessor)(Object)this.nameField;
          selStart = access.bbsPov$getSelectionStart();
          selEnd = access.bbsPov$getSelectionEnd();
       }

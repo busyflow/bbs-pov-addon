@@ -23,7 +23,7 @@ public abstract class KeyframeChannelPovMixin {
    )
    private void bbsPov$copyOverRange(KeyframeChannel channel, int tick, CallbackInfo ci) {
       if (ActiveRecordingRange.isActive()) {
-         KeyframeChannel self = (KeyframeChannel)this;
+         KeyframeChannel self = (KeyframeChannel)(Object)this;
          if (self.getFactory() != channel.getFactory() || channel.isEmpty()) {
             ci.cancel();
             return;
@@ -59,7 +59,7 @@ public abstract class KeyframeChannelPovMixin {
       at = {@At("HEAD")}
    )
    private void bbsPov$removeGroupedSlotKeyframes(int index, CallbackInfo info) {
-      KeyframeChannel<?> channel = (KeyframeChannel<?>)this;
+      KeyframeChannel<?> channel = (KeyframeChannel<?>)(Object)this;
       if (index >= 0 && index < channel.getKeyframes().size() && channel.getParent() instanceof GuiPovActionClip clip && clip.isSlotAnchor(channel)) {
          float tick = channel.get(index).getTick();
          int anchorsAtTick = 0;
@@ -81,7 +81,7 @@ public abstract class KeyframeChannelPovMixin {
       at = {@At("HEAD")}
    )
    private void bbsPov$upgradeLayoutFactory(BaseType data, CallbackInfo info) {
-      KeyframeChannel<?> channel = (KeyframeChannel<?>)this;
+      KeyframeChannel<?> channel = (KeyframeChannel<?>)(Object)this;
       if (channel.getId() != null && channel.getId().contains("layout") && data != null && data.isMap()) {
          data.asMap().putString("type", "transform");
       }

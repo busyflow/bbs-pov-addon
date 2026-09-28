@@ -26,7 +26,7 @@ public class FilmEditorControllerPovMixin {
       cancellable = true
    )
    private void bbsPov$hideHeadLookSourceActor(WorldRenderContext context, Replay replay, IEntity entity, CallbackInfo info) {
-      FilmEditorController self = (FilmEditorController)this;
+      FilmEditorController self = (FilmEditorController)(Object)this;
       UIFilmController controller = self.controller;
       if (UIPovHandEditor.isActive() && replay == controller.panel.replayEditor.getReplay()) {
          info.cancel();

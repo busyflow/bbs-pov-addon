@@ -23,7 +23,7 @@ public class FirstPersonFilmControllerPovMixin {
       cancellable = true
    )
    private void bbsPov$hideHeadLookSourceActor(WorldRenderContext context, Replay replay, IEntity entity, CallbackInfo info) {
-      FirstPersonFilmController controller = (FirstPersonFilmController)this;
+      FirstPersonFilmController controller = (FirstPersonFilmController)(Object)this;
       Film film = controller.film;
       if (replay == film.getFirstPersonReplay()) {
          float transition = controller.paused ? 0.0F : Math.max(0.0F, Math.min(1.0F, context.tickDelta()));

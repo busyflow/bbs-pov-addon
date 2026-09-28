@@ -181,7 +181,7 @@ public class HeldItemRendererPovPickingMixin {
       if (PovHandPlayback.isActive() && hand == Hand.OFF_HAND && item.isEmpty() && !player.isInvisible()) {
          Arm arm = player.getMainArm().getOpposite();
          if (PovHandPlayback.shouldRenderArm(arm)) {
-            ((HeldItemRendererPovAccessor)this).bbsPov$renderArmHoldingItem(matrices, consumers, light, equipProgress, swingProgress, arm);
+            ((HeldItemRendererPovAccessor)(Object)this).bbsPov$renderArmHoldingItem(matrices, consumers, light, equipProgress, swingProgress, arm);
             info.cancel();
          }
       }

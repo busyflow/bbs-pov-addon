@@ -92,7 +92,7 @@ public final class GuiRecorder {
                boolean craftingChanged = false;
                boolean recordChest = !"donkey".equals(guiType) || this.recordingGuiClip.isMountChestOpen(guiType, localTick);
 
-               for (GuiSlotSchema.Slot slot : captureSlots ? schema.slots : List.of()) {
+               for (GuiSlotSchema.Slot slot : captureSlots ? schema.slots : List.<GuiSlotSchema.Slot>of()) {
                   if (!schema.isChestSlot(slot) || recordChest) {
                      ItemStack stack = snapshot.slots.getOrDefault(slot.id(), ItemStack.EMPTY);
                      boolean changed = this.recordItemChannel(this.recordingGuiClip.getGuiSlot(guiType, slot.id()), stack, localTick);

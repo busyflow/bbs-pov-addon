@@ -25,7 +25,7 @@ public class UIModelRendererPovMixin {
    )
    private void bbsPov$setupPosition(CallbackInfo info) {
       if (UIPovHandEditor.isActive()) {
-         UIModelRenderer self = (UIModelRenderer)this;
+         UIModelRenderer self = (UIModelRenderer)(Object)this;
          self.camera.position.set(0.0, 0.0, 0.0);
          info.cancel();
       }

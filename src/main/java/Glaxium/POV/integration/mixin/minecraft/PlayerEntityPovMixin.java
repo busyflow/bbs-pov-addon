@@ -20,7 +20,7 @@ public abstract class PlayerEntityPovMixin {
       if (replayName != null && !replayName.isEmpty()) {
          cir.setReturnValue(Text.literal(replayName));
       } else {
-         PlayerEntity self = (PlayerEntity)this;
+         PlayerEntity self = (PlayerEntity)(Object)this;
          String morphName = ChatMorphHelper.getPlayerMorphName(self);
          if (morphName != null && !morphName.isEmpty()) {
             cir.setReturnValue(Text.literal(morphName));
@@ -38,7 +38,7 @@ public abstract class PlayerEntityPovMixin {
       if (replayName != null && !replayName.isEmpty()) {
          cir.setReturnValue(Text.literal(replayName));
       } else {
-         PlayerEntity self = (PlayerEntity)this;
+         PlayerEntity self = (PlayerEntity)(Object)this;
          String morphName = ChatMorphHelper.getPlayerMorphName(self);
          if (morphName != null && !morphName.isEmpty()) {
             cir.setReturnValue(Text.literal(morphName));

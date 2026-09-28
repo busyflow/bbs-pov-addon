@@ -25,7 +25,7 @@ public abstract class EnchantmentScreenPovMixin {
       at = {@At("HEAD")}
    )
    private void bbsPov$captureEnchantment(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
-      EnchantmentScreen screen = (EnchantmentScreen)this;
+      EnchantmentScreen screen = (EnchantmentScreen)(Object)this;
       EnchantmentScreenHandler handler = (EnchantmentScreenHandler)screen.getScreenHandler();
       MinecraftClient client = MinecraftClient.getInstance();
       ClientPlayerEntity player = client.player;

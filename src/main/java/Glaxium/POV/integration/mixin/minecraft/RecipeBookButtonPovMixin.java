@@ -24,7 +24,7 @@ public abstract class RecipeBookButtonPovMixin {
    )
    private void bbsPov$captureRecipeButton(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
       if (RECIPE_BUTTON_TEXTURE.equals(this.texture)) {
-         GuiSnapshotCapture.updateRecipeButton(((TexturedButtonWidget)this).isSelected());
+         GuiSnapshotCapture.updateRecipeButton(((TexturedButtonWidget)(Object)this).isSelected());
       }
    }
 }

@@ -26,7 +26,7 @@ final class ParticleEffects {
       } else if (type instanceof DefaultParticleType) {
          return (DefaultParticleType)type;
       } else if (type == ParticleTypes.BLOCK || type == ParticleTypes.BLOCK_MARKER || type == ParticleTypes.FALLING_DUST) {
-         return new BlockStateParticleEffect(type, resolveBlock((String)clip.blockId.get()).getDefaultState());
+         return new BlockStateParticleEffect((ParticleType<BlockStateParticleEffect>) type, resolveBlock((String)clip.blockId.get()).getDefaultState());
       } else if (type == ParticleTypes.ITEM) {
          return new ItemStackParticleEffect(ParticleTypes.ITEM, clip.extraItem());
       } else {

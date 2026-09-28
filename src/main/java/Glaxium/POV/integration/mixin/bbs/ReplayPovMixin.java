@@ -35,7 +35,7 @@ public class ReplayPovMixin implements ReplayPovAccess {
       at = {@At("RETURN")}
    )
    private void bbsPov$addReplaySettings(String id, CallbackInfo info) {
-      Replay replay = (Replay)this;
+      Replay replay = (Replay)(Object)this;
       this.bbsPov$overlayEnabled = new ValueBoolean("bbs_pov_enabled", false);
       this.bbsPov$hardcoreLook = new ValueBoolean("bbs_pov_hardcore_look", false);
       this.bbsPov$cameraShake = new ValueBoolean("bbs_pov_camera_shake", true);

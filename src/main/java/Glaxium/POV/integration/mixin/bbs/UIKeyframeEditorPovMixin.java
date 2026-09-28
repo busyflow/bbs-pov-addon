@@ -27,7 +27,7 @@ public abstract class UIKeyframeEditorPovMixin extends UITimelinePanel {
       at = {@At("TAIL")}
    )
    private void bbsPov$dynamicallyAdjustViewWidth(Keyframe keyframe, CallbackInfo info) {
-      UIKeyframeEditor self = (UIKeyframeEditor)this;
+      UIKeyframeEditor self = (UIKeyframeEditor)(Object)this;
       if (self.view != null) {
          if (this.target == null) {
             if (this.editor != null) {

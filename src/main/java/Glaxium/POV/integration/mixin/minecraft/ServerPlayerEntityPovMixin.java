@@ -18,7 +18,7 @@ public abstract class ServerPlayerEntityPovMixin {
       cancellable = true
    )
    private void bbsPov$cancelPlaybackDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-      if (PovPlayerProtection.contains((ServerPlayerEntity)this)) {
+      if (PovPlayerProtection.contains((ServerPlayerEntity)(Object)this)) {
          info.setReturnValue(false);
       }
    }
@@ -33,7 +33,7 @@ public abstract class ServerPlayerEntityPovMixin {
       if (replayName != null && !replayName.isEmpty()) {
          cir.setReturnValue(Text.literal(replayName));
       } else {
-         ServerPlayerEntity self = (ServerPlayerEntity)this;
+         ServerPlayerEntity self = (ServerPlayerEntity)(Object)this;
          String morphName = ChatMorphHelper.getPlayerMorphName(self);
          if (morphName != null && !morphName.isEmpty()) {
             cir.setReturnValue(Text.literal(morphName));

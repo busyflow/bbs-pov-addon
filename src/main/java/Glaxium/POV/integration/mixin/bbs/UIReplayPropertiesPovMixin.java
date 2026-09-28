@@ -9,6 +9,7 @@ import Glaxium.POV.integration.access.bbs.UIReplayPropertiesPovAccess;
 import Glaxium.POV.replay.ReplayPovAccess;
 import java.util.function.Consumer;
 import mchorse.bbs_mod.film.replays.Replay;
+import mchorse.bbs_mod.film.replays.tracks.TimelineBodyPartSelection;
 import mchorse.bbs_mod.forms.FormUtils;
 import mchorse.bbs_mod.forms.forms.Form;
 import mchorse.bbs_mod.l10n.keys.IKey;
@@ -167,7 +168,7 @@ public abstract class UIReplayPropertiesPovMixin implements UIReplayPropertiesPo
 
                   if (this.filmPanel.replayEditor != null && this.filmPanel.replayEditor.replaysList != null) {
                      this.filmPanel.replayEditor.replaysList.replays.update();
-                     this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(currentReplay, "");
+                     this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(currentReplay, new TimelineBodyPartSelection());
                   }
                });
                if (palette != null) {

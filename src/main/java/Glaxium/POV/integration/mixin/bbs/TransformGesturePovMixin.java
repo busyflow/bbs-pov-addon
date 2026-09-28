@@ -143,8 +143,8 @@ public abstract class TransformGesturePovMixin {
          }
 
          if (this.cache != null) {
-            this.bbsPov$startTranslateX = (double)this.cache.translate.x;
-            this.bbsPov$startTranslateY = (double)this.cache.translate.y;
+            this.bbsPov$startTranslateX = (double)(Object)this.cache.translate.x;
+            this.bbsPov$startTranslateY = (double)(Object)this.cache.translate.y;
          }
       }
    }
@@ -206,7 +206,7 @@ public abstract class TransformGesturePovMixin {
                newY = (double)Math.round(newY);
             }
 
-            this.host.setT(null, newX, newY, this.cache != null ? (double)this.cache.translate.z : 0.0);
+            this.host.setT(null, newX, newY, this.cache != null ? (double)(Object)this.cache.translate.z : 0.0);
             this.host.refreshFields();
             info.cancel();
          }

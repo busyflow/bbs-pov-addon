@@ -25,7 +25,7 @@ public abstract class UseItemActionClipPovMixin {
    private void bbsPov$filterRejectedUse(LivingEntity actor, SuperFakePlayer fakePlayer, Film film, Replay replay, int tick, CallbackInfo info) {
       if (replay.keyframes instanceof ReplayKeyframesPovAccess access) {
          RecordedHandData var12 = access.bbsPov$getHand();
-         boolean mainHand = (Boolean)((UseItemActionClip)this).hand.get();
+         boolean mainHand = (Boolean)((UseItemActionClip)(Object)this).hand.get();
          int expected = mainHand ? 1 : 2;
          int active = var12 == null ? 0 : (Integer)var12.activeHand.interpolate((float)tick, 0);
          if (active != expected) {

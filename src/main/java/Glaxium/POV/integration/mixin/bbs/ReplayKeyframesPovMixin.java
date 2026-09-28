@@ -29,11 +29,11 @@ public class ReplayKeyframesPovMixin implements ReplayKeyframesPovAccess {
    )
    private void bbsPov$addChannels(String id, CallbackInfo info) {
       this.bbsPov$hud = new RecordedHudData();
-      this.bbsPov$hud.addTo((ReplayKeyframes)this);
+      this.bbsPov$hud.addTo((ReplayKeyframes)(Object)this);
       this.bbsPov$hand = new RecordedHandData();
-      this.bbsPov$hand.addTo((ReplayKeyframes)this);
+      this.bbsPov$hand.addTo((ReplayKeyframes)(Object)this);
       this.bbsPov$actions = new RecordedPovActions();
-      ((ReplayKeyframes)this).add(this.bbsPov$actions);
+      ((ReplayKeyframes)(Object)this).add(this.bbsPov$actions);
    }
 
    @Override

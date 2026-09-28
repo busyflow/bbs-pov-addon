@@ -54,9 +54,9 @@ public abstract class UIGeneralFormPanelPovMixin extends UIFormPanel {
       }
 
       if (this.options != null) {
-         UISection transformSection = this.transform != null ? (UISection)this.transform.getParent(UISection.class) : null;
-         UISection hitboxSection = this.hitbox != null ? (UISection)this.hitbox.getParent(UISection.class) : null;
-         UISection movementSection = this.hp != null ? (UISection)this.hp.getParent(UISection.class) : null;
+         UISection transformSection = this.transform != null ? (UISection)(Object)this.transform.getParent(UISection.class) : null;
+         UISection hitboxSection = this.hitbox != null ? (UISection)(Object)this.hitbox.getParent(UISection.class) : null;
+         UISection movementSection = this.hp != null ? (UISection)(Object)this.hp.getParent(UISection.class) : null;
          if (transformSection != null) {
             transformSection.setVisible(!isPov);
          }

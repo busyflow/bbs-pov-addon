@@ -36,7 +36,7 @@ public class RecorderPovMixin implements RecorderPovAccess {
       at = {@At("RETURN")}
    )
    private void bbsPov$startSession(Film film, Form form, int replayIndex, int tick, CallbackInfo info) {
-      this.bbsPov$session = PovRecordingSession.start((Recorder)this, film, form, replayIndex, tick);
+      this.bbsPov$session = PovRecordingSession.start((Recorder)(Object)this, film, form, replayIndex, tick);
    }
 
    @Inject(
@@ -45,7 +45,7 @@ public class RecorderPovMixin implements RecorderPovAccess {
    )
    private void bbsPov$recordFrame(CallbackInfo info) {
       if (this.bbsPov$session != null) {
-         this.bbsPov$session.recordFrame((Recorder)this);
+         this.bbsPov$session.recordFrame((Recorder)(Object)this);
       }
    }
 
@@ -55,7 +55,7 @@ public class RecorderPovMixin implements RecorderPovAccess {
    )
    private void bbsPov$finishSession(CallbackInfo info) {
       if (this.bbsPov$session != null) {
-         this.bbsPov$session.finish((Recorder)this);
+         this.bbsPov$session.finish((Recorder)(Object)this);
       }
    }
 }

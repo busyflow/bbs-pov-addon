@@ -74,7 +74,7 @@ public abstract class GameRendererHandPovMixin {
          if (player == null) {
             PovHandPlayback.end();
          } else {
-            GameRenderer renderer = (GameRenderer)this;
+            GameRenderer renderer = (GameRenderer)(Object)this;
             double fov = 70.0;
             Matrix4f handProjection = renderer.getBasicProjectionMatrix(fov);
             int videoWidth = BBSRendering.getVideoWidth();

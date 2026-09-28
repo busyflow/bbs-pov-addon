@@ -84,7 +84,7 @@ public class UIFilmControllerPovMixin {
       at = {@At("TAIL")}
    )
    private void bbsPov$applyHardcoreLookInPovMode(Camera camera, float transition, int mode, CallbackInfo info) {
-      UIFilmController controller = (UIFilmController)this;
+      UIFilmController controller = (UIFilmController)(Object)this;
       if (controller.getPovMode() == 6
          && this.panel.replayEditor.getReplay() instanceof ReplayPovAccess access
          && (Boolean)access.bbsPov$getHardcoreLook().get()) {
@@ -117,7 +117,8 @@ public class UIFilmControllerPovMixin {
             }
 
             if (!map.has(headBone)) {
-               for (String bone : formRenderer.getBones()) {
+               for (Object boneObj : formRenderer.getBones()) {
+                  String bone = String.valueOf(boneObj);
                   if (bone.equalsIgnoreCase("head") || bone.toLowerCase().endsWith("head")) {
                      headBone = bone;
                      break;
@@ -154,7 +155,7 @@ public class UIFilmControllerPovMixin {
       )
    )
    private void bbsPov$hideRecordingCameraPreview(Position position, net.minecraft.client.render.Camera camera, MatrixStack matrices) {
-      UIFilmController controller = (UIFilmController)this;
+      UIFilmController controller = (UIFilmController)(Object)this;
       if (controller.getPovMode() != 6) {
          Recorder.renderCameraPreview(position, camera, matrices);
       }
@@ -188,7 +189,7 @@ public class UIFilmControllerPovMixin {
       cancellable = true
    )
    private void bbsPov$useHandGizmoProjection(CallbackInfoReturnable<Matrix4f> info) {
-      UIFilmController controller = (UIFilmController)this;
+      UIFilmController controller = (UIFilmController)(Object)this;
       Matrix4f projection = PovHandPicking.getProjection();
       if (controller.getPovMode() == 6
          && this.panel instanceof UIFilmPanelPovAccess access
@@ -205,7 +206,7 @@ public class UIFilmControllerPovMixin {
       cancellable = true
    )
    private void bbsPov$usePovEditorBone(CallbackInfoReturnable<Pair<String, TransformSpace>> info) {
-      UIFilmController controller = (UIFilmController)this;
+      UIFilmController controller = (UIFilmController)(Object)this;
       if (controller.getPovMode() == 6
          && this.panel instanceof UIFilmPanelPovAccess access
          && access.bbsPov$getEditor() != null
@@ -219,7 +220,7 @@ public class UIFilmControllerPovMixin {
       at = {@At("HEAD")}
    )
    private void bbsPov$refreshVisibleGizmo(UIContext context, PreviewHud hud, Area area, CallbackInfo info) {
-      if (((UIFilmController)this).getPovMode() == 6) {
+      if (((UIFilmController)(Object)this).getPovMode() == 6) {
          PovHandGizmo.captureVisual();
       }
    }
@@ -230,7 +231,7 @@ public class UIFilmControllerPovMixin {
       cancellable = true
    )
    private void bbsPov$isolateGizmoInPovCamera(CallbackInfoReturnable<Boolean> info) {
-      UIFilmController controller = (UIFilmController)this;
+      UIFilmController controller = (UIFilmController)(Object)this;
       if (controller.getPovMode() == 6) {
          info.setReturnValue(UIBaseMenu.shouldRenderAxes() && !controller.isRecording() && this.bbsPov$getHandGizmoTransform() != null);
       }
@@ -241,7 +242,7 @@ public class UIFilmControllerPovMixin {
       at = {@At("HEAD")}
    )
    private void bbsPov$stopOldGizmoWhenCameraChanges(int mode, CallbackInfo info) {
-      UIFilmController controller = (UIFilmController)this;
+      UIFilmController controller = (UIFilmController)(Object)this;
       if (mode == 6 || controller.getPovMode() == 6) {
          controller.stopGizmoInteraction();
          Gizmo.INSTANCE.stop();
@@ -256,7 +257,7 @@ public class UIFilmControllerPovMixin {
       )
    )
    private boolean bbsPov$startHandGizmo(UIFilmPanel panel, UIContext context, int index, float transition) {
-      UIFilmController controller = (UIFilmController)this;
+      UIFilmController controller = (UIFilmController)(Object)this;
       UIPropTransform transform = this.bbsPov$getHandGizmoTransform();
       if (controller.getPovMode() == 6 && transform != null) {
          GizmoDrag drag = UIReplaysEditorUtils.buildFilmGizmoDrag(panel, panel.getCamera(), panel.preview.getViewport(), transform, transition);
@@ -293,7 +294,7 @@ public class UIFilmControllerPovMixin {
       cancellable = true
    )
    private void bbsPov$pickHandBeforeReplayController(UIContext context, CallbackInfoReturnable<Boolean> info) {
-      UIFilmController controller = (UIFilmController)this;
+      UIFilmController controller = (UIFilmController)(Object)this;
       if (controller.getPovMode() == 6 && this.bbsPov$getHandGizmoTransform() != null && context.mouseButton == 0 && controller.picker.getStencil().hasPicked()
          )
        {

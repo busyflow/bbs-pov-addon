@@ -18,7 +18,7 @@ public abstract class KeyframePovMixin {
       at = {@At("HEAD")}
    )
    private void bbsPov$moveGroupedSlotKeyframes(float tick, boolean notify, CallbackInfo info) {
-      Keyframe<?> keyframe = (Keyframe<?>)this;
+      Keyframe<?> keyframe = (Keyframe<?>)(Object)this;
       if (Math.abs(keyframe.getTick() - tick) >= 1.0E-4F
          && keyframe.getParent() instanceof KeyframeChannel<?> channel
          && channel.getParent() instanceof GuiPovActionClip clip

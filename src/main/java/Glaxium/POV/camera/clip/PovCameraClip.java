@@ -225,7 +225,8 @@ public class PovCameraClip extends CameraClip {
             }
 
             if (!map.has(headBone)) {
-               for (String bone : formRenderer.getBones()) {
+               for (Object boneObj : formRenderer.getBones()) {
+                  String bone = String.valueOf(boneObj);
                   if (bone.equalsIgnoreCase("head") || bone.toLowerCase().endsWith("head")) {
                      headBone = bone;
                      break;

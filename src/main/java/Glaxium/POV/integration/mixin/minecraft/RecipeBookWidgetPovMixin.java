@@ -68,7 +68,7 @@ public abstract class RecipeBookWidgetPovMixin {
       int selStart = 0;
       int selEnd = 0;
       if (this.searchField != null) {
-         TextFieldWidgetPovAccessor access = (TextFieldWidgetPovAccessor)this.searchField;
+         TextFieldWidgetPovAccessor access = (TextFieldWidgetPovAccessor)(Object)this.searchField;
          selStart = access.bbsPov$getSelectionStart();
          selEnd = access.bbsPov$getSelectionEnd();
       }

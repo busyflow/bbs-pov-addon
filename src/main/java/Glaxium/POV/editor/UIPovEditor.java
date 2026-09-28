@@ -28,6 +28,7 @@ import mchorse.bbs_mod.BBSSettings;
 import mchorse.bbs_mod.cubic.ModelInstance;
 import mchorse.bbs_mod.film.Film;
 import mchorse.bbs_mod.film.replays.Replay;
+import mchorse.bbs_mod.film.replays.tracks.TimelineBodyPartSelection;
 import mchorse.bbs_mod.film.replays.tracks.TrackCatalog;
 import mchorse.bbs_mod.film.replays.tracks.TrackDescriptor;
 import mchorse.bbs_mod.film.replays.tracks.TrackKind;
@@ -160,7 +161,9 @@ public final class UIPovEditor extends UIElement {
             }
 
             if (this.filmPanel.replayEditor.replaysList != null) {
-               this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(this.replay, path);
+               TimelineBodyPartSelection selection = new TimelineBodyPartSelection();
+               selection.focus(path);
+               this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(this.replay, selection);
                this.filmPanel.replayEditor.replaysList.bodyParts.setCurrentPath(path);
                this.filmPanel.replayEditor.replaysList.resize();
             }
@@ -844,7 +847,9 @@ public final class UIPovEditor extends UIElement {
       if (signature != this.bodyPartSignature) {
          this.bodyPartSignature = signature;
          if (this.filmPanel != null && this.filmPanel.replayEditor != null && this.filmPanel.replayEditor.replaysList != null) {
-            this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(this.replay, this.selectedBodyPart);
+            TimelineBodyPartSelection selection = new TimelineBodyPartSelection();
+            selection.focus(this.selectedBodyPart);
+            this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(this.replay, selection);
             this.filmPanel.replayEditor.replaysList.resize();
          }
 

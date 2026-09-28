@@ -151,7 +151,7 @@ public class UIFilmControllerPovMixin {
       method = {"renderFrame"},
       at = @At(
          value = "INVOKE",
-         target = "Lmchorse/bbs_mod/film/Recorder;renderCameraPreview"
+         target = "Lmchorse/bbs_mod/film/Recorder;renderCameraPreview(Lmchorse/bbs_mod/camera/values/Position;Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/util/math/MatrixStack;)V"
       )
    )
    private void bbsPov$hideRecordingCameraPreview(Position position, net.minecraft.client.render.Camera camera, MatrixStack matrices) {

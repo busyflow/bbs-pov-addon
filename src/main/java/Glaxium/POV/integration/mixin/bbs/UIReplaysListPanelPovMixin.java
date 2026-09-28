@@ -8,6 +8,7 @@ import Glaxium.POV.integration.access.bbs.UIReplaysListPanelPovAccess;
 import java.util.List;
 import java.util.function.Consumer;
 import mchorse.bbs_mod.film.replays.Replay;
+import mchorse.bbs_mod.film.replays.tracks.TimelineBodyPartSelection;
 import mchorse.bbs_mod.forms.forms.Form;
 import mchorse.bbs_mod.l10n.keys.IKey;
 import mchorse.bbs_mod.ui.film.UIFilmPanel;
@@ -24,7 +25,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(
    value = {UIReplaysListPanel.class},
@@ -61,7 +61,7 @@ public abstract class UIReplaysListPanelPovMixin extends UIElement implements UI
       method = {"<init>"},
       at = {@At("RETURN")}
    )
-   private void bbsPov$init(UIFilmPanel panel, Consumer<List<Replay>> callback, Consumer<Form> formConsumer, Consumer<String> partConsumer, CallbackInfo info) {
+   private void bbsPov$init(UIFilmPanel panel, Consumer<List<Replay>> callback, Consumer<Form> formConsumer, Consumer<List<FormEntry>> partConsumer, CallbackInfo info) {
       this.bbsPov$povBodyParts = new UIForms(list -> {
          if (!list.isEmpty()) {
             String path = ((FormEntry)list.get(0)).getPath();
@@ -86,7 +86,7 @@ public abstract class UIReplaysListPanelPovMixin extends UIElement implements UI
       method = {"setBodyPartsReplay"},
       at = {@At("TAIL")}
    )
-   private void bbsPov$updatePovBodyParts(Replay replay, String path, CallbackInfoReturnable<String> info) {
+   private void bbsPov$updatePovBodyParts(Replay replay, TimelineBodyPartSelection selection, CallbackInfo info) {
       if (this.bbsPov$povBodyParts != null) {
          if (replay != null && replay.keyframes instanceof ReplayKeyframesPovAccess keyAccess) {
             RecordedHandData hand = keyAccess.bbsPov$getHand();
@@ -125,13 +125,14 @@ public abstract class UIReplaysListPanelPovMixin extends UIElement implements UI
          this.bbsPov$povBodyParts.h(Math.max(1, Math.min(rowsHeight2, maxHeight)));
       }
 
-      this.bodyPartsSection.setVisible(hasReplay && !pov);
+      boolean defaultVisible = !TimelineBodyPartSelection.allParts() && hasReplay && this.bodyParts.getList().size() > 1;
+      this.bodyPartsSection.setVisible(defaultVisible && !pov);
       if (this.bbsPov$povBodyPartsSection != null) {
          this.bbsPov$povBodyPartsSection.setVisible(hasReplay && pov);
       }
 
-      UISection activeSection = pov ? this.bbsPov$povBodyPartsSection : this.bodyPartsSection;
-      this.replays.hTo(hasReplay && activeSection != null ? activeSection.area : this.content.area, hasReplay ? 0.0F : 1.0F);
+      boolean sectionVisible = pov ? (hasReplay && this.bbsPov$povBodyPartsSection != null && this.bbsPov$povBodyPartsSection.isVisible()) : defaultVisible;
+      this.replays.hTo(sectionVisible ? (pov ? this.bbsPov$povBodyPartsSection.area : this.bodyPartsSection.area) : this.content.area, sectionVisible ? 0.0F : 1.0F);
       super.resize();
    }
 

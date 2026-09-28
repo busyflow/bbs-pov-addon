@@ -125,7 +125,7 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
       method = {"renderFirstPersonHand"},
       at = {@At(
          value = "INVOKE",
-         target = "Lmchorse/bbs_mod/forms/renderers/ModelFormRenderer;renderModel",
+         target = "Lmchorse/bbs_mod/forms/renderers/ModelFormRenderer;renderModel(Lmchorse/bbs_mod/forms/entities/IEntity;Ljava/util/function/Supplier;Lnet/minecraft/client/util/math/MatrixStack;Lmchorse/bbs_mod/cubic/ModelInstance;IILmchorse/bbs_mod/utils/colors/Color;Lmchorse/bbs_mod/utils/colors/Color;ZLmchorse/bbs_mod/ui/framework/elements/utils/StencilMap;FLnet/minecraft/client/util/math/MatrixStack;)V",
          shift = Shift.BEFORE
       )}
    )
@@ -139,7 +139,7 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
       method = {"renderModel"},
       at = {@At(
          value = "INVOKE",
-         target = "Lmchorse/bbs_mod/cubic/ModelInstance;render",
+         target = "Lmchorse/bbs_mod/cubic/ModelInstance;render(Lnet/minecraft/client/util/math/MatrixStack;Ljava/util/function/Supplier;Lmchorse/bbs_mod/utils/colors/Color;IILmchorse/bbs_mod/ui/framework/elements/utils/StencilMap;Lmchorse/bbs_mod/obj/shapes/ShapeKeys;Ljava/util/function/Function;)V",
          shift = Shift.BEFORE
       )}
    )
@@ -191,7 +191,7 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
       method = {"renderFirstPersonHand"},
       at = @At(
          value = "INVOKE",
-         target = "Lmchorse/bbs_mod/forms/renderers/ModelFormRenderer;renderModel"
+         target = "Lmchorse/bbs_mod/forms/renderers/ModelFormRenderer;renderModel(Lmchorse/bbs_mod/forms/entities/IEntity;Ljava/util/function/Supplier;Lnet/minecraft/client/util/math/MatrixStack;Lmchorse/bbs_mod/cubic/ModelInstance;IILmchorse/bbs_mod/utils/colors/Color;Lmchorse/bbs_mod/utils/colors/Color;ZLmchorse/bbs_mod/ui/framework/elements/utils/StencilMap;FLnet/minecraft/client/util/math/MatrixStack;)V"
       ),
       index = 9
    )
@@ -218,7 +218,7 @@ public abstract class ModelFormRendererArmPovMixin extends FormRenderer<ModelFor
       method = {"renderFirstPersonHand"},
       at = @At(
          value = "INVOKE",
-         target = "Lmchorse/bbs_mod/forms/renderers/ModelFormRenderer;renderModel"
+         target = "Lmchorse/bbs_mod/forms/renderers/ModelFormRenderer;renderModel(Lmchorse/bbs_mod/forms/entities/IEntity;Ljava/util/function/Supplier;Lnet/minecraft/client/util/math/MatrixStack;Lmchorse/bbs_mod/cubic/ModelInstance;IILmchorse/bbs_mod/utils/colors/Color;Lmchorse/bbs_mod/utils/colors/Color;ZLmchorse/bbs_mod/ui/framework/elements/utils/StencilMap;FLnet/minecraft/client/util/math/MatrixStack;)V"
       ),
       index = 1
    )

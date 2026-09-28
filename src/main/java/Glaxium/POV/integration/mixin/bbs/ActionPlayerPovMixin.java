@@ -27,7 +27,7 @@ public abstract class ActionPlayerPovMixin {
       method = {"<init>"},
       at = @At(
          value = "INVOKE",
-         target = "Lmchorse/bbs_mod/actions/ActionPlayer;applyFilmPlayerSettingsTo"
+         target = "Lmchorse/bbs_mod/actions/ActionPlayer;applyFilmPlayerSettingsTo(Lnet/minecraft/server/network/ServerPlayerEntity;FFIF)V"
       )
    )
    private void bbsPov$preserveRealHealth(ServerPlayerEntity player, float filmHealth, float filmHunger, int filmXpLevel, float filmXpProgress) {

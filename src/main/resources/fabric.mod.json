@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "bbs_pov",
+  "version": "1.0.0-1.20.1",
+  "name": "BBS-POV",
+  "description": "Adds an actor-based POV Editor with automatically recorded HUD and hand keyframes to BBS 2.5.",
+  "authors": ["GlaxiumDev"],
+  "contact": {
+    "sources": "https://github.com/GlaxiumDev/BBS-POV"
+  },
+  "license": "MIT",
+  "icon": "assets/bbs_pov/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "Glaxium.POV.PovAddon"
+    ]
+  },
+  "mixins": [
+    "bbs-pov.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "fabric-api": "*",
+    "java": ">=17",
+    "minecraft": "~1.20.1",
+    "bbs": ">=2.7-1.20.1"
+  }
+}

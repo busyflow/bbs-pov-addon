@@ -1,0 +1,156 @@
+package Glaxium.POV.actions.editor;
+
+import Glaxium.POV.actions.clip.MenuPovActionClip;
+import Glaxium.POV.actions.menu.MenuTypeEntry;
+import mchorse.bbs_mod.l10n.keys.IKey;
+import mchorse.bbs_mod.ui.film.IUIClipsDelegate;
+import mchorse.bbs_mod.ui.film.utils.keyframes.UIFilmKeyframes;
+import mchorse.bbs_mod.ui.framework.UIContext;
+import mchorse.bbs_mod.ui.framework.elements.UIElement;
+import mchorse.bbs_mod.ui.framework.elements.buttons.UIButton;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeEditor;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet;
+import mchorse.bbs_mod.ui.utils.icons.Icons;
+
+public class UIMenuActionClip extends UIPovActionClip<MenuPovActionClip> {
+   public UIButton editKeyframes;
+   public UIButton menuType;
+   public UIKeyframeEditor keyframes;
+   public UIElement menuKeyframesSection;
+
+   public UIMenuActionClip(MenuPovActionClip clip, IUIClipsDelegate editor) {
+      super(clip, editor);
+   }
+
+   @Override
+   protected void registerUI() {
+      super.registerUI();
+      this.keyframes = new UIKeyframeEditor(consumer -> new UIFilmKeyframes(this.editor, consumer));
+      this.keyframes.view.duration(() -> (Integer)((MenuPovActionClip)this.clip).duration.get());
+      this.editKeyframes = new UIButton(IKey.constant("Edit Keyframes"), button -> {
+         this.updateKeyframeSheets();
+         this.editor.embedView(this.keyframes);
+         this.keyframes.view.resetView();
+         if (this.keyframes.view.getGraph() != null) {
+            this.keyframes.view.getGraph().clearSelection();
+         }
+      });
+      this.menuType = new UIButton(IKey.constant("Menu Type"), button -> {
+         MenuTypeEntry next = MenuTypeEntry.next(((MenuPovActionClip)this.clip).resolveType());
+         this.editor.editMultiple(((MenuPovActionClip)this.clip).state, channel -> {
+            if (channel.isEmpty()) {
+               channel.insert(0.0F, next.id);
+            } else {
+               channel.get(0).setValue(next.id);
+            }
+         });
+         this.updateMenuTypeButton(next.id);
+         this.updateKeyframeSectionVisibility();
+         this.updateKeyframeSheets();
+      });
+   }
+
+   private void updateKeyframeSheets() {
+      String type = ((MenuPovActionClip)this.clip).resolveType();
+      this.keyframes.view.removeAllSheets();
+      if ("death".equals(type)) {
+         this.keyframes
+            .view
+            .addSheet(
+               new UIKeyframeSheet("death_message", IKey.constant("Death Message"), 16777215, ((MenuPovActionClip)this.clip).deathMessage, null)
+                  .icon(Icons.FONT)
+                  .seed(() -> "")
+            );
+         this.keyframes
+            .view
+            .addSheet(
+               new UIKeyframeSheet("score", IKey.constant("Score"), 16777045, ((MenuPovActionClip)this.clip).score, null)
+                  .icon(Icons.FONT)
+                  .seed(() -> "Score: 0")
+            );
+         this.keyframes
+            .view
+            .addSheet(
+               new UIKeyframeSheet("bg_opacity", IKey.constant("Red Background"), 16733525, ((MenuPovActionClip)this.clip).bgOpacity, null)
+                  .icon(Icons.COLOR)
+                  .seed(() -> 1.0F)
+            );
+         this.keyframes
+            .view
+            .addSheet(
+               new UIKeyframeSheet("buttons_active", IKey.constant("Buttons Active"), 11184810, ((MenuPovActionClip)this.clip).buttonsActive, null)
+                  .icon(Icons.POINTER)
+                  .seed(() -> false)
+            );
+      } else if ("sleep".equals(type)) {
+         this.keyframes
+            .view
+            .addSheet(
+               new UIKeyframeSheet("opacity", IKey.constant("Darkness"), 8947848, ((MenuPovActionClip)this.clip).opacity, null)
+                  .icon(Icons.FADING)
+                  .seed(() -> 1.0F)
+            );
+         this.keyframes
+            .view
+            .addSheet(
+               new UIKeyframeSheet("leave_bed", IKey.constant("Leave Bed"), 13421772, ((MenuPovActionClip)this.clip).leaveBed, null)
+                  .icon(Icons.POINTER)
+                  .seed(() -> true)
+            );
+      }
+   }
+
+   private void updateKeyframeSectionVisibility() {
+      boolean show = !"game_menu".equals(((MenuPovActionClip)this.clip).resolveType());
+      if (this.menuKeyframesSection != null) {
+         if (show) {
+            if (!this.menuKeyframesSection.hasParent()) {
+               this.panels.add(this.menuKeyframesSection);
+            }
+         } else if (this.menuKeyframesSection.hasParent()) {
+            this.menuKeyframesSection.removeFromParent();
+         }
+
+         this.resize();
+         if (this.panels != null) {
+            this.panels.resize();
+         }
+      }
+   }
+
+   @Override
+   protected void registerPanels() {
+      super.registerPanels();
+      this.panels.add(this.section(IKey.constant("Menu Settings"), new UIElement[]{this.menuType}));
+      this.menuKeyframesSection = this.section(IKey.constant("Menu Keyframes"), new UIElement[]{this.editKeyframes});
+   }
+
+   @Override
+   public void fillData() {
+      super.fillData();
+      this.updateMenuTypeButton(((MenuPovActionClip)this.clip).resolveType());
+      this.updateKeyframeSectionVisibility();
+      this.updateKeyframeSheets();
+      if (this.keyframes != null && this.keyframes.view != null && this.keyframes.view.getGraph() != null) {
+         this.keyframes.view.getGraph().clearSelection();
+      }
+   }
+
+   public void render(UIContext context) {
+      if (this.keyframes != null
+         && !this.keyframes.hasParent()
+         && this.keyframes.view != null
+         && this.keyframes.view.getGraph() != null
+         && this.keyframes.view.getGraph().getSelected() != null) {
+         this.keyframes.view.getGraph().clearSelection();
+      }
+
+      super.render(context);
+   }
+
+   private void updateMenuTypeButton(String id) {
+      MenuTypeEntry entry = MenuTypeEntry.findById(id);
+      String name = entry == null ? (id != null && !id.isBlank() ? id : "Game Menu") : entry.name;
+      this.menuType.label = IKey.constant("Menu: " + name);
+   }
+}

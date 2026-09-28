@@ -1,0 +1,50 @@
+{
+	"texture": "assets:models/player/steve/steve.png",
+	"culling": false,
+	"scale": [0.9375, 0.9375, 0.9375],
+	"items_main": [
+		{
+			"group": "low_right_arm.end",
+			"transform": {
+				"t": [0.0, -0.25, 0.125],
+				"r": [180.0, 0.0, 0.0]
+			}
+		}
+	],
+	"items_off": [
+		{
+			"group": "low_left_arm.end",
+			"transform": {
+				"t": [0.0, -0.25, 0.125],
+				"r": [180.0, 0.0, 0.0]
+			}
+		}
+	],
+	"fp_main": {
+		"transform": {
+			"r": [180.0, 0.0, -5.729],
+			"s": [1.0, 1.0, 1.0],
+			"t": [0.13875, 1.525, 0.0]
+		},
+		"group": "right_arm"
+	},
+	"fp_offhand": {
+		"transform": {
+			"r": [180.0, -0.0, 5.729],
+			"s": [1.0, 1.0, 1.0],
+			"t": [-0.13875, 1.525, 0.0]
+		},
+		"group": "left_arm"
+	},
+	"disabledBones": [
+		"body",
+		"low_left_arm.end",
+		"low_right_arm.end",
+		"misc_bone_1",
+		"misc_bone_2",
+		"misc_bone_3",
+		"misc_gbone_1",
+		"misc_gbone_2",
+		"misc_gbone_3"
+	]
+}

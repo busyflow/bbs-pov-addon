@@ -79,11 +79,11 @@ public abstract class FilmsHudPovMixin {
       method = {"playFilm(Lmchorse/bbs_mod/film/Film;Z)V"},
       at = @At(
          value = "INVOKE",
-         target = "Lmchorse/bbs_mod/film/Film;hasFirstPerson()Z"
+         target = "Lmchorse/bbs_mod/film/Film;shouldUseCameraTrack()Z"
       )
    )
    private static boolean bbsPov$allowCameraTimelineForPovClips(Film film) {
-      return film.hasFirstPerson() || PovCameraClips.hasAny(film) && film.camera.getClips(Clip.class).stream().allMatch(clip -> clip instanceof PovCameraClip);
+      return film.shouldUseCameraTrack() || (PovCameraClips.hasAny(film) && film.camera != null && film.camera.getClips(Clip.class).stream().allMatch(clip -> clip instanceof PovCameraClip));
    }
 
    @Inject(

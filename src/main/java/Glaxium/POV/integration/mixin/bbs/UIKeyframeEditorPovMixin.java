@@ -22,27 +22,6 @@ public abstract class UIKeyframeEditorPovMixin extends UITimelinePanel {
    @Shadow
    public UIKeyframeFactory<?> editor;
 
-   @Inject(
-      method = {"pickKeyframe"},
-      at = {@At("TAIL")}
-   )
-   private void bbsPov$dynamicallyAdjustViewWidth(Keyframe keyframe, CallbackInfo info) {
-      UIKeyframeEditor self = (UIKeyframeEditor)(Object)this;
-      if (self.view != null) {
-         if (this.target == null) {
-            if (this.editor != null) {
-               self.view.w(1.0F, -140);
-            } else {
-               self.view.w(1.0F);
-            }
-
-            self.resize();
-         } else {
-            self.view.w(1.0F);
-            self.resize();
-         }
-      }
-   }
 
    @Inject(
       method = {"getBone"},

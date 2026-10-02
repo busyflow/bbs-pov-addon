@@ -37,7 +37,8 @@ public abstract class FormRendererPovMixin {
    @Inject(
       method = {"applyTransforms(Lorg/joml/Matrix4f;F)V"},
       at = {@At("HEAD")},
-      cancellable = true
+      cancellable = true,
+      require = 0
    )
    private void bbsPov$suppressMatrixTransforms(Matrix4f matrix, float transition, CallbackInfo info) {
       if (PovHandPlayback.isSuppressFormTransform(this.form)) {

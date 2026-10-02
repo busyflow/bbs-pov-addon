@@ -48,7 +48,7 @@ public final class BodyPartEditorSection implements PovEditorSection {
                }
 
                List<UIKeyframeSheet> sheets = new ArrayList<>();
-               UIReplaysEditorUtils.buildSheets(descriptors, sheets);
+               UIReplaysEditorUtils.buildSheets(descriptors, sheets, (mchorse.bbs_mod.film.replays.FormProperties) null);
 
                for (UIKeyframeSheet sheet : sheets) {
                   editor.addPendingSheet(sheet);

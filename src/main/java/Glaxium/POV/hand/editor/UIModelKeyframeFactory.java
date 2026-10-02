@@ -10,6 +10,7 @@ import mchorse.bbs_mod.ui.framework.UIContext;
 import mchorse.bbs_mod.ui.framework.elements.UIElement;
 import mchorse.bbs_mod.ui.framework.elements.buttons.UIButton;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
 
@@ -17,9 +18,9 @@ public class UIModelKeyframeFactory extends UIKeyframeFactory<String> {
    private final UIButton pickModel;
    private String currentModel;
 
-   public UIModelKeyframeFactory(Keyframe<String> keyframe, UIKeyframes editor) {
-      super(keyframe, editor);
-      this.currentModel = (String)keyframe.getValue();
+   public UIModelKeyframeFactory(UITrackValue<String> track, UIKeyframes editor) {
+      super(track, editor);
+      this.currentModel = track.getValue();
       if (this.currentModel == null) {
          this.currentModel = "";
       }
@@ -81,7 +82,7 @@ public class UIModelKeyframeFactory extends UIKeyframeFactory<String> {
 
    public void update() {
       super.update();
-      String val = (String)this.keyframe.getValue();
+      String val = this.track.getValue();
       if (val != null && !val.equals(this.currentModel)) {
          this.currentModel = val;
          this.updateButtonLabel();

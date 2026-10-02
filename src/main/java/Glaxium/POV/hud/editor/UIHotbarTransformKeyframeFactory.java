@@ -5,13 +5,14 @@ import mchorse.bbs_mod.ui.framework.UIContext;
 import mchorse.bbs_mod.ui.framework.elements.IUIElement;
 import mchorse.bbs_mod.ui.framework.elements.UIElement;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UITransformKeyframeFactory;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
 import mchorse.bbs_mod.utils.pose.Transform;
 
 public final class UIHotbarTransformKeyframeFactory extends UITransformKeyframeFactory {
-   public UIHotbarTransformKeyframeFactory(Keyframe<Transform> keyframe, UIKeyframes editor) {
-      super(keyframe, editor);
+   public UIHotbarTransformKeyframeFactory(UITrackValue<Transform> track, UIKeyframes editor) {
+      super(track, editor);
       List<IUIElement> rows = List.copyOf(this.transform.getChildren());
       this.transform.tz.removeFromParent();
       this.transform.sz.removeFromParent();

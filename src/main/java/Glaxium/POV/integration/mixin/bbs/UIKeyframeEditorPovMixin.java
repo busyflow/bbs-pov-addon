@@ -51,14 +51,12 @@ public abstract class UIKeyframeEditorPovMixin extends UITimelinePanel {
    )
    private void bbsPov$getParentPoseBone(CallbackInfoReturnable<Pair<String, TransformSpace>> info) {
       if (this.editor instanceof UIPoseKeyframeFactory poseFactory) {
-         Keyframe<?> keyframe = poseFactory.getKeyframe();
-         if (keyframe != null && keyframe.getParent() != null) {
-            String channel = keyframe.getParent().getId();
-            if ("pov_hand_pose".equals(channel) || "pov_hand_item_pose".equals(channel)) {
-               String bone = (String)poseFactory.poseEditor.groups.list.getCurrentFirst();
-               if (bone != null && !bone.isBlank()) {
-                  info.setReturnValue(new Pair(bone, poseFactory.poseEditor.transform.getSpace()));
-               }
+         mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet sheet = poseFactory.getSheet();
+         String channel = sheet != null && sheet.channel != null ? sheet.channel.getId() : "";
+         if ("pov_hand_pose".equals(channel) || "pov_hand_item_pose".equals(channel)) {
+            String bone = (String)poseFactory.poseEditor.groups.list.getCurrentFirst();
+            if (bone != null && !bone.isBlank()) {
+               info.setReturnValue(new Pair(bone, poseFactory.poseEditor.transform.getSpace()));
             }
          }
       }

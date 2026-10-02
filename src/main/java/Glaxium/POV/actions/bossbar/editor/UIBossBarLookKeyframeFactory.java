@@ -5,6 +5,7 @@ import mchorse.bbs_mod.l10n.keys.IKey;
 import mchorse.bbs_mod.ui.framework.UIContext;
 import mchorse.bbs_mod.ui.framework.elements.buttons.UIButton;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
 
@@ -13,16 +14,16 @@ public class UIBossBarLookKeyframeFactory extends UIKeyframeFactory<String> {
    private final UIButton button;
    private String lastValue;
 
-   public UIBossBarLookKeyframeFactory(Keyframe<String> keyframe, UIKeyframes editor, UIBossBarLookKeyframeFactory.Mode mode) {
-      super(keyframe, editor);
+   public UIBossBarLookKeyframeFactory(UITrackValue<String> track, UIKeyframes editor, UIBossBarLookKeyframeFactory.Mode mode) {
+      super(track, editor);
       this.mode = mode;
-      this.lastValue = (String)keyframe.getValue();
+      this.lastValue = track.getValue();
       this.button = new UIButton(IKey.constant(this.getButtonLabel()), this::onButtonClicked);
       this.scroll.add(this.button);
    }
 
    private String getButtonLabel() {
-      String val = (String)this.keyframe.getValue();
+      String val = this.track.getValue();
       return this.mode == UIBossBarLookKeyframeFactory.Mode.COLOR ? "Color: " + BossBarLooks.displayColor(val) : "Style: " + BossBarLooks.displayStyle(val);
    }
 
@@ -31,7 +32,7 @@ public class UIBossBarLookKeyframeFactory extends UIKeyframeFactory<String> {
    }
 
    private void onButtonClicked(UIButton button) {
-      String current = (String)this.keyframe.getValue();
+      String current = this.track.getValue();
       String next = this.mode == UIBossBarLookKeyframeFactory.Mode.COLOR ? BossBarLooks.nextColor(current) : BossBarLooks.nextStyle(current);
       this.setValue(next);
       this.lastValue = next;
@@ -40,7 +41,7 @@ public class UIBossBarLookKeyframeFactory extends UIKeyframeFactory<String> {
 
    public void update() {
       super.update();
-      String val = (String)this.keyframe.getValue();
+      String val = this.track.getValue();
       if (val == null ? this.lastValue != null : !val.equals(this.lastValue)) {
          this.lastValue = val;
          this.updateButtonLabel();

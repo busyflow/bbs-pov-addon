@@ -11,22 +11,22 @@ import mchorse.bbs_mod.ui.film.IUIClipsDelegate;
 import mchorse.bbs_mod.ui.film.UIFilmPanel;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
 
 public class UIGuiSlotKeyframeFactory extends UIKeyframeFactory<Boolean> {
    private final UIGuiSlotEditor slotEditor;
 
-   public UIGuiSlotKeyframeFactory(Keyframe<Boolean> keyframe, UIKeyframes editor) {
-      super(keyframe, editor);
+   public UIGuiSlotKeyframeFactory(UITrackValue<Boolean> track, UIKeyframes editor) {
+      super(track, editor);
       this.scroll.removeAll();
-      UIKeyframeSheet sheet = editor != null && editor.getGraph() != null
-         ? editor.getGraph().getSheet(keyframe)
-         : (editor != null && editor.getDopeSheet() != null ? editor.getDopeSheet().getSheet(keyframe) : null);
+      UIKeyframeSheet sheet = track.sheet;
+      float tick = editor != null ? editor.getTick() : 0.0F;
       String sheetId = sheet == null ? "" : sheet.id;
       UIFilmPanel filmPanel = PovReplaySettings.getFilmPanel();
       IUIClipsDelegate clipsDelegate = filmPanel != null ? filmPanel.cameraEditor : null;
-      BaseValue parentChannel = keyframe.getParent();
+      BaseValue parentChannel = sheet != null ? sheet.channel : null;
       GuiPovActionClip guiClip = null;
       if (parentChannel != null && parentChannel.getParent() instanceof GuiPovActionClip clip) {
          guiClip = clip;
@@ -55,7 +55,7 @@ public class UIGuiSlotKeyframeFactory extends UIKeyframeFactory<Boolean> {
 
          if (hud != null && filmPanel != null) {
             this.slotEditor = new UIGuiSlotEditor(null, null);
-            this.slotEditor.configure(hud.inventory, hud.inventoryAnchor, keyframe.getTick());
+            this.slotEditor.configure(hud.inventory, hud.inventoryAnchor, tick);
             this.scroll.add(this.slotEditor);
          } else {
             this.slotEditor = null;
@@ -64,7 +64,7 @@ public class UIGuiSlotKeyframeFactory extends UIKeyframeFactory<Boolean> {
          String guiId = guiClip.state.isEmpty() ? "inventory" : (String)guiClip.state.get(0).getValue();
          UIGuiSlotEditor.Mode mode = "crafting_grid".equals(sheetId) ? UIGuiSlotEditor.Mode.CRAFTING : UIGuiSlotEditor.Mode.GUI;
          this.slotEditor = new UIGuiSlotEditor(guiClip, clipsDelegate);
-         this.slotEditor.configure(guiId, mode, keyframe.getTick());
+         this.slotEditor.configure(guiId, mode, tick);
          this.scroll.add(this.slotEditor);
       } else {
          this.slotEditor = null;

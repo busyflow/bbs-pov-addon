@@ -8,6 +8,7 @@ import mchorse.bbs_mod.ui.framework.elements.buttons.UIButton;
 import mchorse.bbs_mod.ui.framework.elements.buttons.UIToggle;
 import mchorse.bbs_mod.ui.framework.elements.input.UIColor;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
 import mchorse.bbs_mod.ui.utils.UI;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
@@ -63,9 +64,9 @@ public class UIExecutedTextKeyframeFactory extends UIKeyframeFactory<String> {
       }
    }
 
-   public UIExecutedTextKeyframeFactory(Keyframe<String> keyframe, UIKeyframes editor) {
-      super(keyframe, editor);
-      this.lastValue = (String)keyframe.getValue();
+   public UIExecutedTextKeyframeFactory(UITrackValue<String> track, UIKeyframes editor) {
+      super(track, editor);
+      this.lastValue = track.getValue();
       this.textarea = new UIFormattedTextarea(str -> this.updateKeyframeValue(str, this.showOnHud == null || this.showOnHud.getValue()));
       this.textarea.h(80);
       this.textarea.setFormattedText(getRawText(this.lastValue));
@@ -127,7 +128,7 @@ public class UIExecutedTextKeyframeFactory extends UIKeyframeFactory<String> {
 
    public void update() {
       super.update();
-      String val = (String)this.keyframe.getValue();
+      String val = this.track.getValue();
       if (val == null ? this.lastValue != null : !val.equals(this.lastValue)) {
          this.lastValue = val;
          this.textarea.setFormattedText(getRawText(val));

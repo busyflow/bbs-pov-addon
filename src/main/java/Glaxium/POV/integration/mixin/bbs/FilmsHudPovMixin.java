@@ -75,16 +75,7 @@ public abstract class FilmsHudPovMixin {
       }
    }
 
-   @Redirect(
-      method = {"playFilm(Lmchorse/bbs_mod/film/Film;Z)V"},
-      at = @At(
-         value = "INVOKE",
-         target = "Lmchorse/bbs_mod/film/Film;shouldUseCameraTrack()Z"
-      )
-   )
-   private static boolean bbsPov$allowCameraTimelineForPovClips(Film film) {
-      return film.shouldUseCameraTrack() || (PovCameraClips.hasAny(film) && film.camera != null && film.camera.getClips(Clip.class).stream().allMatch(clip -> clip instanceof PovCameraClip));
-   }
+
 
    @Inject(
       method = {"renderHud"},

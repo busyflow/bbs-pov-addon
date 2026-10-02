@@ -20,9 +20,13 @@ public abstract class FormRendererPovMixin {
    public Form form;
 
    @Inject(
-      method = {"applyTransforms(Lnet/minecraft/client/util/math/MatrixStack;ZF)V"},
+      method = {
+         "applyTransforms(Lnet/minecraft/class_4587;ZF)V",
+         "applyTransforms(Lnet/minecraft/client/util/math/MatrixStack;ZF)V"
+      },
       at = {@At("HEAD")},
-      cancellable = true
+      cancellable = true,
+      require = 0
    )
    private void bbsPov$suppressFormTransforms(MatrixStack stack, boolean origin, float transition, CallbackInfo info) {
       if (PovHandPlayback.isSuppressFormTransform(this.form)) {

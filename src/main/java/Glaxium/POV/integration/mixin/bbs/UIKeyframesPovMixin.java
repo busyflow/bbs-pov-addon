@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 )
 public abstract class UIKeyframesPovMixin {
    @Shadow
-   private Consumer<Keyframe> callback;
+   private Runnable callback;
    @Shadow
    private IUIKeyframeGraph currentGraph;
    @Unique
@@ -32,7 +32,7 @@ public abstract class UIKeyframesPovMixin {
       if (this.currentGraph != null) {
          boolean hasSelected = this.currentGraph.getSelected() != null;
          if (!hasSelected && this.bbsPov$hadSelection && this.callback != null) {
-            this.callback.accept(null);
+            this.callback.run();
          }
 
          this.bbsPov$hadSelection = hasSelected;

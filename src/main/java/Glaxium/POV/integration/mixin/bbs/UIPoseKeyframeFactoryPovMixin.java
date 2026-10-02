@@ -10,6 +10,7 @@ import mchorse.bbs_mod.forms.forms.ModelForm;
 import mchorse.bbs_mod.forms.renderers.ModelFormRenderer;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIPoseKeyframeFactory;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIPoseKeyframeFactory.UIPoseFactoryEditor;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
@@ -32,10 +33,10 @@ public class UIPoseKeyframeFactoryPovMixin {
       method = {"<init>"},
       at = {@At("RETURN")}
    )
-   private void bbsPov$filterHandBones(Keyframe<Pose> keyframe, UIKeyframes editor, CallbackInfo info) {
-      UIKeyframeSheet sheet = editor.getGraph().getSheet(keyframe);
-      if (sheet != null && "pov_hand_item_pose".equals(sheet.channel.getId())) {
-         this.poseEditor.setPose((Pose)keyframe.getValue(), "");
+   private void bbsPov$filterHandBones(UITrackValue<Pose> track, UIKeyframes editor, CallbackInfo info) {
+      UIKeyframeSheet sheet = track != null ? track.sheet : null;
+      if (sheet != null && sheet.channel != null && "pov_hand_item_pose".equals(sheet.channel.getId())) {
+         this.poseEditor.setPose(track.getValue(), "");
          this.poseEditor.fillGroups(PovItemPose.BONES, false);
       } else if (sheet != null && sheet.form instanceof ModelForm form) {
          if (sheet.id == null || !sheet.id.contains("/")) {

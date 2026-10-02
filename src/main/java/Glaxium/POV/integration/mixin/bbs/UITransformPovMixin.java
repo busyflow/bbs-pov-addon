@@ -9,27 +9,28 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(
-   value = {UITransform.class},
-   remap = false
-)
-public abstract class UITransformPovMixin extends UIElement {
-   @Shadow
-   public UITrackpad tz;
-   @Shadow
-   public UITrackpad sz;
+/** BBS rebuilds scaleRow when uniform scaling is toggled. For the POV Layout
+ * panel, translation Z has no parent, which identifies the 2D variant and lets
+ * us remove the scale Z field again after BBS performs that rebuild. */
+@Mixin(value = UITransform.class, remap = false)
+public abstract class UITransformPovMixin extends UIElement
+{
+    @Shadow public UITrackpad tz;
+    @Shadow public UITrackpad sz;
 
-   @Inject(
-      method = {"toggleUniformScale"},
-      at = {@At("RETURN")}
-   )
-   private void bbsPov$keepLayoutScaleTwoDimensional(CallbackInfo info) {
-      if (!this.tz.hasParent() && this.sz.hasParent()) {
-         this.sz.removeFromParent();
-         UIElement container = this.getParentContainer();
-         if (container != null) {
-            container.resize();
-         }
-      }
-   }
+    @Inject(method = "toggleUniformScale", at = @At("RETURN"))
+    private void bbsPov$keepLayoutScaleTwoDimensional(CallbackInfo info)
+    {
+        if (!this.tz.hasParent() && this.sz.hasParent())
+        {
+            this.sz.removeFromParent();
+
+            UIElement container = this.getParentContainer();
+
+            if (container != null)
+            {
+                container.resize();
+            }
+        }
+    }
 }

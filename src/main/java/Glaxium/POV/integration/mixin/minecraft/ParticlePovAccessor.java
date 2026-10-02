@@ -5,57 +5,45 @@ import net.minecraft.client.particle.Particle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin({Particle.class})
-public interface ParticlePovAccessor extends ParticlePovAccess {
-   @Accessor("x")
-   @Override
-   double bbsPov$getX();
+@Mixin(Particle.class)
+public interface ParticlePovAccessor extends ParticlePovAccess
+{
+    @Accessor("x")
+    double bbsPov$getX();
 
-   @Accessor("y")
-   @Override
-   double bbsPov$getY();
+    @Accessor("y")
+    double bbsPov$getY();
 
-   @Accessor("z")
-   @Override
-   double bbsPov$getZ();
+    @Accessor("z")
+    double bbsPov$getZ();
 
-   @Accessor("x")
-   @Override
-   void bbsPov$setX(double var1);
+    @Accessor("x")
+    void bbsPov$setX(double x);
 
-   @Accessor("y")
-   @Override
-   void bbsPov$setY(double var1);
+    @Accessor("y")
+    void bbsPov$setY(double y);
 
-   @Accessor("z")
-   @Override
-   void bbsPov$setZ(double var1);
+    @Accessor("z")
+    void bbsPov$setZ(double z);
 
-   @Accessor("prevPosX")
-   @Override
-   void bbsPov$setPrevPosX(double var1);
+    @Accessor("prevPosX")
+    void bbsPov$setPrevPosX(double x);
 
-   @Accessor("prevPosY")
-   @Override
-   void bbsPov$setPrevPosY(double var1);
+    @Accessor("prevPosY")
+    void bbsPov$setPrevPosY(double y);
 
-   @Accessor("prevPosZ")
-   @Override
-   void bbsPov$setPrevPosZ(double var1);
+    @Accessor("prevPosZ")
+    void bbsPov$setPrevPosZ(double z);
 
-   @Accessor("gravityStrength")
-   @Override
-   float bbsPov$getGravityStrength();
+    @Accessor("gravityStrength")
+    float bbsPov$getGravityStrength();
 
-   @Accessor("velocityMultiplier")
-   @Override
-   float bbsPov$getVelocityMultiplier();
+    @Accessor("velocityMultiplier")
+    float bbsPov$getVelocityMultiplier();
 
-   @Accessor("maxAge")
-   @Override
-   int bbsPov$getMaxAge();
+    @Accessor("maxAge")
+    int bbsPov$getMaxAge();
 
-   @Accessor("age")
-   @Override
-   void bbsPov$setAge(int var1);
+    @Accessor("age")
+    void bbsPov$setAge(int age);
 }

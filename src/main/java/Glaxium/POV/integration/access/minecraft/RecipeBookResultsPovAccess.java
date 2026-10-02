@@ -1,5 +1,7 @@
 package Glaxium.POV.integration.access.minecraft;
 
-public interface RecipeBookResultsPovAccess {
-   int bbsPov$getCurrentPage();
+/** Feature-facing accessor. Mixin implements this; do not import mixin types from features. */
+public interface RecipeBookResultsPovAccess
+{
+    int bbsPov$getCurrentPage();
 }

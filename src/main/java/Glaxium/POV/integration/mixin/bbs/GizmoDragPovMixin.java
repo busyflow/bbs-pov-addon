@@ -6,21 +6,20 @@ import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(
-   value = {GizmoDrag.class},
-   remap = false
-)
-public abstract class GizmoDragPovMixin implements IGizmoDragFirstPerson {
-   @Unique
-   private Vector3f bbsPov$rotationPivot;
+@Mixin(value = GizmoDrag.class, remap = false)
+public abstract class GizmoDragPovMixin implements IGizmoDragFirstPerson
+{
+    @Unique private Vector3f bbsPov$rotationPivot;
 
-   @Override
-   public void bbsPov$setRotationPivot(Vector3f pivot) {
-      this.bbsPov$rotationPivot = pivot != null ? new Vector3f(pivot) : null;
-   }
+    @Override
+    public void bbsPov$setRotationPivot(Vector3f pivot)
+    {
+        this.bbsPov$rotationPivot = pivot != null ? new Vector3f(pivot) : null;
+    }
 
-   @Override
-   public Vector3f bbsPov$getRotationPivot() {
-      return this.bbsPov$rotationPivot;
-   }
+    @Override
+    public Vector3f bbsPov$getRotationPivot()
+    {
+        return this.bbsPov$rotationPivot;
+    }
 }

@@ -1,5 +1,6 @@
 package Glaxium.POV.bootstrap;
 
+import Glaxium.POV.PovAddon;
 import Glaxium.POV.actions.editor.UIPovActionPanels;
 import Glaxium.POV.camera.clip.PovCameraClip;
 import Glaxium.POV.camera.clip.UIPovCameraClip;
@@ -15,18 +16,25 @@ import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyfram
 import mchorse.bbs_mod.ui.utils.icons.Icons;
 import mchorse.bbs_mod.utils.keyframes.factories.KeyframeFactories;
 
-public final class PovRegistries {
-   private PovRegistries() {
-   }
+/** Registers clips, keyframe factories, and action panels. Do not change clip id bbs_pov:pov. */
+public final class PovRegistries
+{
+    private PovRegistries()
+    {
+    }
 
-   public static void register() {
-      UICursorCropSetting.register();
-      BBSMod.getFactoryCameraClips().register(new Link("bbs_pov", "pov"), PovCameraClip.class, new ClipFactoryData(Icons.VISIBLE, 5614335));
-      UIClip.register(PovCameraClip.class, UIPovCameraClip::new);
-      UIKeyframeFactory.register(KeyframeFactories.ITEM_STACK, UIHotbarItemKeyframeFactory::new);
-      UIKeyframeFactory.register(KeyframeFactories.INTEGER, UIHotbarIntegerKeyframeFactory::new);
-      UIKeyframeFactory.registerProperty("pov_hand_model", UIModelKeyframeFactory::new);
-      UIKeyframeFactory.registerProperty("model", UIModelKeyframeFactory::new);
-      UIPovActionPanels.register();
-   }
+    public static void register()
+    {
+        UICursorCropSetting.register();
+        BBSMod.getFactoryCameraClips().register(
+            new Link(PovAddon.MOD_ID, "pov"),
+            PovCameraClip.class,
+            new ClipFactoryData(Icons.VISIBLE, 0x55AAFF));
+        UIClip.register(PovCameraClip.class, UIPovCameraClip::new);
+        UIKeyframeFactory.register(KeyframeFactories.ITEM_STACK, UIHotbarItemKeyframeFactory::new);
+        UIKeyframeFactory.register(KeyframeFactories.INTEGER, UIHotbarIntegerKeyframeFactory::new);
+        UIKeyframeFactory.registerProperty("pov_hand_model", UIModelKeyframeFactory::new);
+        UIKeyframeFactory.registerProperty("model", UIModelKeyframeFactory::new);
+        UIPovActionPanels.register();
+    }
 }

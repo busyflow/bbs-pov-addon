@@ -1,5 +1,6 @@
 package Glaxium.POV.integration.access.bbs;
 
-public interface UIReplayPropertiesPovAccess {
-   void bbsPov$setPovMode(boolean var1);
+public interface UIReplayPropertiesPovAccess
+{
+    void bbsPov$setPovMode(boolean povActive);
 }

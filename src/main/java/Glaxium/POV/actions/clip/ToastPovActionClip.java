@@ -8,147 +8,200 @@ import mchorse.bbs_mod.settings.values.core.ValueLink;
 import mchorse.bbs_mod.settings.values.core.ValueString;
 import mchorse.bbs_mod.utils.clips.Clip;
 
-public final class ToastPovActionClip extends PovActionClip {
-   public final ValueString presetId = new ValueString("preset_id", "adv_stone_age");
-   public final ValueString customTitle = new ValueString("custom_title", "");
-   public final ValueString customDescription = new ValueString("custom_description", "");
-   public final ValueString customIcon = new ValueString("custom_icon", "");
-   public final ValueLink customTexture = new ValueLink("custom_texture", null);
-   public final ValueString frameType = new ValueString("frame_type", "task");
+/** Action clip representing a vanilla Toast popup notification. */
+public final class ToastPovActionClip extends PovActionClip
+{
+    public final ValueString presetId = new ValueString("preset_id", "adv_stone_age");
+    public final ValueString customTitle = new ValueString("custom_title", "");
+    public final ValueString customDescription = new ValueString("custom_description", "");
+    public final ValueString customIcon = new ValueString("custom_icon", "");
+    public final ValueLink customTexture = new ValueLink("custom_texture", null);
+    public final ValueString frameType = new ValueString("frame_type", "task");
 
-   public ToastPovActionClip() {
-      this.add(this.presetId);
-      this.add(this.customTitle);
-      this.add(this.customDescription);
-      this.add(this.customIcon);
-      this.add(this.customTexture);
-      this.add(this.frameType);
-   }
+    public ToastPovActionClip()
+    {
+        super();
 
-   public Clip create() {
-      ToastPovActionClip clip = new ToastPovActionClip();
-      clip.copy(this);
-      return clip;
-   }
+        this.add(this.presetId);
+        this.add(this.customTitle);
+        this.add(this.customDescription);
+        this.add(this.customIcon);
+        this.add(this.customTexture);
+        this.add(this.frameType);
+    }
 
-   @Override
-   public PovActionType getActionType() {
-      return PovActionType.TOASTS;
-   }
+    @Override
+    public Clip create()
+    {
+        ToastPovActionClip clip = new ToastPovActionClip();
+        clip.copy(this);
+        return clip;
+    }
 
-   public void trimToRecording(int endTick) {
-      int start = (Integer)this.tick.get();
-      if (endTick > start && start + (Integer)this.duration.get() > endTick) {
-         this.duration.set(Math.max(1, endTick - start));
-      }
-   }
+    @Override
+    public PovActionType getActionType()
+    {
+        return PovActionType.TOASTS;
+    }
 
-   public void ensureBakingBounds() {
-      if ((Integer)this.duration.get() < 1) {
-         this.duration.set(1);
-      }
-   }
+    public void trimToRecording(int endTick)
+    {
+        int start = this.tick.get();
+        if (endTick > start && (start + this.duration.get()) > endTick)
+        {
+            this.duration.set(Math.max(1, endTick - start));
+        }
+    }
 
-   public String getPresetId() {
-      return (String)this.presetId.get();
-   }
+    public void ensureBakingBounds()
+    {
+        if (this.duration.get() < 1)
+        {
+            this.duration.set(1);
+        }
+    }
 
-   public void setPresetId(String presetId) {
-      this.presetId.set(presetId == null ? "adv_stone_age" : presetId);
-      ToastTypeEntry entry = ToastPresets.getById((String)this.presetId.get());
-      if (entry != null) {
-         this.frameType.set(entry.frameType);
-      }
-   }
+    public String getPresetId()
+    {
+        return this.presetId.get();
+    }
 
-   public void applyPreset(ToastTypeEntry entry) {
-      if (entry != null) {
-         this.presetId.set(entry.id);
-         this.customTitle.set("");
-         this.customDescription.set("");
-         this.customIcon.set("");
-         this.customTexture.set(null);
-         this.frameType.set(entry.frameType);
-      }
-   }
+    public void setPresetId(String presetId)
+    {
+        this.presetId.set(presetId == null ? "adv_stone_age" : presetId);
+        ToastTypeEntry entry = ToastPresets.getById(this.presetId.get());
+        if (entry != null)
+        {
+            this.frameType.set(entry.frameType);
+        }
+    }
 
-   public String getEffectiveTitle() {
-      String title = (String)this.customTitle.get();
-      if (title != null && !title.trim().isEmpty()) {
-         return title;
-      } else {
-         ToastTypeEntry entry = ToastPresets.getById((String)this.presetId.get());
-         return entry != null ? entry.title : "Advancement Made!";
-      }
-   }
+    public void applyPreset(ToastTypeEntry entry)
+    {
+        if (entry != null)
+        {
+            this.presetId.set(entry.id);
+            this.customTitle.set("");
+            this.customDescription.set("");
+            this.customIcon.set("");
+            this.customTexture.set(null);
+            this.frameType.set(entry.frameType);
+        }
+    }
 
-   public String getEffectiveDescription() {
-      String desc = (String)this.customDescription.get();
-      if (desc != null && !desc.trim().isEmpty()) {
-         return desc;
-      } else {
-         ToastTypeEntry entry = ToastPresets.getById((String)this.presetId.get());
-         return entry != null ? entry.description : "Stone Age";
-      }
-   }
+    public String getEffectiveTitle()
+    {
+        String title = this.customTitle.get();
+        if (title != null && !title.trim().isEmpty())
+        {
+            return title;
+        }
+        ToastTypeEntry entry = ToastPresets.getById(this.presetId.get());
+        return entry != null ? entry.title : "Advancement Made!";
+    }
 
-   public String getEffectiveIcon() {
-      String icon = (String)this.customIcon.get();
-      if (icon != null && !icon.trim().isEmpty()) {
-         return icon;
-      } else {
-         ToastTypeEntry entry = ToastPresets.getById((String)this.presetId.get());
-         return entry != null ? entry.iconItemId : "minecraft:wooden_pickaxe";
-      }
-   }
+    public net.minecraft.text.Text getEffectiveTitleText()
+    {
+        String title = this.customTitle.get();
+        if (title != null && !title.trim().isEmpty())
+        {
+            return net.minecraft.text.Text.literal(title);
+        }
+        ToastTypeEntry entry = ToastPresets.getById(this.presetId.get());
+        return entry != null ? entry.getTitleText() : net.minecraft.text.Text.translatable("advancements.toast.task");
+    }
 
-   public Link getCustomTexture() {
-      return (Link)this.customTexture.get();
-   }
+    public String getEffectiveDescription()
+    {
+        String desc = this.customDescription.get();
+        if (desc != null && !desc.trim().isEmpty())
+        {
+            return desc;
+        }
+        ToastTypeEntry entry = ToastPresets.getById(this.presetId.get());
+        return entry != null ? entry.description : "Stone Age";
+    }
 
-   public void setCustomTexture(Link customTexture) {
-      this.customTexture.set(customTexture);
-   }
+    public net.minecraft.text.Text getEffectiveDescriptionText()
+    {
+        String desc = this.customDescription.get();
+        if (desc != null && !desc.trim().isEmpty())
+        {
+            return net.minecraft.text.Text.literal(desc);
+        }
+        ToastTypeEntry entry = ToastPresets.getById(this.presetId.get());
+        return entry != null ? entry.getDescriptionText() : net.minecraft.text.Text.translatable("advancements.story.mine_stone.title");
+    }
 
-   public String getEffectiveFrameType() {
-      String type = (String)this.frameType.get();
-      if (type != null && !type.trim().isEmpty()) {
-         return type;
-      } else {
-         ToastTypeEntry entry = ToastPresets.getById((String)this.presetId.get());
-         return entry != null ? entry.frameType : "task";
-      }
-   }
+    public String getEffectiveIcon()
+    {
+        String icon = this.customIcon.get();
+        if (icon != null && !icon.trim().isEmpty())
+        {
+            return icon;
+        }
+        ToastTypeEntry entry = ToastPresets.getById(this.presetId.get());
+        return entry != null ? entry.iconItemId : "minecraft:wooden_pickaxe";
+    }
 
-   public String getCustomTitle() {
-      return (String)this.customTitle.get();
-   }
+    public Link getCustomTexture()
+    {
+        return this.customTexture.get();
+    }
 
-   public void setCustomTitle(String customTitle) {
-      this.customTitle.set(customTitle == null ? "" : customTitle);
-   }
+    public void setCustomTexture(Link customTexture)
+    {
+        this.customTexture.set(customTexture);
+    }
 
-   public String getCustomDescription() {
-      return (String)this.customDescription.get();
-   }
+    public String getEffectiveFrameType()
+    {
+        String type = this.frameType.get();
+        if (type != null && !type.trim().isEmpty())
+        {
+            return type;
+        }
+        ToastTypeEntry entry = ToastPresets.getById(this.presetId.get());
+        return entry != null ? entry.frameType : "task";
+    }
 
-   public void setCustomDescription(String customDescription) {
-      this.customDescription.set(customDescription == null ? "" : customDescription);
-   }
+    public String getCustomTitle()
+    {
+        return this.customTitle.get();
+    }
 
-   public String getCustomIcon() {
-      return (String)this.customIcon.get();
-   }
+    public void setCustomTitle(String customTitle)
+    {
+        this.customTitle.set(customTitle == null ? "" : customTitle);
+    }
 
-   public void setCustomIcon(String customIcon) {
-      this.customIcon.set(customIcon == null ? "" : customIcon);
-   }
+    public String getCustomDescription()
+    {
+        return this.customDescription.get();
+    }
 
-   public String getFrameType() {
-      return (String)this.frameType.get();
-   }
+    public void setCustomDescription(String customDescription)
+    {
+        this.customDescription.set(customDescription == null ? "" : customDescription);
+    }
 
-   public void setFrameType(String frameType) {
-      this.frameType.set(frameType == null ? "task" : frameType);
-   }
+    public String getCustomIcon()
+    {
+        return this.customIcon.get();
+    }
+
+    public void setCustomIcon(String customIcon)
+    {
+        this.customIcon.set(customIcon == null ? "" : customIcon);
+    }
+
+    public String getFrameType()
+    {
+        return this.frameType.get();
+    }
+
+    public void setFrameType(String frameType)
+    {
+        this.frameType.set(frameType == null ? "task" : frameType);
+    }
 }

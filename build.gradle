@@ -1,46 +1,50 @@
 plugins {
-	id 'fabric-loom' version '1.15-SNAPSHOT'
+    id 'fabric-loom' version '1.6-SNAPSHOT'
 }
 
-version = "${project.mod_version}-1.20.1"
+version = project.mod_version + "-" + minecraft_version
 group = project.maven_group
 
 base {
-	archivesName = project.archives_base_name
+    archivesName = project.archives_base_name
 }
 
 repositories {
-	flatDir {
-		dirs 'libs'
-	}
-	mavenCentral()
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation files("libs/bbs-2.7-1.20.1.jar")
-	modCompileOnly files("libs/iris-1.7.2+1.20.1.jar")
+    modImplementation files("libs/${project.bbs_jar}")
+    modCompileOnly files("libs/iris-1.7.2+1.20.1.jar")
 }
 
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
-	}
+loom {
+    runs {
+        client {
+            property 'sodium.checks.issue2561', 'false'
+        }
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 17
+    it.options.release = 17
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
 }
 
 apply from: 'gradle/audit_mixins.gradle'

@@ -12,35 +12,41 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(
-   value = {UIModelFormPanel.class},
-   remap = false
-)
-public class UIModelFormPanelPovMixin {
-   @Shadow
-   public UIModelPoseEditor poseEditor;
+/**
+ * Automatically filters the Pose Editor bone list to only show POV hand bones
+ * on the root hand form, while exposing all model bones for body parts.
+ */
+@Mixin(value = UIModelFormPanel.class, remap = false)
+public class UIModelFormPanelPovMixin
+{
+    @Shadow public UIModelPoseEditor poseEditor;
 
-   @Inject(
-      method = {"startEdit(Lmchorse/bbs_mod/forms/forms/ModelForm;)V"},
-      at = {@At("TAIL")}
-   )
-   private void bbsPov$filterPoseEditor(ModelForm form, CallbackInfo info) {
-      if (UIPovHandEditor.isActive()) {
-         UIPovHandEditor editor = UIPovHandEditor.getActive();
-         boolean isRoot = editor != null && form == editor.getRootForm();
-         if (isRoot) {
-            if (((UIModelFormPanel)(Object)this).shapeKeysSection != null) {
-               ((UIModelFormPanel)(Object)this).shapeKeysSection.removeFromParent();
-               ((UIModelFormPanel)(Object)this).options.resize();
-            }
+    @Inject(method = "startEdit(Lmchorse/bbs_mod/forms/forms/ModelForm;)V", at = @At("TAIL"))
+    private void bbsPov$filterPoseEditor(ModelForm form, CallbackInfo info)
+    {
+        if (UIPovHandEditor.isActive())
+        {
+            UIPovHandEditor editor = UIPovHandEditor.getActive();
+            boolean isRoot = editor != null && form == editor.getRootForm();
 
-            UIPovHandEditor.filterModelPoseEditor(this.poseEditor, form);
-         } else {
-            ModelInstance model = ModelFormRenderer.getModel(form);
-            if (model != null && model.getModel() != null) {
-               this.poseEditor.fillGroups(model.getModel(), model.getFlippedParts(), false, null);
+            if (isRoot)
+            {
+                if (((UIModelFormPanel) (Object) this).shapeKeysSection != null)
+                {
+                    ((UIModelFormPanel) (Object) this).shapeKeysSection.removeFromParent();
+                    ((UIModelFormPanel) (Object) this).options.resize();
+                }
+                UIPovHandEditor.filterModelPoseEditor(this.poseEditor, form);
             }
-         }
-      }
-   }
+            else
+            {
+                ModelInstance model = ModelFormRenderer.getModel(form);
+                if (model != null && model.getModel() != null)
+                {
+                    this.poseEditor.fillGroups(model.getModel(), model.getFlippedParts(), false, null);
+                }
+            }
+        }
+    }
 }
+

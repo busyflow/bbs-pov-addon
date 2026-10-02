@@ -1,14 +1,14 @@
 package Glaxium.POV.integration.access.minecraft;
 
-import java.util.Set;
 import net.minecraft.screen.slot.Slot;
 
-public interface HandledScreenPovAccess {
-   Set<Slot> bbsPov$getCursorDragSlots();
+import java.util.Set;
 
-   boolean bbsPov$isCursorDragging();
-
-   int bbsPov$getDraggedStackRemainder();
-
-   int bbsPov$getHeldButtonType();
+/** Feature-facing accessor. Mixin implements this; do not import mixin types from features. */
+public interface HandledScreenPovAccess
+{
+    Set<Slot> bbsPov$getCursorDragSlots();
+    boolean bbsPov$isCursorDragging();
+    int bbsPov$getDraggedStackRemainder();
+    int bbsPov$getHeldButtonType();
 }

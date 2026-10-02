@@ -1,35 +1,32 @@
 package Glaxium.POV.integration.mixin.minecraft;
 
 import Glaxium.POV.integration.access.minecraft.BookEditScreenPovAccess;
-import java.util.List;
+
 import net.minecraft.client.gui.screen.ingame.BookEditScreen;
 import net.minecraft.client.util.SelectionManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin({BookEditScreen.class})
-public interface BookEditScreenPovAccessor extends BookEditScreenPovAccess {
-   @Accessor("pages")
-   @Override
-   List<String> bbsPov$getPages();
+import java.util.List;
 
-   @Accessor("currentPage")
-   @Override
-   int bbsPov$getCurrentPage();
+@Mixin(BookEditScreen.class)
+public interface BookEditScreenPovAccessor extends BookEditScreenPovAccess
+{
+    @Accessor("pages")
+    List<String> bbsPov$getPages();
 
-   @Accessor("signing")
-   @Override
-   boolean bbsPov$isSigning();
+    @Accessor("currentPage")
+    int bbsPov$getCurrentPage();
 
-   @Accessor("title")
-   @Override
-   String bbsPov$getTitle();
+    @Accessor("signing")
+    boolean bbsPov$isSigning();
 
-   @Accessor("currentPageSelectionManager")
-   @Override
-   SelectionManager bbsPov$getPageSelection();
+    @Accessor("title")
+    String bbsPov$getTitle();
 
-   @Accessor("bookTitleSelectionManager")
-   @Override
-   SelectionManager bbsPov$getTitleSelection();
+    @Accessor("currentPageSelectionManager")
+    SelectionManager bbsPov$getPageSelection();
+
+    @Accessor("bookTitleSelectionManager")
+    SelectionManager bbsPov$getTitleSelection();
 }

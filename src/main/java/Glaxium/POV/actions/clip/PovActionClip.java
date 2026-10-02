@@ -1,90 +1,124 @@
 package Glaxium.POV.actions.clip;
 
 import Glaxium.POV.actions.PovActionType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import mchorse.bbs_mod.utils.clips.Clip;
 import mchorse.bbs_mod.utils.interps.Interpolations;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
 import mchorse.bbs_mod.utils.keyframes.KeyframeChannel;
 import mchorse.bbs_mod.utils.keyframes.factories.IKeyframeFactory;
 
-public abstract class PovActionClip extends Clip {
-   private final List<KeyframeChannel<?>> channels = new ArrayList<>();
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-   public PovActionClip() {
-      this.layer.set(this.getActionType().seedLayer());
-   }
+/** Base class for all native BBS-POV Action timeline clips. */
+public abstract class PovActionClip extends Clip
+{
+    private final List<KeyframeChannel<?>> channels = new ArrayList<>();
 
-   public abstract PovActionType getActionType();
+    public PovActionClip()
+    {
+        super();
+        this.layer.set(this.getActionType().seedLayer());
+    }
 
-   public float getLocalTick(float globalTick) {
-      return Math.max(0.0F, globalTick - (float)((Integer)this.tick.get()).intValue());
-   }
+    public abstract PovActionType getActionType();
 
-   public boolean isActive(float globalTick) {
-      if (!(Boolean)this.enabled.get()) {
-         return false;
-      } else {
-         int start = (Integer)this.tick.get();
-         int end = start + Math.max(0, (Integer)this.duration.get());
-         return globalTick >= (float)start && globalTick <= (float)end;
-      }
-   }
+    public float getLocalTick(float globalTick)
+    {
+        return Math.max(0F, globalTick - this.tick.get());
+    }
 
-   protected final <T> KeyframeChannel<T> channel(String id, IKeyframeFactory<T> factory) {
-      KeyframeChannel<T> channel = new KeyframeChannel(id, factory);
-      this.channels.add(channel);
-      this.add(channel);
-      return channel;
-   }
+    public boolean isActive(float globalTick)
+    {
+        if (!this.enabled.get())
+        {
+            return false;
+        }
 
-   public final List<KeyframeChannel<?>> getChannels() {
-      return Collections.unmodifiableList(this.channels);
-   }
+        int start = this.tick.get();
+        int end = start + Math.max(0, this.duration.get());
 
-   public static void constant(KeyframeChannel<?> channel) {
-      if (channel != null) {
-         for (Keyframe<?> keyframe : channel.getKeyframes()) {
+        return globalTick >= start && globalTick <= end;
+    }
+
+    protected final <T> KeyframeChannel<T> channel(String id, IKeyframeFactory<T> factory)
+    {
+        KeyframeChannel<T> channel = new KeyframeChannel<>(id, factory);
+
+        this.channels.add(channel);
+        this.add(channel);
+
+        return channel;
+    }
+
+    public final List<KeyframeChannel<?>> getChannels()
+    {
+        return Collections.unmodifiableList(this.channels);
+    }
+
+    public static void constant(KeyframeChannel<?> channel)
+    {
+        if (channel == null)
+        {
+            return;
+        }
+
+        for (Keyframe<?> keyframe : channel.getKeyframes())
+        {
             keyframe.getInterpolation().setInterp(Interpolations.CONST);
-         }
-      }
-   }
+        }
+    }
 
-   public static void linear(KeyframeChannel<?> channel) {
-      if (channel != null) {
-         for (Keyframe<?> keyframe : channel.getKeyframes()) {
+    public static void linear(KeyframeChannel<?> channel)
+    {
+        if (channel == null)
+        {
+            return;
+        }
+
+        for (Keyframe<?> keyframe : channel.getKeyframes())
+        {
             keyframe.getInterpolation().setInterp(Interpolations.LINEAR);
-         }
-      }
-   }
+        }
+    }
 
-   public static void clamp(KeyframeChannel<Float> channel, float minimum, float maximum) {
-      for (Keyframe<Float> keyframe : channel.getKeyframes()) {
-         keyframe.setValue(Math.max(minimum, Math.min(maximum, (Float)keyframe.getValue())));
-      }
-   }
+    public static void clamp(KeyframeChannel<Float> channel, float minimum, float maximum)
+    {
+        for (Keyframe<Float> keyframe : channel.getKeyframes())
+        {
+            keyframe.setValue(Math.max(minimum, Math.min(maximum, keyframe.getValue())));
+        }
+    }
 
-   public static void clamp(KeyframeChannel<Double> channel, double minimum, double maximum) {
-      for (Keyframe<Double> keyframe : channel.getKeyframes()) {
-         keyframe.setValue(Math.max(minimum, Math.min(maximum, (Double)keyframe.getValue())));
-      }
-   }
+    public static void clamp(KeyframeChannel<Double> channel, double minimum, double maximum)
+    {
+        for (Keyframe<Double> keyframe : channel.getKeyframes())
+        {
+            keyframe.setValue(Math.max(minimum, Math.min(maximum, keyframe.getValue())));
+        }
+    }
 
-   public static void clamp(KeyframeChannel<Integer> channel, int minimum, int maximum) {
-      for (Keyframe<Integer> keyframe : channel.getKeyframes()) {
-         keyframe.setValue(Math.max(minimum, Math.min(maximum, (Integer)keyframe.getValue())));
-      }
-   }
+    public static void clamp(KeyframeChannel<Integer> channel, int minimum, int maximum)
+    {
+        for (Keyframe<Integer> keyframe : channel.getKeyframes())
+        {
+            keyframe.setValue(Math.max(minimum, Math.min(maximum, keyframe.getValue())));
+        }
+    }
 
-   public void normalize() {
-      if (((String)this.title.get()).equals(this.getActionType().title)) {
-         this.title.set("");
-      }
+    public void normalize()
+    {
+        /* Early POV builds stored the action type as an explicit title.
+         * BBS actions leave title empty and show the type as a placeholder. */
+        if (this.title.get().equals(this.getActionType().title))
+        {
+            this.title.set("");
+        }
 
-      if ((Integer)this.duration.get() < 1) {
-         this.duration.set(1);
-      }
-   }
+        if (this.duration.get() < 1)
+        {
+            this.duration.set(1);
+        }
+    }
 }

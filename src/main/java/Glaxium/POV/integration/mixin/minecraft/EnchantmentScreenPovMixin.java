@@ -13,31 +13,27 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin({EnchantmentScreen.class})
-public abstract class EnchantmentScreenPovMixin {
-   @Shadow
-   private float pageTurningSpeed;
-   @Shadow
-   private float nextPageTurningSpeed;
+@Mixin(EnchantmentScreen.class)
+public abstract class EnchantmentScreenPovMixin
+{
+    @Shadow private float pageTurningSpeed;
+    @Shadow private float nextPageTurningSpeed;
 
-   @Inject(
-      method = {"render"},
-      at = {@At("HEAD")}
-   )
-   private void bbsPov$captureEnchantment(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
-      EnchantmentScreen screen = (EnchantmentScreen)(Object)this;
-      EnchantmentScreenHandler handler = (EnchantmentScreenHandler)screen.getScreenHandler();
-      MinecraftClient client = MinecraftClient.getInstance();
-      ClientPlayerEntity player = client.player;
-      float open = MathHelper.lerp(client.getTickDelta(), this.pageTurningSpeed, this.nextPageTurningSpeed);
-      GuiSnapshotCapture.updateEnchantment(
-         handler.enchantmentPower,
-         handler.enchantmentId,
-         handler.enchantmentLevel,
-         handler.getSeed(),
-         player == null ? 0 : player.experienceLevel,
-         player != null && player.getAbilities().creativeMode,
-         open
-      );
-   }
+    @Inject(method = "render", at = @At("HEAD"))
+    private void bbsPov$captureEnchantment(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info)
+    {
+        EnchantmentScreen screen = (EnchantmentScreen) (Object) this;
+        EnchantmentScreenHandler handler = screen.getScreenHandler();
+        MinecraftClient client = MinecraftClient.getInstance();
+        ClientPlayerEntity player = client.player;
+        float open = MathHelper.lerp(client.getTickDelta(), this.pageTurningSpeed, this.nextPageTurningSpeed);
+        GuiSnapshotCapture.updateEnchantment(
+            handler.enchantmentPower,
+            handler.enchantmentId,
+            handler.enchantmentLevel,
+            handler.getSeed(),
+            player == null ? 0 : player.experienceLevel,
+            player != null && player.getAbilities().creativeMode,
+            open);
+    }
 }

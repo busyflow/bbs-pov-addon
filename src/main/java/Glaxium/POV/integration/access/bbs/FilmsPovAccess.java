@@ -1,8 +1,11 @@
 package Glaxium.POV.integration.access.bbs;
 
-import java.util.List;
 import mchorse.bbs_mod.film.BaseFilmController;
 
-public interface FilmsPovAccess {
-   List<BaseFilmController> bbsPov$getControllers();
+import java.util.List;
+
+/** Feature-facing accessor. Mixin implements this; do not import mixin types from features. */
+public interface FilmsPovAccess
+{
+    List<BaseFilmController> bbsPov$getControllers();
 }

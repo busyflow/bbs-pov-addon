@@ -1,7 +1,6 @@
 package Glaxium.POV.actions.gui.schema;
 
 import Glaxium.POV.integration.access.minecraft.HorseScreenPovAccess;
-import java.util.Locale;
 import net.minecraft.client.gui.screen.GameModeSelectionScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
@@ -33,87 +32,99 @@ import net.minecraft.entity.passive.DonkeyEntity;
 import net.minecraft.entity.passive.MuleEntity;
 import net.minecraft.screen.GenericContainerScreenHandler;
 
-public final class GuiTypeResolver {
-   private GuiTypeResolver() {
-   }
+/**
+ * Single screen→saved-id mapping. Never serialize id {@code mule}; mules use {@code donkey}.
+ * {@link #resolve} returns null for unknown screens. Recording of unknown handled screens
+ * uses {@link #resolveOrInventory}.
+ */
+public final class GuiTypeResolver
+{
+    private GuiTypeResolver()
+    {
+    }
 
-   public static String resolve(Screen screen) {
-      if (screen instanceof BookEditScreen || screen instanceof BookScreen) {
-         return "book";
-      } else if (screen instanceof GameModeSelectionScreen) {
-         return "gamemode_switcher";
-      } else {
-         return screen instanceof HandledScreen<?> handled ? resolveHandled(handled) : null;
-      }
-   }
+    public static String resolve(Screen screen)
+    {
+        if (screen instanceof BookEditScreen || screen instanceof BookScreen)
+        {
+            return "book";
+        }
+        if (screen instanceof GameModeSelectionScreen)
+        {
+            return "gamemode_switcher";
+        }
+        if (!(screen instanceof HandledScreen<?> handled))
+        {
+            return null;
+        }
+        return resolveHandled(handled);
+    }
 
-   public static String resolveOrInventory(HandledScreen<?> handled) {
-      String id = resolveHandled(handled);
-      return id == null ? "inventory" : id;
-   }
+    public static String resolveOrInventory(HandledScreen<?> handled)
+    {
+        String id = resolveHandled(handled);
+        return id == null ? "inventory" : id;
+    }
 
-   private static String resolveHandled(HandledScreen<?> handled) {
-      if (handled instanceof CreativeInventoryScreen) {
-         return "creative_inventory";
-      } else if (handled instanceof InventoryScreen) {
-         return "inventory";
-      } else if (handled instanceof CraftingScreen) {
-         return "crafting_table";
-      } else if (handled instanceof AnvilScreen) {
-         return "anvil";
-      } else if (handled instanceof ShulkerBoxScreen) {
-         return "shulker_box";
-      } else if (handled instanceof Generic3x3ContainerScreen) {
-         String title = handled.getTitle().getString().toLowerCase(Locale.ROOT);
-         return title.contains("dropper") ? "dropper" : "dispenser";
-      } else if (handled instanceof GenericContainerScreen containerScreen) {
-         String title = handled.getTitle().getString().toLowerCase(Locale.ROOT);
-         if (title.contains("barrel")) {
-            return "barrel";
-         } else if (title.contains("ender")) {
-            return "ender_chest";
-         } else {
-            if (containerScreen.getScreenHandler() instanceof GenericContainerScreenHandler) {
-               GenericContainerScreenHandler handler = (GenericContainerScreenHandler)containerScreen.getScreenHandler();
-               if (handler.getRows() > 3) {
-                  return "large_chest";
-               }
+    private static String resolveHandled(HandledScreen<?> handled)
+    {
+        if (handled instanceof CreativeInventoryScreen) return "creative_inventory";
+        if (handled instanceof InventoryScreen) return "inventory";
+        if (handled instanceof CraftingScreen) return "crafting_table";
+        if (handled instanceof AnvilScreen) return "anvil";
+        if (handled instanceof ShulkerBoxScreen) return "shulker_box";
+        if (handled instanceof Generic3x3ContainerScreen)
+        {
+            String title = handled.getTitle().getString().toLowerCase(java.util.Locale.ROOT);
+            return title.contains("dropper") ? "dropper" : "dispenser";
+        }
+        if (handled instanceof GenericContainerScreen containerScreen)
+        {
+            String title = handled.getTitle().getString().toLowerCase(java.util.Locale.ROOT);
+            if (title.contains("barrel")) return "barrel";
+            if (title.contains("ender")) return "ender_chest";
+            if (containerScreen.getScreenHandler() instanceof GenericContainerScreenHandler)
+            {
+                GenericContainerScreenHandler handler = (GenericContainerScreenHandler) containerScreen.getScreenHandler();
+                if (handler.getRows() > 3)
+                {
+                    return "large_chest";
+                }
             }
-
             return "chest";
-         }
-      } else if (handled instanceof FurnaceScreen) {
-         return "furnace";
-      } else if (handled instanceof BlastFurnaceScreen) {
-         return "blast_furnace";
-      } else if (handled instanceof SmokerScreen) {
-         return "smoker";
-      } else if (handled instanceof EnchantmentScreen) {
-         return "enchanting_table";
-      } else if (handled instanceof BrewingStandScreen) {
-         return "brewing_stand";
-      } else if (handled instanceof SmithingScreen) {
-         return "smithing_table";
-      } else if (handled instanceof GrindstoneScreen) {
-         return "grindstone";
-      } else if (handled instanceof StonecutterScreen) {
-         return "stonecutter";
-      } else if (handled instanceof CartographyTableScreen) {
-         return "cartography_table";
-      } else if (handled instanceof LoomScreen) {
-         return "loom";
-      } else if (handled instanceof HopperScreen) {
-         return "hopper";
-      } else if (handled instanceof MerchantScreen) {
-         return "villager";
-      } else if (handled instanceof HorseScreen) {
-         return resolveMount(handled instanceof HorseScreenPovAccess horseScreen ? horseScreen.bbsPov$getEntity() : null);
-      } else {
-         return handled instanceof BeaconScreen ? "beacon" : null;
-      }
-   }
+        }
+        if (handled instanceof FurnaceScreen) return "furnace";
+        if (handled instanceof BlastFurnaceScreen) return "blast_furnace";
+        if (handled instanceof SmokerScreen) return "smoker";
+        if (handled instanceof EnchantmentScreen) return "enchanting_table";
+        if (handled instanceof BrewingStandScreen) return "brewing_stand";
+        if (handled instanceof SmithingScreen) return "smithing_table";
+        if (handled instanceof GrindstoneScreen) return "grindstone";
+        if (handled instanceof StonecutterScreen) return "stonecutter";
+        if (handled instanceof CartographyTableScreen) return "cartography_table";
+        if (handled instanceof LoomScreen) return "loom";
+        if (handled instanceof HopperScreen) return "hopper";
+        if (handled instanceof MerchantScreen) return "villager";
+        if (handled instanceof HorseScreen)
+        {
+            return resolveMount(handled instanceof HorseScreenPovAccess horseScreen
+                ? horseScreen.bbsPov$getEntity()
+                : null);
+        }
+        if (handled instanceof BeaconScreen) return "beacon";
+        return null;
+    }
 
-   public static String resolveMount(AbstractHorseEntity mount) {
-      return !(mount instanceof DonkeyEntity) && !(mount instanceof MuleEntity) ? "horse" : "donkey";
-   }
+    /**
+     * Saved mount GUI id. Donkeys and mules both return {@code donkey}.
+     * Never returns {@code mule}.
+     */
+    public static String resolveMount(AbstractHorseEntity mount)
+    {
+        if (mount instanceof DonkeyEntity || mount instanceof MuleEntity)
+        {
+            return "donkey";
+        }
+        return "horse";
+    }
 }

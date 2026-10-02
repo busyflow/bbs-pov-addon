@@ -5,26 +5,38 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 
-public final class GuiItemRenderer {
-   private static boolean itemGroupsPopulated = false;
+/** Item-group display context and item-stack drawing for GUI clips. */
+public final class GuiItemRenderer
+{
+    private static boolean itemGroupsPopulated = false;
 
-   private GuiItemRenderer() {
-   }
+    private GuiItemRenderer()
+    {
+    }
 
-   public static void drawSlotItem(Batcher2D batcher, ItemStack stack, int x, int y) {
-      GuiSlotRenderer.drawSlotItem(batcher, stack, x, y);
-   }
+    public static void drawSlotItem(Batcher2D batcher, ItemStack stack, int x, int y)
+    {
+        GuiSlotRenderer.drawSlotItem(batcher, stack, x, y);
+    }
 
-   public static void ensureItemGroupsPopulated() {
-      if (!itemGroupsPopulated) {
-         MinecraftClient client = MinecraftClient.getInstance();
-         if (client.world != null) {
-            try {
-               ItemGroups.updateDisplayContext(client.world.getEnabledFeatures(), true, client.world.getRegistryManager());
-               itemGroupsPopulated = true;
-            } catch (Exception var2) {
+    public static void ensureItemGroupsPopulated()
+    {
+        if (itemGroupsPopulated)
+        {
+            return;
+        }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.world != null)
+        {
+            try
+            {
+                ItemGroups.updateDisplayContext(client.world.getEnabledFeatures(), true, client.world.getRegistryManager());
+                itemGroupsPopulated = true;
             }
-         }
-      }
-   }
+            catch (Exception ignored)
+            {
+            }
+        }
+    }
 }

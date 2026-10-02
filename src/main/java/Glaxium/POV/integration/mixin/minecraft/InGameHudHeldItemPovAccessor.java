@@ -6,13 +6,12 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin({InGameHud.class})
-public interface InGameHudHeldItemPovAccessor extends InGameHudHeldItemPovAccess {
-   @Accessor("heldItemTooltipFade")
-   @Override
-   int bbsPov$getHeldItemTooltipFade();
+@Mixin(InGameHud.class)
+public interface InGameHudHeldItemPovAccessor extends InGameHudHeldItemPovAccess
+{
+    @Accessor("heldItemTooltipFade")
+    int bbsPov$getHeldItemTooltipFade();
 
-   @Accessor("currentStack")
-   @Override
-   ItemStack bbsPov$getHeldItemTooltipStack();
+    @Accessor("currentStack")
+    ItemStack bbsPov$getHeldItemTooltipStack();
 }

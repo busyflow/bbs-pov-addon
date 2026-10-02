@@ -2,6 +2,7 @@ package Glaxium.POV.integration.mixin.minecraft;
 
 import Glaxium.POV.actions.gui.recording.GuiSnapshotCapture;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
@@ -11,20 +12,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin({TexturedButtonWidget.class})
-public abstract class RecipeBookButtonPovMixin {
-   private static final Identifier RECIPE_BUTTON_TEXTURE = new Identifier("textures/gui/recipe_button.png");
-   @Shadow
-   @Final
-   protected Identifier texture;
+@Mixin(TexturedButtonWidget.class)
+public abstract class RecipeBookButtonPovMixin
+{
+    private static final Identifier RECIPE_BUTTON_TEXTURE = new Identifier("textures/gui/recipe_button.png");
+    @Shadow @Final protected Identifier texture;
 
-   @Inject(
-      method = {"renderButton"},
-      at = {@At("HEAD")}
-   )
-   private void bbsPov$captureRecipeButton(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
-      if (RECIPE_BUTTON_TEXTURE.equals(this.texture)) {
-         GuiSnapshotCapture.updateRecipeButton(((TexturedButtonWidget)(Object)this).isSelected());
-      }
-   }
+    @Inject(method = "renderButton", at = @At("HEAD"))
+    private void bbsPov$captureRecipeButton(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info)
+    {
+        if (RECIPE_BUTTON_TEXTURE.equals(this.texture))
+        {
+            GuiSnapshotCapture.updateRecipeButton(((TexturedButtonWidget) (Object) this).isSelected());
+        }
+    }
 }

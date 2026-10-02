@@ -51,11 +51,13 @@
     "minecraft.InGameOverlayRendererPovMixin",
     "compat.iris.IrisHandRendererPovMixin",
     "compat.iris.IrisEyeBrightnessPovMixin",
+    "compat.iris.IrisCapturedRenderingStatePovMixin",
     "minecraft.HeldItemRendererPovAccessor",
     "minecraft.HeldItemRendererPovPickingMixin",
     "bbs.KeyframeChannelPovMixin",
     "bbs.KeyframePovMixin",
     "minecraft.KeyboardPovPlaybackMixin",
+    "minecraft.MousePovPlaybackMixin",
     "minecraft.LivingEntityPovAccessor",
     "minecraft.LivingEntityStatusEffectPovMixin",
     "minecraft.LoomScreenPovMixin",
@@ -122,6 +124,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "refmap": "BBS-POV-refmap.json"
+  }
 }

@@ -1,4 +1,11 @@
-﻿.gradle/
-build/
-src-old-backup/
+# Project exclude paths
+/.gradle/
+/.idea
+/build/
+/.idea/
+/run/
+libs/bbs-fs-master
+/bin/
+*.bak
+libs/bbs-2.7-1.20.4 source
 libs/

@@ -5,30 +5,27 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Arm;
 
-public interface HeldItemRendererPovAccess {
-   ItemStack bbsPov$getMainHand();
+/** Feature-facing accessor. Mixin implements this; do not import mixin types from features. */
+public interface HeldItemRendererPovAccess
+{
+    ItemStack bbsPov$getMainHand();
+    void bbsPov$setMainHand(ItemStack stack);
+    ItemStack bbsPov$getOffHand();
+    void bbsPov$setOffHand(ItemStack stack);
+    float bbsPov$getEquipProgressMainHand();
+    void bbsPov$setEquipProgressMainHand(float value);
+    float bbsPov$getPrevEquipProgressMainHand();
+    void bbsPov$setPrevEquipProgressMainHand(float value);
+    float bbsPov$getEquipProgressOffHand();
+    void bbsPov$setEquipProgressOffHand(float value);
+    float bbsPov$getPrevEquipProgressOffHand();
+    void bbsPov$setPrevEquipProgressOffHand(float value);
 
-   void bbsPov$setMainHand(ItemStack var1);
-
-   ItemStack bbsPov$getOffHand();
-
-   void bbsPov$setOffHand(ItemStack var1);
-
-   float bbsPov$getEquipProgressMainHand();
-
-   void bbsPov$setEquipProgressMainHand(float var1);
-
-   float bbsPov$getPrevEquipProgressMainHand();
-
-   void bbsPov$setPrevEquipProgressMainHand(float var1);
-
-   float bbsPov$getEquipProgressOffHand();
-
-   void bbsPov$setEquipProgressOffHand(float var1);
-
-   float bbsPov$getPrevEquipProgressOffHand();
-
-   void bbsPov$setPrevEquipProgressOffHand(float var1);
-
-   void bbsPov$renderArmHoldingItem(MatrixStack var1, VertexConsumerProvider var2, int var3, float var4, float var5, Arm var6);
+    void bbsPov$renderArmHoldingItem(
+        MatrixStack matrices,
+        VertexConsumerProvider consumers,
+        int light,
+        float equipProgress,
+        float swingProgress,
+        Arm arm);
 }

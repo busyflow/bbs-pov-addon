@@ -1,6 +1,5 @@
 package Glaxium.POV.integration.mixin.minecraft;
 
-import Glaxium.POV.actions.RecordedPovActions;
 import Glaxium.POV.actions.toast.recording.ToastRecorder;
 import Glaxium.POV.config.PovSettings;
 import Glaxium.POV.integration.access.bbs.ReplayKeyframesPovAccess;
@@ -13,24 +12,33 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin({ToastManager.class})
-public class ToastManagerPovMixin {
-   @Inject(
-      method = {"add"},
-      at = {@At("HEAD")}
-   )
-   private void bbsPov$onToastAdded(Toast toast, CallbackInfo ci) {
-      if (PovSettings.isBakeAnyActions()) {
-         try {
+@Mixin(ToastManager.class)
+public class ToastManagerPovMixin
+{
+    @Inject(method = "add", at = @At("HEAD"))
+    private void bbsPov$onToastAdded(Toast toast, CallbackInfo ci)
+    {
+        if (!PovSettings.isBakeAnyActions())
+        {
+            return;
+        }
+
+        try
+        {
             Recorder recorder = BBSModClient.getFilms().getRecorder();
-            if (recorder != null && !recorder.hasNotStarted() && recorder.tick >= 0 && recorder.keyframes instanceof ReplayKeyframesPovAccess access) {
-               RecordedPovActions actions = access.bbsPov$getActions();
-               if (actions != null) {
-                  ToastRecorder.onToastAdded(toast, actions, recorder.tick);
-               }
+            if (recorder != null && !recorder.hasNotStarted() && recorder.tick >= 0)
+            {
+                if (recorder.keyframes instanceof ReplayKeyframesPovAccess access)
+                {
+                    var actions = access.bbsPov$getActions();
+                    if (actions != null)
+                    {
+                        ToastRecorder.onToastAdded(toast, actions, recorder.tick);
+                    }
+                }
             }
-         } catch (Throwable var6) {
-         }
-      }
-   }
+        }
+        catch (Throwable ignored)
+        {}
+    }
 }

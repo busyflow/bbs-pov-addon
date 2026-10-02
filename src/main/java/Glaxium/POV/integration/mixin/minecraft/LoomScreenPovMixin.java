@@ -10,32 +10,41 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin({LoomScreen.class})
-public abstract class LoomScreenPovMixin {
-   @Shadow
-   private int visibleTopRow;
+@Mixin(LoomScreen.class)
+public abstract class LoomScreenPovMixin
+{
+    @Shadow private int visibleTopRow;
 
-   @Inject(
-      method = {"render"},
-      at = {@At("HEAD")}
-   )
-   private void bbsPov$captureLoomState(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
-      GuiSnapshotCapture.updateLoom(this.visibleTopRow);
-   }
+    @Inject(method = "render", at = @At("HEAD"))
+    private void bbsPov$captureLoomState(
+        DrawContext context,
+        int mouseX,
+        int mouseY,
+        float delta,
+        CallbackInfo info)
+    {
+        GuiSnapshotCapture.updateLoom(this.visibleTopRow);
+    }
 
-   @Inject(
-      method = {"mouseScrolled"},
-      at = {@At("RETURN")}
-   )
-   private void bbsPov$captureLoomWheel(double mouseX, double mouseY, double amount, CallbackInfoReturnable<Boolean> info) {
-      GuiSnapshotCapture.updateLoom(this.visibleTopRow);
-   }
+    @Inject(method = "mouseScrolled", at = @At("RETURN"))
+    private void bbsPov$captureLoomWheel(
+        double mouseX,
+        double mouseY,
+        double amount,
+        CallbackInfoReturnable<Boolean> info)
+    {
+        GuiSnapshotCapture.updateLoom(this.visibleTopRow);
+    }
 
-   @Inject(
-      method = {"mouseDragged"},
-      at = {@At("RETURN")}
-   )
-   private void bbsPov$captureLoomScrollbar(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> info) {
-      GuiSnapshotCapture.updateLoom(this.visibleTopRow);
-   }
+    @Inject(method = "mouseDragged", at = @At("RETURN"))
+    private void bbsPov$captureLoomScrollbar(
+        double mouseX,
+        double mouseY,
+        int button,
+        double deltaX,
+        double deltaY,
+        CallbackInfoReturnable<Boolean> info)
+    {
+        GuiSnapshotCapture.updateLoom(this.visibleTopRow);
+    }
 }

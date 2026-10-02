@@ -9,19 +9,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(
-   value = {IUIKeyframeGraph.class},
-   remap = false
-)
-public interface IUIKeyframeGraphBodyPartFolderMixin {
-   @Inject(
-      method = {"addKeyframeManually"},
-      at = {@At("HEAD")},
-      cancellable = true
-   )
-   private void bbsPov$blockBodyPartFolderKeys(UIKeyframeSheet sheet, float tick, Object value, CallbackInfoReturnable<Keyframe> info) {
-      if (sheet instanceof PovBodyPartFolderSheet) {
-         info.setReturnValue(null);
-      }
-   }
+/** The add-key command is a default interface method, shared by mouse, hotkey
+ * and toolbar paths. Block folder rows here once instead of missing a path. */
+@Mixin(value = IUIKeyframeGraph.class, remap = false)
+public interface IUIKeyframeGraphBodyPartFolderMixin
+{
+    @Inject(method = "addKeyframeManually", at = @At("HEAD"), cancellable = true)
+    private void bbsPov$blockBodyPartFolderKeys(
+        UIKeyframeSheet sheet, float tick, Object value,
+        CallbackInfoReturnable<Keyframe> info)
+    {
+        if (sheet instanceof PovBodyPartFolderSheet)
+        {
+            info.setReturnValue(null);
+        }
+    }
 }

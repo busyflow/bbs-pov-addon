@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "bbs_pov",
-  "version": "1.0.0-1.20.1",
+  "version": "${version}",
   "name": "BBS-POV",
   "description": "Adds an actor-based POV Editor with automatically recorded HUD and hand keyframes to BBS 2.5.",
   "authors": ["GlaxiumDev"],

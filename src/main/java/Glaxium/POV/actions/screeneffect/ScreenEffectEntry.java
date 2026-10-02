@@ -5,193 +5,229 @@ import mchorse.bbs_mod.resources.Link;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
-public class ScreenEffectEntry {
-   private String effectId = "fire";
-   private float intensity = 1.0F;
-   private int fadeIn = 0;
-   private int fadeOut = 0;
-   private Link customTexture = null;
-   private int customColor = -16777216;
-   private String blockOrItem = "";
+/** Represents a single screen overlay effect entry inside a ScreenEffectPovActionClip. */
+public class ScreenEffectEntry
+{
+    private String effectId = "fire";
+    private float intensity = 1.0F;
+    private int fadeIn = 0;
+    private int fadeOut = 0;
+    private Link customTexture = null;
+    private int customColor = 0xFF000000;
+    private String blockOrItem = "";
 
-   public ScreenEffectEntry() {
-   }
+    public ScreenEffectEntry()
+    {
+    }
 
-   public ScreenEffectEntry(String effectId) {
-      this.effectId = effectId;
-      ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(effectId);
-      if (preset != null) {
-         this.intensity = preset.defaultIntensity;
-      }
-   }
+    public ScreenEffectEntry(String effectId)
+    {
+        this.effectId = effectId;
+        ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(effectId);
+        if (preset != null)
+        {
+            this.intensity = preset.defaultIntensity;
+        }
+    }
 
-   public String getEffectId() {
-      return this.effectId;
-   }
+    public String getEffectId()
+    {
+        return this.effectId;
+    }
 
-   public void setEffectId(String effectId) {
-      this.effectId = effectId == null ? "fire" : effectId;
-   }
+    public void setEffectId(String effectId)
+    {
+        this.effectId = effectId == null ? "fire" : effectId;
+    }
 
-   public float getIntensity() {
-      return this.intensity;
-   }
+    public float getIntensity()
+    {
+        return this.intensity;
+    }
 
-   public void setIntensity(float intensity) {
-      this.intensity = MathHelper.clamp(intensity, 0.0F, 1.0F);
-   }
+    public void setIntensity(float intensity)
+    {
+        this.intensity = MathHelper.clamp(intensity, 0F, 1F);
+    }
 
-   public int getFadeIn() {
-      return this.fadeIn;
-   }
+    public int getFadeIn()
+    {
+        return this.fadeIn;
+    }
 
-   public void setFadeIn(int fadeIn) {
-      this.fadeIn = Math.max(0, fadeIn);
-   }
+    public void setFadeIn(int fadeIn)
+    {
+        this.fadeIn = Math.max(0, fadeIn);
+    }
 
-   public int getFadeOut() {
-      return this.fadeOut;
-   }
+    public int getFadeOut()
+    {
+        return this.fadeOut;
+    }
 
-   public void setFadeOut(int fadeOut) {
-      this.fadeOut = Math.max(0, fadeOut);
-   }
+    public void setFadeOut(int fadeOut)
+    {
+        this.fadeOut = Math.max(0, fadeOut);
+    }
 
-   public Link getCustomTexture() {
-      return this.customTexture;
-   }
+    public Link getCustomTexture()
+    {
+        return this.customTexture;
+    }
 
-   public void setCustomTexture(Link customTexture) {
-      this.customTexture = customTexture;
-   }
+    public void setCustomTexture(Link customTexture)
+    {
+        this.customTexture = customTexture;
+    }
 
-   public int getCustomColor() {
-      return this.customColor;
-   }
+    public int getCustomColor()
+    {
+        return this.customColor;
+    }
 
-   public void setCustomColor(int customColor) {
-      this.customColor = customColor;
-   }
+    public void setCustomColor(int customColor)
+    {
+        this.customColor = customColor;
+    }
 
-   public String getBlockOrItem() {
-      return this.blockOrItem;
-   }
+    public String getBlockOrItem()
+    {
+        return this.blockOrItem;
+    }
 
-   public void setBlockOrItem(String blockOrItem) {
-      this.blockOrItem = blockOrItem == null ? "" : blockOrItem;
-   }
+    public void setBlockOrItem(String blockOrItem)
+    {
+        this.blockOrItem = blockOrItem == null ? "" : blockOrItem;
+    }
 
-   public String getDisplayName() {
-      ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(this.effectId);
-      return preset != null ? preset.name : this.effectId;
-   }
+    public String getDisplayName()
+    {
+        ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(this.effectId);
+        return preset != null ? preset.name : this.effectId;
+    }
 
-   public String getDescription() {
-      ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(this.effectId);
-      return preset != null ? preset.description : "";
-   }
+    public String getDescription()
+    {
+        ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(this.effectId);
+        return preset != null ? preset.description : "";
+    }
 
-   public int getVanillaRenderOrder() {
-      ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(this.effectId);
-      return preset != null ? preset.vanillaRenderOrder : 10;
-   }
+    public int getVanillaRenderOrder()
+    {
+        ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(this.effectId);
+        return preset != null ? preset.vanillaRenderOrder : 10;
+    }
 
-   public ItemStack createIconStack() {
-      ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(this.effectId);
-      return preset != null ? preset.createIconStack() : ItemStack.EMPTY;
-   }
+    public ItemStack createIconStack()
+    {
+        ScreenEffectPresetEntry preset = ScreenEffectPresets.getById(this.effectId);
+        return preset != null ? preset.createIconStack() : ItemStack.EMPTY;
+    }
 
-   public float getEffectiveIntensity(float elapsed, int duration) {
-      if (duration > 0 && !(this.intensity <= 0.001F)) {
-         int in = Math.min(this.fadeIn, duration / 2);
-         int out = Math.min(this.fadeOut, duration / 2);
-         float factor = 1.0F;
-         if (in > 0 && elapsed < (float)in) {
-            factor = elapsed / (float)in;
-         } else if (out > 0 && elapsed > (float)(duration - out)) {
-            factor = ((float)duration - elapsed) / (float)out;
-         }
+    public float getEffectiveIntensity(float elapsed, int duration)
+    {
+        if (duration <= 0 || this.intensity <= 0.001F)
+        {
+            return 0F;
+        }
 
-         return MathHelper.clamp(this.intensity * factor, 0.0F, 1.0F);
-      } else {
-         return 0.0F;
-      }
-   }
+        int in = Math.min(this.fadeIn, duration / 2);
+        int out = Math.min(this.fadeOut, duration / 2);
 
-   public ScreenEffectEntry copy() {
-      ScreenEffectEntry copy = new ScreenEffectEntry(this.effectId);
-      copy.intensity = this.intensity;
-      copy.fadeIn = this.fadeIn;
-      copy.fadeOut = this.fadeOut;
-      copy.customTexture = this.customTexture;
-      copy.customColor = this.customColor;
-      copy.blockOrItem = this.blockOrItem;
-      return copy;
-   }
+        float factor = 1.0F;
+        if (in > 0 && elapsed < in)
+        {
+            factor = elapsed / (float) in;
+        }
+        else if (out > 0 && elapsed > (duration - out))
+        {
+            factor = (duration - elapsed) / (float) out;
+        }
 
-   public void toData(MapType data) {
-      data.putString("id", this.effectId);
-      data.putFloat("intensity", this.intensity);
-      data.putInt("fade_in", this.fadeIn);
-      data.putInt("fade_out", this.fadeOut);
-      if (this.customTexture != null) {
-         data.putString("texture", this.customTexture.toString());
-      }
+        return MathHelper.clamp(this.intensity * factor, 0F, 1F);
+    }
 
-      data.putInt("color", this.customColor);
-      if (this.blockOrItem != null && !this.blockOrItem.isEmpty()) {
-         data.putString("item_block", this.blockOrItem);
-      }
-   }
+    public ScreenEffectEntry copy()
+    {
+        ScreenEffectEntry copy = new ScreenEffectEntry(this.effectId);
+        copy.intensity = this.intensity;
+        copy.fadeIn = this.fadeIn;
+        copy.fadeOut = this.fadeOut;
+        copy.customTexture = this.customTexture;
+        copy.customColor = this.customColor;
+        copy.blockOrItem = this.blockOrItem;
+        return copy;
+    }
 
-   public void fromData(MapType data) {
-      if (data.has("id")) {
-         this.effectId = data.getString("id");
-      }
+    public void toData(MapType data)
+    {
+        data.putString("id", this.effectId);
+        data.putFloat("intensity", this.intensity);
+        data.putInt("fade_in", this.fadeIn);
+        data.putInt("fade_out", this.fadeOut);
+        if (this.customTexture != null)
+        {
+            data.putString("texture", this.customTexture.toString());
+        }
+        data.putInt("color", this.customColor);
+        if (this.blockOrItem != null && !this.blockOrItem.isEmpty())
+        {
+            data.putString("item_block", this.blockOrItem);
+        }
+    }
 
-      if (data.has("intensity")) {
-         this.intensity = data.getFloat("intensity");
-      }
+    public void fromData(MapType data)
+    {
+        if (data.has("id"))
+        {
+            this.effectId = data.getString("id");
+        }
+        if (data.has("intensity"))
+        {
+            this.intensity = data.getFloat("intensity");
+        }
+        if (data.has("fade_in"))
+        {
+            this.fadeIn = data.getInt("fade_in");
+        }
+        if (data.has("fade_out"))
+        {
+            this.fadeOut = data.getInt("fade_out");
+        }
+        if (data.has("texture"))
+        {
+            this.customTexture = Link.create(data.getString("texture"));
+        }
+        else
+        {
+            this.customTexture = null;
+        }
+        if (data.has("color"))
+        {
+            this.customColor = data.getInt("color");
+        }
+        if (data.has("item_block"))
+        {
+            this.blockOrItem = data.getString("item_block");
+        }
+        else
+        {
+            this.blockOrItem = "";
+        }
+    }
 
-      if (data.has("fade_in")) {
-         this.fadeIn = data.getInt("fade_in");
-      }
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ScreenEffectEntry other = (ScreenEffectEntry) obj;
+        return this.effectId != null && this.effectId.equalsIgnoreCase(other.effectId);
+    }
 
-      if (data.has("fade_out")) {
-         this.fadeOut = data.getInt("fade_out");
-      }
-
-      if (data.has("texture")) {
-         this.customTexture = Link.create(data.getString("texture"));
-      } else {
-         this.customTexture = null;
-      }
-
-      if (data.has("color")) {
-         this.customColor = data.getInt("color");
-      }
-
-      if (data.has("item_block")) {
-         this.blockOrItem = data.getString("item_block");
-      } else {
-         this.blockOrItem = "";
-      }
-   }
-
-   @Override
-   public boolean equals(Object obj) {
-      if (this == obj) {
-         return true;
-      } else if (obj != null && this.getClass() == obj.getClass()) {
-         ScreenEffectEntry other = (ScreenEffectEntry)obj;
-         return this.effectId != null && this.effectId.equalsIgnoreCase(other.effectId);
-      } else {
-         return false;
-      }
-   }
-
-   @Override
-   public int hashCode() {
-      return this.effectId != null ? this.effectId.toLowerCase().hashCode() : 0;
-   }
+    @Override
+    public int hashCode()
+    {
+        return this.effectId != null ? this.effectId.toLowerCase().hashCode() : 0;
+    }
 }

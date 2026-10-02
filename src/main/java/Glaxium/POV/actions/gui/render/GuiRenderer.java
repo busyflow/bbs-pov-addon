@@ -1,5 +1,7 @@
 package Glaxium.POV.actions.gui.render;
 
-public interface GuiRenderer {
-   void render(GuiRenderContext var1);
+/** Per-GUI-type clip renderer. */
+public interface GuiRenderer
+{
+    void render(GuiRenderContext ctx);
 }

@@ -1,29 +1,30 @@
 package Glaxium.POV.integration.access.minecraft;
 
-public interface ParticlePovAccess {
-   double bbsPov$getX();
+public interface ParticlePovAccess
+{
+    double bbsPov$getX();
 
-   double bbsPov$getY();
+    double bbsPov$getY();
 
-   double bbsPov$getZ();
+    double bbsPov$getZ();
 
-   void bbsPov$setX(double var1);
+    void bbsPov$setX(double x);
 
-   void bbsPov$setY(double var1);
+    void bbsPov$setY(double y);
 
-   void bbsPov$setZ(double var1);
+    void bbsPov$setZ(double z);
 
-   void bbsPov$setPrevPosX(double var1);
+    void bbsPov$setPrevPosX(double x);
 
-   void bbsPov$setPrevPosY(double var1);
+    void bbsPov$setPrevPosY(double y);
 
-   void bbsPov$setPrevPosZ(double var1);
+    void bbsPov$setPrevPosZ(double z);
 
-   float bbsPov$getGravityStrength();
+    float bbsPov$getGravityStrength();
 
-   float bbsPov$getVelocityMultiplier();
+    float bbsPov$getVelocityMultiplier();
 
-   int bbsPov$getMaxAge();
+    int bbsPov$getMaxAge();
 
-   void bbsPov$setAge(int var1);
+    void bbsPov$setAge(int age);
 }

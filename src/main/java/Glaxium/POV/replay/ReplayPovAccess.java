@@ -2,10 +2,12 @@ package Glaxium.POV.replay;
 
 import mchorse.bbs_mod.settings.values.numeric.ValueBoolean;
 
-public interface ReplayPovAccess {
-   ValueBoolean bbsPov$getOverlayEnabled();
+/** Persistent BBS-POV settings attached to every BBS replay. */
+public interface ReplayPovAccess
+{
+    ValueBoolean bbsPov$getOverlayEnabled();
 
-   ValueBoolean bbsPov$getHardcoreLook();
+    ValueBoolean bbsPov$getHardcoreLook();
 
-   ValueBoolean bbsPov$getCameraShake();
+    ValueBoolean bbsPov$getCameraShake();
 }

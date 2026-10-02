@@ -1,9 +1,9 @@
 package Glaxium.POV.integration.mixin.bbs;
 
 import Glaxium.POV.PovAddon;
+import Glaxium.POV.camera.PovCameraMode;
 import Glaxium.POV.camera.clip.PovCameraClip;
 import Glaxium.POV.camera.clip.PovCameraClips;
-import Glaxium.POV.editor.UIPovHandEditor;
 import Glaxium.POV.hand.editor.PovHandGizmo;
 import Glaxium.POV.hand.editor.PovHandPicking;
 import Glaxium.POV.hand.playback.PovHandPlayback;
@@ -28,8 +28,8 @@ import mchorse.bbs_mod.ui.utils.StencilFormFramebuffer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.render.VertexConsumerProvider.Immediate;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Matrix4f;
@@ -41,129 +41,185 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(
-   value = {FilmStencilPicker.class},
-   remap = false
-)
-public class FilmStencilPickerPovMixin {
-   @Shadow
-   @Final
-   private UIFilmController controller;
-   @Shadow
-   @Final
-   private StencilFormFramebuffer stencil;
-   @Shadow
-   @Final
-   private StencilMap stencilMap;
+@Mixin(value = FilmStencilPicker.class, remap = false)
+public class FilmStencilPickerPovMixin
+{
+    @Shadow @Final private UIFilmController controller;
+    @Shadow @Final private StencilFormFramebuffer stencil;
+    @Shadow @Final private StencilMap stencilMap;
 
-   @Inject(
-      method = {"renderStencil"},
-      at = {@At("HEAD")},
-      cancellable = true
-   )
-   private void bbsPov$renderHandPicker(WorldRenderContext worldContext, UIContext context, boolean alt, CallbackInfo info) {
-      if (this.controller.getPovMode() == 6) {
-         UIFilmPanel panel;
-         Area viewport;
-         boolean var10000;
-         label111: {
-            info.cancel();
-            panel = this.controller.panel;
-            viewport = panel.preview.getViewport();
-            if (panel instanceof UIFilmPanelPovAccess access && access.bbsPov$getEditor() != null && access.bbsPov$getEditor().isPoseGizmoSection()) {
-               var10000 = true;
-               break label111;
-            }
+    @Inject(method = "renderStencil", at = @At("HEAD"), cancellable = true)
+    private void bbsPov$renderHandPicker(
+        WorldRenderContext worldContext,
+        UIContext context,
+        boolean alt,
+        CallbackInfo info)
+    {
+        if (this.controller.getPovMode() != PovCameraMode.POV)
+        {
+            return;
+        }
 
-            var10000 = false;
-         }
+        info.cancel();
 
-         boolean handEditor = var10000;
-         if (handEditor && viewport.isInside(context) && viewport.w > 0 && viewport.h > 0) {
-            MinecraftClient client = MinecraftClient.getInstance();
-            ClientPlayerEntity player = client.player;
-            if (player == null) {
-               this.stencil.clearPicking();
-               PovHandPicking.abortStencil();
-            } else {
-               this.stencil.setup(Link.bbs("stencil_film"));
-               Texture texture = this.stencil.getFramebuffer().getMainTexture();
-               int videoWidth = BBSRendering.getVideoWidth();
-               int videoHeight = BBSRendering.getVideoHeight();
-               if (texture.width != videoWidth || texture.height != videoHeight) {
-                  this.stencil.resizeGUI(videoWidth, videoHeight);
-                  texture = this.stencil.getFramebuffer().getMainTexture();
-               }
+        UIFilmPanel panel = this.controller.panel;
+        Area viewport = panel.preview.getViewport();
+        boolean handEditor = panel instanceof UIFilmPanelPovAccess access
+            && access.bbsPov$getEditor() != null
+            && access.bbsPov$getEditor().isPoseGizmoSection();
 
-               this.stencilMap.setup();
-               this.stencil.apply();
-               PovHandPicking.beginStencil(this.stencilMap);
-               MatrixStack matrices = worldContext.matrixStack();
-               matrices.push();
-               matrices.loadIdentity();
-
-               try {
-                  Matrix4f handProjection = PovHandPicking.getProjection();
-                  if (handProjection != null) {
-                     RenderSystem.setProjectionMatrix(handProjection, VertexSorter.BY_Z);
-                  }
-
-                  boolean began = PovHandPlayback.begin(worldContext.tickDelta());
-                  if (began) {
-                     PovHandPlayback.useCapturedPose(PovHandMatrices.getCapturedPose());
-                     Immediate consumers = client.getBufferBuilders().getEntityVertexConsumers();
-                     BlockPos cameraPos = BlockPos.ofFloored(panel.getCamera().position.x, panel.getCamera().position.y, panel.getCamera().position.z);
-                     int light = client.world == null ? 15728880 : WorldRenderer.getLightmapCoordinates(client.world, cameraPos);
-                     PovHandPlayback.render(client.gameRenderer.firstPersonRenderer, worldContext.tickDelta(), matrices, consumers, player, light);
-                     PovHandGizmo.renderStencil(this.stencilMap);
-                  }
-
-                  int x = (int)((float)(context.mouseX - viewport.x) / (float)viewport.w * (float)texture.width);
-                  int y = (int)((1.0F - (float)(context.mouseY - viewport.y) / (float)viewport.h) * (float)texture.height);
-                  int tolerance = Math.round((float)((Integer)BBSSettings.gizmoHoverTolerance.get() * texture.width) / (float)viewport.w);
-                  this.stencil.pick(x, y, tolerance, 19);
-                  this.stencil.unbind(this.stencilMap);
-                  PovHandPicking.finishStencil(this.stencil.getPicked());
-               } catch (Throwable var22) {
-                  PovAddon.LOGGER.error("POV hand stencil render failed", var22);
-                  this.stencil.unbind(this.stencilMap);
-                  PovHandPicking.abortStencil();
-               } finally {
-                  PovHandPlayback.end();
-                  matrices.pop();
-                  client.getFramebuffer().beginWrite(true);
-               }
-            }
-         } else {
+        if (!handEditor || !viewport.isInside(context) || viewport.w <= 0 || viewport.h <= 0)
+        {
             this.stencil.clearPicking();
             PovHandPicking.abortStencil();
-         }
-      }
-   }
+            return;
+        }
 
-   @Redirect(
-      method = {"renderStencil"},
-      at = @At(
-         value = "INVOKE",
-         target = "Lmchorse/bbs_mod/film/FilmEntityRenderer;renderEntity(Lmchorse/bbs_mod/film/FilmControllerContext;)V"
-      )
-   )
-   private void bbsPov$hideHeadLookSourceFromPicker(FilmControllerContext renderContext) {
-      UIFilmPanel panel = this.controller.panel;
-      if (!UIPovHandEditor.isActive() || renderContext.replay != panel.replayEditor.getReplay()) {
-         int povMode = this.controller.getPovMode();
-         if (povMode != 1 && povMode != 2) {
-            Film film = (Film)panel.getData();
-            float filmTick = panel.getRunner() != null && panel.getRunner().isRunning()
-               ? (float)panel.getRunner().ticks + renderContext.transition
-               : (float)panel.getCursor();
-            PovCameraClip clip = PovCameraClips.resolve(film, filmTick);
-            if (clip == null || !(Boolean)clip.headLook.get() || renderContext.replay != PovCameraClips.resolveReplay(film, clip)) {
-               FilmEntityRenderer.renderEntity(renderContext);
+        MinecraftClient client = MinecraftClient.getInstance();
+        ClientPlayerEntity player = client.player;
+
+        if (player == null)
+        {
+            this.stencil.clearPicking();
+            PovHandPicking.abortStencil();
+            return;
+        }
+
+        this.stencil.setup(Link.bbs("stencil_film"));
+        Texture texture = this.stencil.getFramebuffer().getMainTexture();
+        int videoWidth = BBSRendering.getVideoWidth();
+        int videoHeight = BBSRendering.getVideoHeight();
+
+        if (texture.width != videoWidth || texture.height != videoHeight)
+        {
+            this.stencil.resizeGUI(videoWidth, videoHeight);
+            texture = this.stencil.getFramebuffer().getMainTexture();
+        }
+
+        this.stencilMap.setup();
+        this.stencil.apply();
+        PovHandPicking.beginStencil(this.stencilMap);
+
+        MatrixStack matrices = worldContext.matrixStack();
+        matrices.push();
+        matrices.loadIdentity();
+        RenderSystem.getModelViewStack().push();
+        RenderSystem.getModelViewStack().loadIdentity();
+        RenderSystem.applyModelViewMatrix();
+
+        try
+        {
+            Matrix4f handProjection = PovHandPicking.getProjection();
+
+            if (handProjection == null)
+            {
+                handProjection = client.gameRenderer.getBasicProjectionMatrix(70D);
+                if (videoWidth > 0 && videoHeight > 0)
+                {
+                    handProjection.m00(handProjection.m11() / (videoWidth / (float) videoHeight));
+                }
+                PovHandPicking.captureProjection(handProjection);
             }
-         } else {
+
+            RenderSystem.setProjectionMatrix(handProjection, VertexSorter.BY_Z);
+
+            boolean began = PovHandPlayback.begin(worldContext.tickDelta());
+
+            if (began)
+            {
+                PovHandPlayback.useCapturedPose(PovHandMatrices.getCapturedPose());
+
+                VertexConsumerProvider.Immediate consumers = client.getBufferBuilders().getEntityVertexConsumers();
+                BlockPos cameraPos = BlockPos.ofFloored(
+                    panel.getCamera().position.x,
+                    panel.getCamera().position.y,
+                    panel.getCamera().position.z);
+                int light = client.world == null
+                    ? 0x00F000F0
+                    : WorldRenderer.getLightmapCoordinates(client.world, cameraPos);
+
+                RenderSystem.enableDepthTest();
+                RenderSystem.depthMask(true);
+                RenderSystem.depthFunc(org.lwjgl.opengl.GL11.GL_LEQUAL);
+
+                PovHandPlayback.render(
+                    client.gameRenderer.firstPersonRenderer,
+                    worldContext.tickDelta(),
+                    matrices,
+                    consumers,
+                    player,
+                    light);
+
+                consumers.draw();
+                PovHandGizmo.renderStencil(this.stencilMap);
+            }
+
+            int x = (int) (((context.mouseX - viewport.x) / (float) viewport.w) * texture.width);
+            int y = (int) ((1F - (context.mouseY - viewport.y) / (float) viewport.h) * texture.height);
+            int tolerance = Math.round((Integer) BBSSettings.gizmoHoverTolerance.get()
+                * texture.width / (float) viewport.w);
+
+            /* [PORTING NOTE: BBS GIZMO HOVER TOLERANCE FIX]
+             * BBS's StencilFormFramebuffer.pick(x, y, radius, handleMax) uses handleMax to
+             * restrict hover tolerance searching ONLY to gizmo handles (1..handleMax).
+             * Any index > handleMax (bones, bodyparts) resolves strictly at the exact center
+             * pixel. Passing Integer.MAX_VALUE would cause bones to grab from tolerance radius,
+             * causing flickering / mispicking between nearby limbs. Pass Gizmo.STENCIL_MAX. */
+            this.stencil.pick(x, y, tolerance, mchorse.bbs_mod.ui.utils.Gizmo.STENCIL_MAX);
+            this.stencil.unbind(this.stencilMap);
+            PovHandPicking.finishStencil(this.stencil.getPicked());
+        }
+        catch (Throwable throwable)
+        {
+            PovAddon.LOGGER.error("POV hand stencil render failed", throwable);
+            this.stencil.unbind(this.stencilMap);
+            PovHandPicking.abortStencil();
+        }
+        finally
+        {
+            PovHandPlayback.end();
+            RenderSystem.getModelViewStack().pop();
+            RenderSystem.applyModelViewMatrix();
+            matrices.pop();
+            client.getFramebuffer().beginWrite(true);
+        }
+    }
+
+    @Redirect(
+        method = "renderStencil",
+        at = @At(
+            value = "INVOKE",
+            target = "Lmchorse/bbs_mod/film/FilmEntityRenderer;renderEntity(Lmchorse/bbs_mod/film/FilmControllerContext;)V"))
+    private void bbsPov$hideHeadLookSourceFromPicker(FilmControllerContext renderContext)
+    {
+        UIFilmPanel panel = this.controller.panel;
+
+        if (Glaxium.POV.editor.UIPovHandEditor.isActive() && renderContext.replay == panel.replayEditor.getReplay())
+        {
+            return;
+        }
+
+        int povMode = this.controller.getPovMode();
+
+        if (povMode == UIFilmController.CAMERA_MODE_FREE || povMode == UIFilmController.CAMERA_MODE_ORBIT)
+        {
             FilmEntityRenderer.renderEntity(renderContext);
-         }
-      }
-   }
+            return;
+        }
+
+        Film film = (Film) panel.getData();
+        float filmTick = panel.getRunner() != null && panel.getRunner().isRunning()
+            ? panel.getRunner().ticks + renderContext.transition
+            : panel.getCursor();
+        PovCameraClip clip = PovCameraClips.resolve(film, filmTick);
+
+        if (clip != null
+            && clip.headLook.get()
+            && renderContext.replay == PovCameraClips.resolveReplay(film, clip))
+        {
+            return;
+        }
+
+        FilmEntityRenderer.renderEntity(renderContext);
+    }
 }

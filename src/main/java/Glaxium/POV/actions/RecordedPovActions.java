@@ -2,19 +2,13 @@ package Glaxium.POV.actions;
 
 import Glaxium.POV.actions.clip.BossBarPovActionClip;
 import Glaxium.POV.actions.clip.CameraShakePovActionClip;
-import Glaxium.POV.actions.clip.ChatPovActionClip;
 import Glaxium.POV.actions.clip.GuiPovActionClip;
 import Glaxium.POV.actions.clip.MenuPovActionClip;
 import Glaxium.POV.actions.clip.ParticleEffectPovActionClip;
 import Glaxium.POV.actions.clip.PovActionClip;
 import Glaxium.POV.actions.clip.ScreenEffectPovActionClip;
 import Glaxium.POV.actions.clip.SemanticHudPovActionClip;
-import Glaxium.POV.actions.clip.StatusEffectsPovActionClip;
-import Glaxium.POV.actions.clip.ToastPovActionClip;
 import Glaxium.POV.actions.timeline.PovActionTimelineFactory;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import mchorse.bbs_mod.data.types.BaseType;
 import mchorse.bbs_mod.utils.clips.Clip;
 import mchorse.bbs_mod.utils.clips.Clips;
@@ -23,322 +17,405 @@ import mchorse.bbs_mod.utils.keyframes.KeyframeChannel;
 import mchorse.bbs_mod.utils.pose.Transform;
 import net.minecraft.item.ItemStack;
 
-public final class RecordedPovActions extends Clips {
-   private final List<PovActionClip> sessionClips = new ArrayList<>();
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-   public RecordedPovActions() {
-      super("pov_actions", new PovActionTimelineFactory());
-   }
+/** Native BBS Clips container owned directly by an actor's ReplayKeyframes. */
+public final class RecordedPovActions extends Clips
+{
+    public RecordedPovActions()
+    {
+        super("pov_actions", new PovActionTimelineFactory());
+    }
 
-   public PovActionClip add(PovActionType type, int tick, int duration) {
-      PovActionClip clip = (PovActionClip)(switch (type) {
-         case GUI -> new GuiPovActionClip();
-         case MENU -> new MenuPovActionClip();
-         case CAMERA_SHAKE -> new CameraShakePovActionClip();
-         case PARTICLE_EFFECT -> new ParticleEffectPovActionClip();
-         case BOSS_BARS -> new BossBarPovActionClip();
-         case SCREEN_EFFECT -> new ScreenEffectPovActionClip();
-         case STATUS_EFFECTS -> new StatusEffectsPovActionClip();
-         case TOASTS -> new ToastPovActionClip();
-         case CHAT -> new ChatPovActionClip();
-         default -> new SemanticHudPovActionClip(type);
-      });
-      clip.tick.set(Math.max(0, tick));
-      clip.duration.set(Math.max(1, duration));
-      clip.layer.set(type.seedLayer());
-      this.addClip(clip);
-      this.sessionClips.add(clip);
-      this.sync();
-      return clip;
-   }
+    private final List<PovActionClip> sessionClips = new ArrayList<>();
 
-   public ChatPovActionClip getActiveChat(float tick) {
-      ChatPovActionClip top = null;
+    public PovActionClip add(PovActionType type, int tick, int duration)
+    {
+        PovActionClip clip = switch (type)
+        {
+            case GUI -> new GuiPovActionClip();
+            case MENU -> new MenuPovActionClip();
+            case CAMERA_SHAKE -> new CameraShakePovActionClip();
+            case PARTICLE_EFFECT -> new ParticleEffectPovActionClip();
+            case BOSS_BARS -> new BossBarPovActionClip();
+            case SCREEN_EFFECT -> new ScreenEffectPovActionClip();
+            case STATUS_EFFECTS -> new Glaxium.POV.actions.clip.StatusEffectsPovActionClip();
+            case TOASTS -> new Glaxium.POV.actions.clip.ToastPovActionClip();
+            case CHAT -> new Glaxium.POV.actions.clip.ChatPovActionClip();
+            default -> new SemanticHudPovActionClip(type);
+        };
 
-      for (Clip clip : this.get()) {
-         if (clip instanceof ChatPovActionClip) {
-            ChatPovActionClip chat = (ChatPovActionClip)clip;
-            if (chat.isActive(tick) && (top == null || (Integer)chat.layer.get() >= (Integer)top.layer.get())) {
-               top = chat;
+        clip.tick.set(Math.max(0, tick));
+        clip.duration.set(Math.max(1, duration));
+        clip.layer.set(type.seedLayer());
+        this.addClip(clip);
+        this.sessionClips.add(clip);
+        this.sync();
+
+        return clip;
+    }
+
+    public Glaxium.POV.actions.clip.ChatPovActionClip getActiveChat(float tick)
+    {
+        Glaxium.POV.actions.clip.ChatPovActionClip top = null;
+
+        for (Clip clip : this.get())
+        {
+            if (clip instanceof Glaxium.POV.actions.clip.ChatPovActionClip chat && chat.isActive(tick)
+                && (top == null || chat.layer.get() >= top.layer.get()))
+            {
+                top = chat;
             }
-         }
-      }
+        }
 
-      return top;
-   }
+        return top;
+    }
 
-   public CameraShakePovActionClip getActiveCameraShake(float tick) {
-      CameraShakePovActionClip top = null;
+    public CameraShakePovActionClip getActiveCameraShake(float tick)
+    {
+        CameraShakePovActionClip top = null;
 
-      for (Clip clip : this.get()) {
-         if (clip instanceof CameraShakePovActionClip) {
-            CameraShakePovActionClip shake = (CameraShakePovActionClip)clip;
-            if (shake.isActive(tick) && (top == null || (Integer)shake.layer.get() >= (Integer)top.layer.get())) {
-               top = shake;
+        for (Clip clip : this.get())
+        {
+            if (clip instanceof CameraShakePovActionClip shake && shake.isActive(tick)
+                && (top == null || shake.layer.get() >= top.layer.get()))
+            {
+                top = shake;
             }
-         }
-      }
+        }
 
-      return top;
-   }
+        return top;
+    }
 
-   public StatusEffectsPovActionClip getActiveStatusEffects(float tick) {
-      StatusEffectsPovActionClip top = null;
+    public Glaxium.POV.actions.clip.StatusEffectsPovActionClip getActiveStatusEffects(float tick)
+    {
+        Glaxium.POV.actions.clip.StatusEffectsPovActionClip top = null;
 
-      for (Clip clip : this.get()) {
-         if (clip instanceof StatusEffectsPovActionClip) {
-            StatusEffectsPovActionClip effects = (StatusEffectsPovActionClip)clip;
-            if (effects.isActive(tick) && (top == null || (Integer)effects.layer.get() >= (Integer)top.layer.get())) {
-               top = effects;
+        for (Clip clip : this.get())
+        {
+            if (clip instanceof Glaxium.POV.actions.clip.StatusEffectsPovActionClip effects && effects.isActive(tick)
+                && (top == null || effects.layer.get() >= top.layer.get()))
+            {
+                top = effects;
             }
-         }
-      }
+        }
 
-      return top;
-   }
+        return top;
+    }
 
-   public List<PovActionClip> takeSessionClips() {
-      List<PovActionClip> recorded = new ArrayList<>(this.sessionClips);
-      this.sessionClips.clear();
-      return recorded;
-   }
+    public List<PovActionClip> takeSessionClips()
+    {
+        List<PovActionClip> recorded = new ArrayList<>(this.sessionClips);
+        this.sessionClips.clear();
+        return recorded;
+    }
 
-   public void clearAll() {
-      for (Clip clip : new ArrayList<Clip>(this.get())) {
-         this.remove(clip);
-      }
+    public void clearAll()
+    {
+        for (Clip clip : new ArrayList<>(this.get()))
+        {
+            this.remove(clip);
+        }
+        this.sync();
+    }
 
-      this.sync();
-   }
+    /**
+     * Trims action clips for an outside recording session within [startTick, endTick]:
+     * - Clips starting at or after endTick are kept untouched.
+     * - Clips ending at or before startTick are kept untouched.
+     * - Clips fully within [startTick, endTick] are removed.
+     * - Clips straddling startTick are trimmed to end at startTick.
+     * - Clips straddling endTick are cut so their left part is removed and they start at endTick.
+     * - Clips straddling both startTick and endTick are split into left and right pieces.
+     */
+    public void trimForRecordingRange(int startTick, int endTick)
+    {
+        List<Clip> toAdd = new ArrayList<>();
 
-   public void trimForRecordingRange(int startTick, int endTick) {
-      List<Clip> toAdd = new ArrayList<>();
+        for (Clip c : new ArrayList<>(this.get()))
+        {
+            int start = c.tick.get();
+            int duration = c.duration.get();
+            int end = start + duration;
 
-      for (Clip c : new ArrayList<Clip>(this.get())) {
-         int start = (Integer)c.tick.get();
-         int duration = (Integer)c.duration.get();
-         int end = start + duration;
-         if (end > startTick && start < endTick) {
-            if (start >= startTick && end <= endTick) {
-               this.remove(c);
-            } else if (start < startTick && end > endTick) {
-               Clip rightPiece = c.copy();
-               int cutAmount = endTick - start;
-               rightPiece.tick.set(endTick);
-               rightPiece.duration.set(Math.max(1, end - endTick));
-               if (rightPiece instanceof PovActionClip povRight) {
-                  for (KeyframeChannel<?> channel : povRight.getChannels()) {
-                     trimLeftChannel(channel, (float)cutAmount);
-                  }
-               }
-
-               toAdd.add(rightPiece);
-               int leftDuration = Math.max(1, startTick - start);
-               c.duration.set(leftDuration);
-               if (c instanceof PovActionClip povClip) {
-                  for (KeyframeChannel<?> channel : povClip.getChannels()) {
-                     trimRightChannel(channel, (float)leftDuration);
-                  }
-               }
-            } else if (start < startTick && end <= endTick) {
-               int newDuration = Math.max(1, startTick - start);
-               c.duration.set(newDuration);
-               if (c instanceof PovActionClip povClip) {
-                  for (KeyframeChannel<?> channel : povClip.getChannels()) {
-                     trimRightChannel(channel, (float)newDuration);
-                  }
-               }
-            } else if (start < endTick && end > endTick) {
-               int cutAmountx = endTick - start;
-               c.tick.set(endTick);
-               c.duration.set(Math.max(1, end - endTick));
-               if (c instanceof PovActionClip povClip) {
-                  for (KeyframeChannel<?> channel : povClip.getChannels()) {
-                     trimLeftChannel(channel, (float)cutAmountx);
-                  }
-               }
+            if (end <= startTick || start >= endTick)
+            {
+                continue;
             }
-         }
-      }
 
-      for (Clip clip : toAdd) {
-         this.addClip(clip);
-      }
-
-      this.sync();
-   }
-
-   public void trimForRecordingAt(int timelineTick) {
-      this.trimForRecordingRange(timelineTick, Integer.MAX_VALUE);
-   }
-
-   private static void trimRightChannel(KeyframeChannel channel, float maxDuration) {
-      if (!channel.isEmpty()) {
-         boolean hasKeyAtEnd = false;
-
-         for (Object obj : channel.getKeyframes()) {
-            Keyframe<?> kf = (Keyframe<?>)obj;
-            if (Math.abs(kf.getTick() - maxDuration) < 1.0E-4F) {
-               hasKeyAtEnd = true;
-               break;
+            if (start >= startTick && end <= endTick)
+            {
+                this.remove(c);
+                continue;
             }
-         }
 
-         if (!hasKeyAtEnd) {
-            Object initial = ((Keyframe)channel.getKeyframes().get(0)).getValue();
+            if (start < startTick && end > endTick)
+            {
+                Clip rightPiece = c.copy();
+                int cutAmount = endTick - start;
+                rightPiece.tick.set(endTick);
+                rightPiece.duration.set(Math.max(1, end - endTick));
+                if (rightPiece instanceof PovActionClip povRight)
+                {
+                    for (KeyframeChannel<?> channel : povRight.getChannels())
+                    {
+                        trimLeftChannel(channel, cutAmount);
+                    }
+                }
+                toAdd.add(rightPiece);
+
+                int leftDuration = Math.max(1, startTick - start);
+                c.duration.set(leftDuration);
+                if (c instanceof PovActionClip povClip)
+                {
+                    for (KeyframeChannel<?> channel : povClip.getChannels())
+                    {
+                        trimRightChannel(channel, leftDuration);
+                    }
+                }
+                continue;
+            }
+
+            if (start < startTick && end <= endTick)
+            {
+                int newDuration = Math.max(1, startTick - start);
+                c.duration.set(newDuration);
+                if (c instanceof PovActionClip povClip)
+                {
+                    for (KeyframeChannel<?> channel : povClip.getChannels())
+                    {
+                        trimRightChannel(channel, newDuration);
+                    }
+                }
+                continue;
+            }
+
+            if (start < endTick && end > endTick)
+            {
+                int cutAmount = endTick - start;
+                c.tick.set(endTick);
+                c.duration.set(Math.max(1, end - endTick));
+                if (c instanceof PovActionClip povClip)
+                {
+                    for (KeyframeChannel<?> channel : povClip.getChannels())
+                    {
+                        trimLeftChannel(channel, cutAmount);
+                    }
+                }
+                continue;
+            }
+        }
+
+        for (Clip clip : toAdd)
+        {
+            this.addClip(clip);
+        }
+
+        this.sync();
+    }
+
+    public void trimForRecordingAt(int timelineTick)
+    {
+        this.trimForRecordingRange(timelineTick, Integer.MAX_VALUE);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void trimRightChannel(KeyframeChannel channel, float maxDuration)
+    {
+        if (channel.isEmpty())
+        {
+            return;
+        }
+
+        boolean hasKeyAtEnd = false;
+        for (Object obj : channel.getKeyframes())
+        {
+            Keyframe<?> kf = (Keyframe<?>) obj;
+            if (Math.abs(kf.getTick() - maxDuration) < 0.0001F)
+            {
+                hasKeyAtEnd = true;
+                break;
+            }
+        }
+
+        if (!hasKeyAtEnd)
+        {
+            Object initial = ((Keyframe<?>) channel.getKeyframes().get(0)).getValue();
             Object endValue = channel.interpolate(maxDuration, initial);
-            if (endValue != null) {
-               if (endValue instanceof ItemStack stack) {
-                  endValue = stack.copy();
-               } else if (endValue instanceof Transform transform) {
-                  endValue = transform.copy();
-               }
-
-               channel.insert(maxDuration, endValue);
+            if (endValue != null)
+            {
+                if (endValue instanceof ItemStack stack)
+                {
+                    endValue = stack.copy();
+                }
+                else if (endValue instanceof Transform transform)
+                {
+                    endValue = transform.copy();
+                }
+                channel.insert(maxDuration, endValue);
             }
-         }
+        }
 
-         List list = channel.getKeyframes();
-
-         for (int i = list.size() - 1; i >= 0; i--) {
-            Keyframe<?> kf = (Keyframe<?>)list.get(i);
-            if (kf.getTick() > maxDuration + 1.0E-4F) {
-               channel.remove(i);
+        List list = channel.getKeyframes();
+        for (int i = list.size() - 1; i >= 0; i--)
+        {
+            Keyframe<?> kf = (Keyframe<?>) list.get(i);
+            if (kf.getTick() > maxDuration + 0.0001F)
+            {
+                channel.remove(i);
             }
-         }
+        }
+        channel.sort();
+    }
 
-         channel.sort();
-      }
-   }
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void trimLeftChannel(KeyframeChannel channel, float cutAmount)
+    {
+        if (channel.isEmpty())
+        {
+            return;
+        }
 
-   private static void trimLeftChannel(KeyframeChannel channel, float cutAmount) {
-      if (!channel.isEmpty()) {
-         boolean hasKeyAtCut = false;
-
-         for (Object obj : channel.getKeyframes()) {
-            Keyframe<?> kf = (Keyframe<?>)obj;
-            if (Math.abs(kf.getTick() - cutAmount) < 1.0E-4F) {
-               hasKeyAtCut = true;
-               break;
+        boolean hasKeyAtCut = false;
+        for (Object obj : channel.getKeyframes())
+        {
+            Keyframe<?> kf = (Keyframe<?>) obj;
+            if (Math.abs(kf.getTick() - cutAmount) < 0.0001F)
+            {
+                hasKeyAtCut = true;
+                break;
             }
-         }
+        }
 
-         if (!hasKeyAtCut) {
-            Object initial = ((Keyframe)channel.getKeyframes().get(0)).getValue();
+        if (!hasKeyAtCut)
+        {
+            Object initial = ((Keyframe<?>) channel.getKeyframes().get(0)).getValue();
             Object cutValue = channel.interpolate(cutAmount, initial);
-            if (cutValue != null) {
-               if (cutValue instanceof ItemStack stack) {
-                  cutValue = stack.copy();
-               } else if (cutValue instanceof Transform transform) {
-                  cutValue = transform.copy();
-               }
-
-               channel.insert(cutAmount, cutValue);
+            if (cutValue != null)
+            {
+                if (cutValue instanceof ItemStack stack)
+                {
+                    cutValue = stack.copy();
+                }
+                else if (cutValue instanceof Transform transform)
+                {
+                    cutValue = transform.copy();
+                }
+                channel.insert(cutAmount, cutValue);
             }
-         }
+        }
 
-         List list = channel.getKeyframes();
-
-         for (int i = list.size() - 1; i >= 0; i--) {
-            Keyframe<?> kf = (Keyframe<?>)list.get(i);
-            if (kf.getTick() < cutAmount - 1.0E-4F) {
-               channel.remove(i);
+        List list = channel.getKeyframes();
+        for (int i = list.size() - 1; i >= 0; i--)
+        {
+            Keyframe<?> kf = (Keyframe<?>) list.get(i);
+            if (kf.getTick() < cutAmount - 0.0001F)
+            {
+                channel.remove(i);
             }
-         }
+        }
 
-         for (Object objx : channel.getKeyframes()) {
-            Keyframe<?> kf = (Keyframe<?>)objx;
+        for (Object obj : channel.getKeyframes())
+        {
+            Keyframe<?> kf = (Keyframe<?>) obj;
             kf.setTick(kf.getTick() - cutAmount);
-         }
+        }
+        channel.sort();
+    }
 
-         channel.sort();
-      }
-   }
+    public List<PovActionClip> getActive(float tick)
+    {
+        List<PovActionClip> active = new ArrayList<>();
 
-   public List<PovActionClip> getActive(float tick) {
-      List<PovActionClip> active = new ArrayList<>();
-
-      for (Clip clip : this.get()) {
-         if (clip instanceof PovActionClip) {
-            PovActionClip povClip = (PovActionClip)clip;
-            if (povClip.isActive(tick)) {
-               active.add(povClip);
+        for (Clip clip : this.get())
+        {
+            if (clip instanceof PovActionClip povClip && povClip.isActive(tick))
+            {
+                active.add(povClip);
             }
-         }
-      }
+        }
 
-      active.sort(Comparator.comparingInt(clipx -> (Integer)clipx.layer.get()));
-      return active;
-   }
+        active.sort(Comparator.comparingInt(clip -> clip.layer.get()));
 
-   public MenuPovActionClip getActiveMenu(float tick) {
-      MenuPovActionClip top = null;
+        return active;
+    }
 
-      for (Clip clip : this.get()) {
-         if (clip instanceof MenuPovActionClip) {
-            MenuPovActionClip menu = (MenuPovActionClip)clip;
-            if (menu.isActive(tick) && (top == null || (Integer)menu.layer.get() >= (Integer)top.layer.get())) {
-               top = menu;
+    public MenuPovActionClip getActiveMenu(float tick)
+    {
+        MenuPovActionClip top = null;
+
+        for (Clip clip : this.get())
+        {
+            if (clip instanceof MenuPovActionClip menu && menu.isActive(tick)
+                && (top == null || menu.layer.get() >= top.layer.get()))
+            {
+                top = menu;
             }
-         }
-      }
+        }
 
-      return top;
-   }
+        return top;
+    }
 
-   public GuiPovActionClip getActiveGui(float tick) {
-      GuiPovActionClip top = null;
+    public GuiPovActionClip getActiveGui(float tick)
+    {
+        GuiPovActionClip top = null;
 
-      for (Clip clip : this.get()) {
-         if (clip instanceof GuiPovActionClip) {
-            GuiPovActionClip gui = (GuiPovActionClip)clip;
-            if (gui.isActive(tick) && (top == null || (Integer)gui.layer.get() >= (Integer)top.layer.get())) {
-               top = gui;
+        for (Clip clip : this.get())
+        {
+            if (clip instanceof GuiPovActionClip gui && gui.isActive(tick)
+                && (top == null || gui.layer.get() >= top.layer.get()))
+            {
+                top = gui;
             }
-         }
-      }
+        }
 
-      return top;
-   }
+        return top;
+    }
 
-   public List<BossBarPovActionClip> getActiveBossBars(float tick) {
-      List<BossBarPovActionClip> active = new ArrayList<>();
+    public List<BossBarPovActionClip> getActiveBossBars(float tick)
+    {
+        List<BossBarPovActionClip> active = new ArrayList<>();
 
-      for (Clip clip : this.get()) {
-         if (clip instanceof BossBarPovActionClip) {
-            BossBarPovActionClip bar = (BossBarPovActionClip)clip;
-            if (bar.isActive(tick)) {
-               active.add(bar);
+        for (Clip clip : this.get())
+        {
+            if (clip instanceof BossBarPovActionClip bar && bar.isActive(tick))
+            {
+                active.add(bar);
             }
-         }
-      }
+        }
+        active.sort(Comparator.comparingInt(c -> c.layer.get()));
+        return active;
+    }
 
-      active.sort(Comparator.comparingInt(c -> (Integer)c.layer.get()));
-      return active;
-   }
+    public BossBarPovActionClip getActiveBossBar(float tick)
+    {
+        BossBarPovActionClip top = null;
 
-   public BossBarPovActionClip getActiveBossBar(float tick) {
-      BossBarPovActionClip top = null;
-
-      for (Clip clip : this.get()) {
-         if (clip instanceof BossBarPovActionClip) {
-            BossBarPovActionClip bar = (BossBarPovActionClip)clip;
-            if (bar.isActive(tick) && (top == null || (Integer)bar.layer.get() >= (Integer)top.layer.get())) {
-               top = bar;
+        for (Clip clip : this.get())
+        {
+            if (clip instanceof BossBarPovActionClip bar && bar.isActive(tick)
+                && (top == null || bar.layer.get() >= top.layer.get()))
+            {
+                top = bar;
             }
-         }
-      }
+        }
 
-      return top;
-   }
+        return top;
+    }
 
-   public void fromData(BaseType data) {
-      super.fromData(data);
+    @Override
+    public void fromData(BaseType data)
+    {
+        super.fromData(data);
 
-      for (Clip clip : this.get()) {
-         if (clip instanceof PovActionClip povClip) {
-            povClip.normalize();
-         }
-      }
-   }
+        for (Clip clip : this.get())
+        {
+            if (clip instanceof PovActionClip povClip)
+            {
+                povClip.normalize();
+            }
+        }
+    }
 }

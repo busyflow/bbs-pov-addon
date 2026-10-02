@@ -2,6 +2,8 @@ package Glaxium.POV.integration.access.minecraft;
 
 import net.minecraft.entity.passive.AbstractHorseEntity;
 
-public interface HorseScreenPovAccess {
-   AbstractHorseEntity bbsPov$getEntity();
+/** Feature-facing accessor. Mixin implements this; do not import mixin types from features. */
+public interface HorseScreenPovAccess
+{
+    AbstractHorseEntity bbsPov$getEntity();
 }

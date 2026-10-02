@@ -6,17 +6,15 @@ import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin({DeathScreen.class})
-public interface DeathScreenPovAccessor extends DeathScreenPovAccess {
-   @Accessor("message")
-   @Override
-   Text bbsPov$getDeathMessage();
+@Mixin(DeathScreen.class)
+public interface DeathScreenPovAccessor extends DeathScreenPovAccess
+{
+    @Accessor("message")
+    Text bbsPov$getDeathMessage();
 
-   @Accessor("scoreText")
-   @Override
-   Text bbsPov$getScoreText();
+    @Accessor("scoreText")
+    Text bbsPov$getScoreText();
 
-   @Accessor("ticksSinceDeath")
-   @Override
-   int bbsPov$getTicksSinceDeath();
+    @Accessor("ticksSinceDeath")
+    int bbsPov$getTicksSinceDeath();
 }

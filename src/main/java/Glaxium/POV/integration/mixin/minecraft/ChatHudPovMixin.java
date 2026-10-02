@@ -10,13 +10,31 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin({ChatHud.class})
-public class ChatHudPovMixin {
-   @Inject(
-      method = {"addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V"},
-      at = {@At("HEAD")}
-   )
-   private void bbsPov$recordChatHudMessage(Text message, MessageSignatureData signatureData, MessageIndicator indicator, CallbackInfo ci) {
-      ChatRecorder.onChatMessageReceived(message);
-   }
+@Mixin(ChatHud.class)
+public class ChatHudPovMixin
+{
+    @Inject(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V", at = @At("HEAD"))
+    private void bbsPov$recordChatHudMessage(
+        Text message,
+        MessageSignatureData signatureData,
+        MessageIndicator indicator,
+        CallbackInfo ci)
+    {
+        ChatRecorder.onChatMessageReceived(message);
+    }
+
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    private void bbsPov$hideChatInBbsScreen(
+        net.minecraft.client.gui.DrawContext context,
+        int currentTick,
+        int mouseX,
+        int mouseY,
+        CallbackInfo ci)
+    {
+        net.minecraft.client.MinecraftClient mc = net.minecraft.client.MinecraftClient.getInstance();
+        if (mc != null && mc.currentScreen instanceof mchorse.bbs_mod.ui.framework.UIScreen)
+        {
+            ci.cancel();
+        }
+    }
 }

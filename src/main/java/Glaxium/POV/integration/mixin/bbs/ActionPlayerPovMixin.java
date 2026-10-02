@@ -11,51 +11,59 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(
-   value = {ActionPlayer.class},
-   remap = false
-)
-public abstract class ActionPlayerPovMixin {
-   @Shadow
-   private ServerPlayerEntity serverPlayer;
-   @Shadow
-   private boolean borrowedEquipment;
-   @Unique
-   private boolean bbsPov$protectedPlayer;
+/** Prevent first-person film HUD settings from damaging the real player. */
+@Mixin(value = ActionPlayer.class, remap = false)
+public abstract class ActionPlayerPovMixin
+{
+    @Shadow private ServerPlayerEntity serverPlayer;
+    @Shadow private boolean borrowedEquipment;
 
-   @Redirect(
-      method = {"<init>"},
-      at = @At(
-         value = "INVOKE",
-         target = "Lmchorse/bbs_mod/actions/ActionPlayer;applyFilmPlayerSettingsTo"
-      )
-   )
-   private void bbsPov$preserveRealHealth(ServerPlayerEntity player, float filmHealth, float filmHunger, int filmXpLevel, float filmXpProgress) {
-      float safeHealth = Math.max(1.0F, player.getHealth());
-      ActionPlayer.applyFilmPlayerSettingsTo(player, safeHealth, filmHunger, filmXpLevel, filmXpProgress);
-   }
+    @Unique private boolean bbsPov$protectedPlayer;
 
-   @Inject(
-      method = {"<init>"},
-      at = {@At("RETURN")}
-   )
-   private void bbsPov$protectBorrowedPlayer(CallbackInfo info) {
-      if (this.borrowedEquipment && this.serverPlayer != null) {
-         this.serverPlayer.hurtTime = 0;
-         this.serverPlayer.maxHurtTime = 0;
-         PovPlayerProtection.acquire(this.serverPlayer);
-         this.bbsPov$protectedPlayer = true;
-      }
-   }
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "INVOKE",
+            target = "Lmchorse/bbs_mod/actions/ActionPlayer;applyFilmPlayerSettingsTo"))
+    private void bbsPov$preserveRealHealth(
+        ServerPlayerEntity player,
+        float filmHealth,
+        float filmHunger,
+        int filmXpLevel,
+        float filmXpProgress)
+    {
+        /* BBS caches/restores these values at playback boundaries, but setting
+         * filmHealth to zero here kills the actual player before restoration.
+         * Health is visual POV data in this addon, so leave the live value alone. */
+        float safeHealth = Math.max(1F, player.getHealth());
 
-   @Inject(
-      method = {"stop"},
-      at = {@At("RETURN")}
-   )
-   private void bbsPov$releaseBorrowedPlayer(CallbackInfo info) {
-      if (this.bbsPov$protectedPlayer) {
-         PovPlayerProtection.release(this.serverPlayer);
-         this.bbsPov$protectedPlayer = false;
-      }
-   }
+        ActionPlayer.applyFilmPlayerSettingsTo(
+            player, safeHealth, filmHunger, filmXpLevel, filmXpProgress);
+    }
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void bbsPov$protectBorrowedPlayer(CallbackInfo info)
+    {
+        /* borrowedEquipment is set only for NORMAL first-person playback where
+         * BBS temporarily turns the real server player into the POV actor. */
+        if (this.borrowedEquipment && this.serverPlayer != null)
+        {
+            /* The custom POV HUD supplies recorded health. The real player
+             * must not take hits at all, or vanilla hurt-camera still fires. */
+            this.serverPlayer.hurtTime = 0;
+            this.serverPlayer.maxHurtTime = 0;
+            PovPlayerProtection.acquire(this.serverPlayer);
+            this.bbsPov$protectedPlayer = true;
+        }
+    }
+
+    @Inject(method = "stop", at = @At("RETURN"))
+    private void bbsPov$releaseBorrowedPlayer(CallbackInfo info)
+    {
+        if (this.bbsPov$protectedPlayer)
+        {
+            PovPlayerProtection.release(this.serverPlayer);
+            this.bbsPov$protectedPlayer = false;
+        }
+    }
 }

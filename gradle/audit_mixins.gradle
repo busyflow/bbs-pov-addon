@@ -1,0 +1,421 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'org.ow2.asm:asm:9.6'
+		classpath 'org.ow2.asm:asm-tree:9.6'
+	}
+}
+
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.tree.*
+import java.util.jar.JarFile
+
+tasks.register('auditAllMixins') {
+	dependsOn 'compileJava'
+	doLast {
+		println("==================================================")
+		println("STARTING COMPREHENSIVE MIXIN AUDIT FOR BBS-CROWD")
+		println("==================================================")
+		
+		// 1. Build an index of entryName -> source (file or jar)
+		def classIndex = new HashMap<String, Object>() // entryName -> File or JarFile
+		def openJars = new ArrayList<JarFile>()
+		
+		def indexJar = { File jarFile ->
+			if (!jarFile.exists() || !jarFile.name.endsWith(".jar")) return
+			try {
+				def jar = new JarFile(jarFile)
+				openJars.add(jar)
+				def entries = jar.entries()
+				while (entries.hasMoreElements()) {
+					def entry = entries.nextElement()
+					if (entry.name.endsWith(".class")) {
+						String cName = entry.name.substring(0, entry.name.length() - 6)
+						if (!classIndex.containsKey(cName)) {
+							classIndex.put(cName, jar)
+						}
+					}
+				}
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+		
+		// Project classes take precedence
+		def projectClassesDir = file("build/classes/java/main")
+		if (projectClassesDir.exists()) {
+			projectClassesDir.eachFileRecurse { f ->
+				if (f.name.endsWith(".class")) {
+					String rel = projectClassesDir.toPath().relativize(f.toPath()).toString().replace('\\', '/')
+					String cName = rel.substring(0, rel.length() - 6)
+					classIndex.put(cName, f)
+				}
+			}
+		}
+		
+		// Index BBS jar first
+		def bbsJar = file("libs/bbs-2.7-1.20.1.jar")
+		println("Indexing BBS jar: " + bbsJar.name)
+		indexJar(bbsJar)
+		
+		// Index Iris jar if present
+		def irisJar = file("libs/iris-1.7.2+1.20.1.jar")
+		if (irisJar.exists()) indexJar(irisJar)
+		
+		// Index compile & runtime classpath
+		sourceSets.main.compileClasspath.files.each { indexJar(it) }
+		sourceSets.main.runtimeClasspath.files.each { indexJar(it) }
+		
+		println("Total classes indexed in index: " + classIndex.size())
+		
+		// ClassNode cache
+		def classCache = new HashMap<String, ClassNode>()
+		def getClassNode = { String internalName ->
+			if (classCache.containsKey(internalName)) return classCache.get(internalName)
+			def src = classIndex.get(internalName)
+			if (src == null) return null
+			try {
+				InputStream is = null
+				if (src instanceof File) {
+					is = ((File) src).newInputStream()
+				} else if (src instanceof JarFile) {
+					def entry = ((JarFile) src).getJarEntry(internalName + ".class")
+					if (entry != null) is = ((JarFile) src).getInputStream(entry)
+				}
+				if (is != null) {
+					def cr = new ClassReader(is)
+					def cn = new ClassNode()
+					cr.accept(cn, 0)
+					is.close()
+					classCache.put(internalName, cn)
+					return cn
+				}
+			} catch (Exception e) {
+				println("[WARN] Failed to read class " + internalName + ": " + e.message)
+			}
+			return null
+		}
+		
+		// Helper to check if a method exists in class or superclasses
+		def hasMethodInHierarchy
+		hasMethodInHierarchy = { ClassNode cn, String name, String desc ->
+			if (cn == null) return false
+			for (MethodNode mn : cn.methods) {
+				if (mn.name == name) {
+					if (desc == null || mn.desc == desc) return true
+				}
+			}
+			if (cn.superName != null && cn.superName != "java/lang/Object") {
+				def superCn = getClassNode(cn.superName)
+				if (superCn != null && hasMethodInHierarchy(superCn, name, desc)) return true
+			}
+			if (cn.interfaces != null) {
+				for (String itf : cn.interfaces) {
+					def itfCn = getClassNode(itf)
+					if (itfCn != null && hasMethodInHierarchy(itfCn, name, desc)) return true
+				}
+			}
+			return false
+		}
+		
+		// Helper to check if a field exists in class or superclasses
+		def hasFieldInHierarchy
+		hasFieldInHierarchy = { ClassNode cn, String name ->
+			if (cn == null) return false
+			for (FieldNode fn : cn.fields) {
+				if (fn.name == name) return true
+			}
+			if (cn.superName != null && cn.superName != "java/lang/Object") {
+				def superCn = getClassNode(cn.superName)
+				if (superCn != null && hasFieldInHierarchy(superCn, name)) return true
+			}
+			return false
+		}
+		
+		// 2. Read mixin json files
+		def mixinJsonFiles = fileTree(dir: "src/main/resources", include: "**/*mixin*.json").files
+		def allMixinEntries = []
+		for (f in mixinJsonFiles) {
+			if (!f.exists()) continue
+			def mixinJson = new groovy.json.JsonSlurper().parse(f)
+			def pkg = mixinJson.package.replace('.', '/')
+			def mixinNames = []
+			if (mixinJson.mixins) mixinNames.addAll(mixinJson.mixins)
+			if (mixinJson.client) mixinNames.addAll(mixinJson.client)
+			if (mixinJson.server) mixinNames.addAll(mixinJson.server)
+			for (shortName in mixinNames) {
+				allMixinEntries.add([pkg: pkg, shortName: shortName])
+			}
+		}
+		
+		println("Total mixin classes declared in jsons: " + allMixinEntries.size())
+		
+		int totalIssues = 0
+		int totalInjectionsAudited = 0
+		
+		for (entry in allMixinEntries) {
+			String shortName = entry.shortName
+			String fullMixinName = entry.pkg + "/" + shortName.replace('.', '/')
+			ClassNode mixinCn = getClassNode(fullMixinName)
+			if (mixinCn == null) {
+				println("[ERROR] Mixin class not found on classpath: " + fullMixinName)
+				totalIssues++
+				continue
+			}
+			
+			// Find @Mixin annotation
+			AnnotationNode mixinAnn = null
+			def allAnn = []
+			if (mixinCn.invisibleAnnotations != null) allAnn.addAll(mixinCn.invisibleAnnotations)
+			if (mixinCn.visibleAnnotations != null) allAnn.addAll(mixinCn.visibleAnnotations)
+			for (AnnotationNode an : allAnn) {
+				if (an.desc == "Lorg/spongepowered/asm/mixin/Mixin;") {
+					mixinAnn = an
+					break
+				}
+			}
+			
+			if (mixinAnn == null) {
+				println("[WARN] No @Mixin annotation on: " + fullMixinName)
+				continue
+			}
+			
+			def targetClassNames = []
+			for (int i = 0; i < mixinAnn.values.size(); i += 2) {
+				String key = mixinAnn.values.get(i)
+				def val = mixinAnn.values.get(i + 1)
+				if (key == "value" && val instanceof List) {
+					for (def type : val) {
+						if (type instanceof org.objectweb.asm.Type) {
+							targetClassNames.add(type.internalName)
+						}
+					}
+				} else if (key == "targets" && val instanceof List) {
+					for (def str : val) {
+						targetClassNames.add(str.toString().replace('.', '/'))
+					}
+				}
+			}
+			
+			if (targetClassNames.isEmpty()) {
+				println("[WARN] No target classes in @Mixin on " + fullMixinName)
+				continue
+			}
+			
+			for (String targetClassName : targetClassNames) {
+				ClassNode targetCn = getClassNode(targetClassName)
+				if (targetCn == null) {
+					if (!targetClassName.startsWith("net/minecraft") && !targetClassName.startsWith("net/coderbot/iris")) {
+						println("[ERROR] Target class not found: " + targetClassName + " (in mixin " + shortName + ")")
+						totalIssues++
+					}
+					continue
+				}
+				
+				for (MethodNode mn : mixinCn.methods) {
+					def annotations = []
+					if (mn.invisibleAnnotations != null) annotations.addAll(mn.invisibleAnnotations)
+					if (mn.visibleAnnotations != null) annotations.addAll(mn.visibleAnnotations)
+					
+					for (AnnotationNode an : annotations) {
+						if (an.desc == "Lorg/spongepowered/asm/mixin/Shadow;") {
+							// Check if field or method exists
+							boolean isMethod = mn.desc.contains("(")
+							if (isMethod) {
+								boolean foundDirect = targetCn.methods.any { it.name == mn.name && (mn.desc == null || it.desc == mn.desc) }
+								if (!foundDirect) {
+									println("[ERROR] @Shadow method not declared directly on target class: " + targetClassName + "." + mn.name + mn.desc + " (in " + shortName + "). SpongePowered Mixin does NOT resolve shadow methods from superclasses!")
+									totalIssues++
+								}
+							} else {
+								boolean foundField = hasFieldInHierarchy(targetCn, mn.name)
+								if (!foundField) {
+									println("[ERROR] @Shadow field not found in hierarchy: " + targetClassName + "." + mn.name + " (in " + shortName + ")")
+									totalIssues++
+								}
+							}
+						} else if (an.desc == "Lorg/spongepowered/asm/mixin/injection/Inject;" ||
+						           an.desc == "Lorg/spongepowered/asm/mixin/injection/Redirect;" ||
+						           an.desc == "Lorg/spongepowered/asm/mixin/injection/ModifyConstant;" ||
+						           an.desc == "Lorg/spongepowered/asm/mixin/injection/ModifyVariable;") {
+							
+							totalInjectionsAudited++
+							def methodNames = []
+							AnnotationNode atAnn = null
+							
+							int requireVal = -1
+							for (int k = 0; k < an.values.size(); k += 2) {
+								String kName = an.values.get(k)
+								def kVal = an.values.get(k + 1)
+								if (kName == "require" && kVal instanceof Integer) {
+									requireVal = (Integer) kVal
+								}
+								if (kName == "method") {
+									if (kVal instanceof List) {
+										methodNames.addAll(kVal.collect { it.toString() })
+									} else if (kVal != null) {
+										methodNames.add(kVal.toString())
+									}
+								} else if (kName == "at") {
+									if (kVal instanceof List && !kVal.isEmpty()) {
+										atAnn = (AnnotationNode) kVal.get(0)
+									} else if (kVal instanceof AnnotationNode) {
+										atAnn = (AnnotationNode) kVal
+									}
+								}
+							}
+							
+							int matchedMethodCount = 0
+							for (String mTarget : methodNames) {
+								String mName = mTarget
+								String mDesc = null
+								int paren = mTarget.indexOf('(')
+								if (paren > 0) {
+									mName = mTarget.substring(0, paren)
+									mDesc = mTarget.substring(paren)
+								}
+								
+								// Find matching methods in target class (including constructors)
+								def matchingTargetMethods = []
+								for (MethodNode tmn : targetCn.methods) {
+									if (tmn.name == mName) {
+										if (mDesc == null || tmn.desc == mDesc) {
+											matchingTargetMethods.add(tmn)
+										}
+									}
+								}
+								
+								if (!matchingTargetMethods.isEmpty()) {
+									matchedMethodCount++
+									
+									// Validate @Inject method descriptor against matching target methods
+									if (an.desc == "Lorg/spongepowered/asm/mixin/injection/Inject;") {
+										def handlerArgs = org.objectweb.asm.Type.getArgumentTypes(mn.desc)
+										if (handlerArgs.length == 0) {
+											println("[ERROR] @Inject handler " + shortName + "." + mn.name + " must take CallbackInfo or CallbackInfoReturnable!")
+											totalIssues++
+										} else {
+											def lastArg = handlerArgs[handlerArgs.length - 1]
+											boolean isCIR = lastArg.descriptor.startsWith("Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable")
+											boolean isCI = lastArg.descriptor == "Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;"
+											
+											if (!isCI && !isCIR) {
+												println("[ERROR] @Inject handler " + shortName + "." + mn.name + " last parameter must be CallbackInfo or CallbackInfoReturnable, found: " + lastArg.descriptor)
+												totalIssues++
+											}
+											
+											boolean anyDescriptorMatch = false
+											for (MethodNode tmn : matchingTargetMethods) {
+												def targetArgs = org.objectweb.asm.Type.getArgumentTypes(tmn.desc)
+												def targetRet = org.objectweb.asm.Type.getReturnType(tmn.desc)
+												
+												boolean retMatch = (targetRet.sort == org.objectweb.asm.Type.VOID) ? isCI : isCIR
+												
+												int leadingCount = handlerArgs.length - 1
+												boolean argsMatch = false
+												if (leadingCount == 0) {
+													argsMatch = true
+												} else if (leadingCount == targetArgs.length) {
+													argsMatch = true
+													for (int p = 0; p < leadingCount; p++) {
+														String hd = handlerArgs[p].descriptor
+														String td = targetArgs[p].descriptor
+														if (hd != td) {
+															boolean isMcBoth = hd.startsWith("Lnet/minecraft/") && td.startsWith("Lnet/minecraft/")
+															if (!isMcBoth) {
+																argsMatch = false
+																break
+															}
+														}
+													}
+												}
+												
+												if (retMatch && argsMatch) {
+													anyDescriptorMatch = true
+													break
+												}
+											}
+											
+											if (!anyDescriptorMatch) {
+												println("[ERROR] @Inject handler descriptor mismatch on " + shortName + "." + mn.name + mn.desc + " targeting " + targetClassName + "." + mName + "! Target methods: " + matchingTargetMethods.collect { it.name + it.desc })
+												totalIssues++
+											}
+										}
+									}
+									
+									if (atAnn != null) {
+										String atValue = null
+										String atTarget = null
+										for (int a = 0; a < atAnn.values.size(); a += 2) {
+											String aName = atAnn.values.get(a)
+											def aVal = atAnn.values.get(a + 1)
+											if (aName == "value") atValue = aVal.toString()
+											if (aName == "target") atTarget = aVal.toString()
+										}
+										
+										if (atValue == "INVOKE" && atTarget != null) {
+											String invOwner = null
+											String invName = atTarget
+											String invDesc = null
+											if (atTarget.startsWith("L") && atTarget.contains(";")) {
+												int semi = atTarget.indexOf(';')
+												invOwner = atTarget.substring(1, semi)
+												invName = atTarget.substring(semi + 1)
+											}
+											int p = invName.indexOf('(')
+											if (p > 0) {
+												invDesc = invName.substring(p)
+												invName = invName.substring(0, p)
+											}
+											
+											boolean foundInvoke = false
+											for (MethodNode tmn : matchingTargetMethods) {
+												for (AbstractInsnNode insn : tmn.instructions) {
+													if (insn instanceof MethodInsnNode) {
+														MethodInsnNode minsn = (MethodInsnNode) insn
+														boolean ownerMatch = (invOwner == null || minsn.owner == invOwner)
+														boolean nameMatch = (minsn.name == invName)
+														boolean descMatch = (invDesc == null || minsn.desc == invDesc)
+														if (ownerMatch && nameMatch && descMatch) {
+															foundInvoke = true
+															break
+														}
+													}
+												}
+												if (foundInvoke) break
+											}
+											
+											if (!foundInvoke) {
+												println("[CRITICAL INJECTION CHECK FAILED] In " + shortName + "." + mn.name + " -> target method " + targetClassName + "." + mTarget + " has NO matching call to: " + atTarget)
+												totalIssues++
+											}
+										}
+									}
+								}
+							}
+							
+							if (matchedMethodCount == 0 && requireVal != 0) {
+								println("[ERROR] None of the target methods found in " + targetClassName + ": " + methodNames + " (in mixin " + shortName + "." + mn.name + ")")
+								totalIssues++
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		// Clean up open jars
+		openJars.each { try { it.close() } catch(Exception e) {} }
+		
+		println("==================================================")
+		println("AUDIT SUMMARY:")
+		println("Total injections audited: " + totalInjectionsAudited)
+		println("Total issues found: " + totalIssues)
+		println("==================================================")
+		if (totalIssues > 0) {
+			throw new GradleException("Mixin audit found " + totalIssues + " critical issues!")
+		}
+	}
+}

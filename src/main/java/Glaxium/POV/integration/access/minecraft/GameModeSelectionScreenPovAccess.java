@@ -1,5 +1,7 @@
 package Glaxium.POV.integration.access.minecraft;
 
-public interface GameModeSelectionScreenPovAccess {
-   Object bbsPov$getGameMode();
+/** Feature-facing accessor. Mixin implements this; do not import mixin types from features. */
+public interface GameModeSelectionScreenPovAccess
+{
+    Object bbsPov$getGameMode();
 }

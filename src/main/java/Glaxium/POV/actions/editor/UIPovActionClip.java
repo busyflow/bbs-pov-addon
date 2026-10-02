@@ -4,23 +4,35 @@ import Glaxium.POV.actions.clip.PovActionClip;
 import mchorse.bbs_mod.ui.film.IUIClipsDelegate;
 import mchorse.bbs_mod.ui.film.clips.UIClip;
 
-public class UIPovActionClip<T extends PovActionClip> extends UIClip<T> {
-   public UIPovActionClip(T clip, IUIClipsDelegate editor) {
-      super(clip, editor);
-   }
+/** Minimal BBS-style inspector shared by every POV Action clip. */
+public class UIPovActionClip<T extends PovActionClip> extends UIClip<T>
+{
+    public UIPovActionClip(T clip, IUIClipsDelegate editor)
+    {
+        super(clip, editor);
+    }
 
-   protected void registerUI() {
-      super.registerUI();
-   }
+    @Override
+    protected void registerUI()
+    {
+        super.registerUI();
+    }
 
-   protected void registerPanels() {
-      super.registerPanels();
-   }
+    @Override
+    protected void registerPanels()
+    {
+        super.registerPanels();
+    }
 
-   protected void addEnvelopes() {
-   }
+    /** Match BBS replay actions: keep the common title/enabled and
+     * layer/tick/duration rows, but omit camera envelopes. */
+    @Override
+    protected void addEnvelopes()
+    {}
 
-   public void fillData() {
-      super.fillData();
-   }
+    @Override
+    public void fillData()
+    {
+        super.fillData();
+    }
 }

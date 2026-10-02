@@ -1,7 +1,8 @@
 package Glaxium.POV.integration.access.minecraft;
 
-public interface MerchantScreenPovAccess {
-   int bbsPov$getSelectedIndex();
-
-   int bbsPov$getIndexStartOffset();
+/** Feature-facing accessor. Mixin implements this; do not import mixin types from features. */
+public interface MerchantScreenPovAccess
+{
+    int bbsPov$getSelectedIndex();
+    int bbsPov$getIndexStartOffset();
 }

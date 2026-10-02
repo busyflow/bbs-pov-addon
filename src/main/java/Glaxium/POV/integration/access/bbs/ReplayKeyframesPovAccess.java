@@ -5,9 +5,9 @@ import Glaxium.POV.hand.RecordedHandData;
 import Glaxium.POV.hud.RecordedHudData;
 
 public interface ReplayKeyframesPovAccess {
-   RecordedHudData bbsPov$getHud();
+    RecordedHudData bbsPov$getHud();
 
-   RecordedHandData bbsPov$getHand();
+    RecordedHandData bbsPov$getHand();
 
-   RecordedPovActions bbsPov$getActions();
+    RecordedPovActions bbsPov$getActions();
 }

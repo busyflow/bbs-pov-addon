@@ -20,6 +20,7 @@ import Glaxium.POV.actions.gui.data.MountSnapshot;
 import Glaxium.POV.actions.gui.data.RecipeBookSnapshot;
 import Glaxium.POV.actions.gui.data.StonecutterSnapshot;
 import Glaxium.POV.actions.gui.schema.GuiTypeResolver;
+import Glaxium.POV.hud.HotbarLayoutTransform;
 import Glaxium.POV.integration.access.minecraft.BeaconScreenPovAccess;
 import Glaxium.POV.integration.access.minecraft.BookEditScreenPovAccess;
 import Glaxium.POV.integration.access.minecraft.BookScreenPovAccess;
@@ -27,15 +28,11 @@ import Glaxium.POV.integration.access.minecraft.GameModeSelectionScreenPovAccess
 import Glaxium.POV.integration.access.minecraft.HandledScreenPovAccess;
 import Glaxium.POV.integration.access.minecraft.HorseScreenPovAccess;
 import Glaxium.POV.integration.access.minecraft.MerchantScreenPovAccess;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
-import net.minecraft.client.gui.screen.ingame.BookScreen.Contents;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -43,106 +40,167 @@ import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.client.util.SelectionManager;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.passive.AbstractDonkeyEntity;
-import net.minecraft.entity.passive.AbstractHorseEntity;
-import net.minecraft.entity.passive.HorseEntity;
-import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemGroup.Type;
 import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.registry.Registries;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 import net.minecraft.screen.AbstractRecipeScreenHandler;
 import net.minecraft.screen.BeaconScreenHandler;
 import net.minecraft.screen.BrewingStandScreenHandler;
-import net.minecraft.screen.MerchantScreenHandler;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
-import net.minecraft.text.Text.Serializer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.GameMode;
 
-public final class GuiSnapshotCapture {
-   private static AnvilSnapshot anvilCache;
-   private static CreativeSnapshot creativeCache;
-   private static LoomSnapshot loomCache;
-   private static StonecutterSnapshot stonecutterCache;
-   private static EnchantmentSnapshot enchantmentCache;
-   private static RecipeBookSnapshot recipeBookCache = new RecipeBookSnapshot(false, "", false, 0, "", 0, false, false, 0, 0);
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-   private GuiSnapshotCapture() {
-   }
+/** Shared screen read path for recording and live preview. */
+public final class GuiSnapshotCapture
+{
+    private static AnvilSnapshot anvilCache;
+    private static CreativeSnapshot creativeCache;
+    private static LoomSnapshot loomCache;
+    private static StonecutterSnapshot stonecutterCache;
+    private static EnchantmentSnapshot enchantmentCache;
+    private static RecipeBookSnapshot recipeBookCache = new RecipeBookSnapshot(
+        false, "", false, 0, "", 0, false, false, 0, 0);
 
-   public static void updateAnvil(String name, boolean focused, int selStart, int selEnd, boolean error) {
-      anvilCache = new AnvilSnapshot(name, focused, selStart, selEnd, error);
-   }
+    private GuiSnapshotCapture()
+    {
+    }
 
-   public static void updateCreative(ItemGroup selected, float scrollPosition, String searchText, int currentPage, boolean focused, int selStart, int selEnd) {
-      List<ItemGroup> groups = CreativeInventoryTabs.groups();
-      int index = groups.indexOf(selected);
-      int tab = index < 0 ? 0 : index;
-      float scroll = Math.max(0.0F, Math.min(1.0F, scrollPosition));
-      String search = searchText == null ? "" : searchText;
-      int page = Math.max(0, currentPage);
-      boolean inventoryTab = selected != null && selected.getType() == Type.INVENTORY;
-      int itemCount = selected == null ? 0 : (selected.getType() == Type.SEARCH ? selected.getSearchTabStacks().size() : selected.getDisplayStacks().size());
-      int rows = Math.max(5, (itemCount + 8) / 9);
-      int row = Math.round(scroll * (float)Math.max(0, rows - 5));
-      creativeCache = new CreativeSnapshot(tab, scroll, search, page, inventoryTab, row, focused, selStart, selEnd);
-   }
+    public static void updateAnvil(String name, boolean focused, int selStart, int selEnd, boolean error)
+    {
+        anvilCache = new AnvilSnapshot(name, focused, selStart, selEnd, error);
+    }
 
-   public static void resetCreative() {
-      creativeCache = null;
-   }
+    public static void updateCreative(
+        ItemGroup selected,
+        float scrollPosition,
+        String searchText,
+        int currentPage,
+        boolean focused,
+        int selStart,
+        int selEnd)
+    {
+        List<ItemGroup> groups = CreativeInventoryTabs.groups();
+        int index = groups.indexOf(selected);
+        int tab = index < 0 ? 0 : index;
+        float scroll = Math.max(0F, Math.min(1F, scrollPosition));
+        String search = searchText == null ? "" : searchText;
+        int page = Math.max(0, currentPage);
+        boolean inventoryTab = selected != null && selected.getType() == ItemGroup.Type.INVENTORY;
+        int itemCount = selected == null ? 0 : (selected.getType() == ItemGroup.Type.SEARCH
+            ? selected.getSearchTabStacks().size()
+            : selected.getDisplayStacks().size());
+        int rows = Math.max(5, (itemCount + 8) / 9);
+        int row = Math.round(scroll * Math.max(0, rows - 5));
+        creativeCache = new CreativeSnapshot(
+            tab, scroll, search, page, inventoryTab, row, focused, selStart, selEnd);
+    }
 
-   public static void resetScreenCaches() {
-      creativeCache = null;
-      anvilCache = null;
-      loomCache = null;
-      stonecutterCache = null;
-      enchantmentCache = null;
-   }
+    public static void resetCreative()
+    {
+        creativeCache = null;
+    }
 
-   public static void updateLoom(int visibleTopRow) {
-      loomCache = new LoomSnapshot(visibleTopRow);
-   }
+    public static void resetScreenCaches()
+    {
+        creativeCache = null;
+        anvilCache = null;
+        loomCache = null;
+        stonecutterCache = null;
+        enchantmentCache = null;
+    }
 
-   public static void updateStonecutter(int scrollOffset) {
-      stonecutterCache = new StonecutterSnapshot(Math.max(0, scrollOffset / 4));
-   }
+    public static void updateLoom(int visibleTopRow)
+    {
+        loomCache = new LoomSnapshot(visibleTopRow);
+    }
 
-   public static void updateEnchantment(
-      int[] enchantPower, int[] enchantId, int[] enchantLevel, int tableSeed, int experienceLevel, boolean creativeMode, float turningSpeed
-   ) {
-      enchantmentCache = new EnchantmentSnapshot(
-         EnchantmentSnapshot.pack(enchantPower, enchantId, enchantLevel), tableSeed, experienceLevel, creativeMode, turningSpeed
-      );
-   }
+    public static void updateStonecutter(int scrollOffset)
+    {
+        stonecutterCache = new StonecutterSnapshot(Math.max(0, scrollOffset / 4));
+    }
 
-   public static void updateRecipeBook(
-      boolean bookOpen, String searchText, boolean craftableOnly, int tab, String selectedRecipe, int currentPage, boolean focused, int selStart, int selEnd
-   ) {
-      RecipeBookSnapshot previous = recipeBookCache;
-      recipeBookCache = new RecipeBookSnapshot(
-         bookOpen, searchText, craftableOnly, tab, selectedRecipe, currentPage, previous == null ? false : previous.buttonSelected, focused, selStart, selEnd
-      );
-   }
+    public static void updateEnchantment(
+        int[] enchantPower,
+        int[] enchantId,
+        int[] enchantLevel,
+        int tableSeed,
+        int experienceLevel,
+        boolean creativeMode,
+        float turningSpeed)
+    {
+        enchantmentCache = new EnchantmentSnapshot(
+            EnchantmentSnapshot.pack(enchantPower, enchantId, enchantLevel),
+            tableSeed,
+            experienceLevel,
+            creativeMode,
+            turningSpeed);
+    }
 
-   public static void updateRecipeBook(
-      boolean bookOpen, String searchText, boolean craftableOnly, int tab, String selectedRecipe, boolean focused, int selStart, int selEnd
-   ) {
-      updateRecipeBook(bookOpen, searchText, craftableOnly, tab, selectedRecipe, recipeBookCache == null ? 0 : recipeBookCache.page, focused, selStart, selEnd);
-   }
+    public static void updateRecipeBook(
+        boolean bookOpen,
+        String searchText,
+        boolean craftableOnly,
+        int tab,
+        String selectedRecipe,
+        int currentPage,
+        boolean focused,
+        int selStart,
+        int selEnd)
+    {
+        RecipeBookSnapshot previous = recipeBookCache;
+        recipeBookCache = new RecipeBookSnapshot(
+            bookOpen,
+            searchText,
+            craftableOnly,
+            tab,
+            selectedRecipe,
+            currentPage,
+            previous == null ? false : previous.buttonSelected,
+            focused,
+            selStart,
+            selEnd);
+    }
 
-   public static void updateRecipePage(int currentPage) {
-      RecipeBookSnapshot previous = recipeBookCache;
-      if (previous == null) {
-         recipeBookCache = new RecipeBookSnapshot(false, "", false, 0, "", Math.max(0, currentPage), false, false, 0, 0);
-      } else {
-         recipeBookCache = new RecipeBookSnapshot(
+    public static void updateRecipeBook(
+        boolean bookOpen,
+        String searchText,
+        boolean craftableOnly,
+        int tab,
+        String selectedRecipe,
+        boolean focused,
+        int selStart,
+        int selEnd)
+    {
+        updateRecipeBook(
+            bookOpen,
+            searchText,
+            craftableOnly,
+            tab,
+            selectedRecipe,
+            recipeBookCache == null ? 0 : recipeBookCache.page,
+            focused,
+            selStart,
+            selEnd);
+    }
+
+    public static void updateRecipePage(int currentPage)
+    {
+        RecipeBookSnapshot previous = recipeBookCache;
+        if (previous == null)
+        {
+            recipeBookCache = new RecipeBookSnapshot(
+                false, "", false, 0, "", Math.max(0, currentPage), false, false, 0, 0);
+            return;
+        }
+        recipeBookCache = new RecipeBookSnapshot(
             previous.open,
             previous.search,
             previous.showing,
@@ -152,17 +210,19 @@ public final class GuiSnapshotCapture {
             previous.buttonSelected,
             previous.searchFocused,
             previous.searchSelStart,
-            previous.searchSelEnd
-         );
-      }
-   }
+            previous.searchSelEnd);
+    }
 
-   public static void updateRecipeButton(boolean selected) {
-      RecipeBookSnapshot previous = recipeBookCache;
-      if (previous == null) {
-         recipeBookCache = new RecipeBookSnapshot(false, "", false, 0, "", 0, selected, false, 0, 0);
-      } else {
-         recipeBookCache = new RecipeBookSnapshot(
+    public static void updateRecipeButton(boolean selected)
+    {
+        RecipeBookSnapshot previous = recipeBookCache;
+        if (previous == null)
+        {
+            recipeBookCache = new RecipeBookSnapshot(
+                false, "", false, 0, "", 0, selected, false, 0, 0);
+            return;
+        }
+        recipeBookCache = new RecipeBookSnapshot(
             previous.open,
             previous.search,
             previous.showing,
@@ -172,279 +232,339 @@ public final class GuiSnapshotCapture {
             selected,
             previous.searchFocused,
             previous.searchSelStart,
-            previous.searchSelEnd
-         );
-      }
-   }
+            previous.searchSelEnd);
+    }
 
-   public static GuiCapture capture(Screen screen, int screenWidth, int screenHeight) {
-      String guiType = GuiTypeResolver.resolve(screen);
-      return guiType == null ? null : captureTyped(screen, guiType, screenWidth, screenHeight);
-   }
+    public static GuiCapture capture(Screen screen, int screenWidth, int screenHeight)
+    {
+        String guiType = GuiTypeResolver.resolve(screen);
+        if (guiType == null)
+        {
+            return null;
+        }
+        return captureTyped(screen, guiType, screenWidth, screenHeight);
+    }
 
-   public static GuiCapture captureOrInventory(HandledScreen<?> handled, int screenWidth, int screenHeight) {
-      String guiType = GuiTypeResolver.resolveOrInventory(handled);
-      return captureTyped(handled, guiType, screenWidth, screenHeight);
-   }
+    public static GuiCapture captureOrInventory(HandledScreen<?> handled, int screenWidth, int screenHeight)
+    {
+        String guiType = GuiTypeResolver.resolveOrInventory(handled);
+        return captureTyped(handled, guiType, screenWidth, screenHeight);
+    }
 
-   private static GuiCapture captureTyped(Screen screen, String guiType, int screenWidth, int screenHeight) {
-      MinecraftClient client = MinecraftClient.getInstance();
-      double mouseX = client.mouse.getX() * (double)screenWidth / (double)client.getWindow().getWidth();
-      double mouseY = client.mouse.getY() * (double)screenHeight / (double)client.getWindow().getHeight();
-      float curTx = (float)((mouseX - (double)screenWidth / 2.0) / 2.0);
-      float curTy = (float)(((double)screenHeight / 2.0 - mouseY) / 2.0);
-      Map<String, ItemStack> slots = new LinkedHashMap<>();
-      ItemStack cursorItem = ItemStack.EMPTY;
-      boolean dragging = false;
-      String dragEncoded = "";
-      List<String> dragKeys = List.of();
-      if (screen instanceof HandledScreen<?> handled) {
-         ScreenHandler handler = handled.getScreenHandler();
-         if ("creative_inventory".equals(guiType) && creativeCache != null && creativeCache.inventoryTab && client.player != null) {
-            handler = client.player.playerScreenHandler;
-         }
+    private static GuiCapture captureTyped(Screen screen, String guiType, int screenWidth, int screenHeight)
+    {
+        MinecraftClient client = MinecraftClient.getInstance();
+        double mouseX = client.mouse.getX() * (double) screenWidth / (double) client.getWindow().getWidth();
+        double mouseY = client.mouse.getY() * (double) screenHeight / (double) client.getWindow().getHeight();
+        float curTx = (float) ((mouseX - (screenWidth / 2.0)) / HotbarLayoutTransform.PIXELS_PER_UNIT);
+        float curTy = (float) (((screenHeight / 2.0) - mouseY) / HotbarLayoutTransform.PIXELS_PER_UNIT);
 
-         if (handler != null) {
-            GuiSlotSchema schema = GuiSlotSchema.get(guiType);
-            if (schema != null && schema.slots != null) {
-               for (GuiSlotSchema.Slot slot : schema.slots) {
-                  if (slot.handlerIndex() >= 0 && slot.handlerIndex() < handler.slots.size()) {
-                     ItemStack stack = ((Slot)handler.slots.get(slot.handlerIndex())).getStack();
-                     slots.put(slot.id(), stack == null ? ItemStack.EMPTY : stack.copy());
-                  }
-               }
+        Map<String, ItemStack> slots = new LinkedHashMap<>();
+        ItemStack cursorItem = ItemStack.EMPTY;
+        boolean dragging = false;
+        String dragEncoded = "";
+        List<String> dragKeys = List.of();
+
+        if (screen instanceof HandledScreen<?> handled)
+        {
+            ScreenHandler handler = handled.getScreenHandler();
+            if ("creative_inventory".equals(guiType)
+                && creativeCache != null
+                && creativeCache.inventoryTab
+                && client.player != null)
+            {
+                handler = client.player.playerScreenHandler;
             }
-
-            ItemStack cursorStack = handler.getCursorStack();
-            cursorItem = cursorStack == null ? ItemStack.EMPTY : cursorStack.copy();
-            HandledScreenPovAccess dragAccess = handled instanceof HandledScreenPovAccess screenDrag ? screenDrag : null;
-            dragging = dragAccess != null
-               && dragAccess.bbsPov$isCursorDragging()
-               && dragAccess.bbsPov$getCursorDragSlots() != null
-               && dragAccess.bbsPov$getCursorDragSlots().size() > 1;
-            if (dragging) {
-               cursorItem = cursorItem.isEmpty() ? ItemStack.EMPTY : cursorItem.copyWithCount(Math.max(0, dragAccess.bbsPov$getDraggedStackRemainder()));
-               dragKeys = GuiSlotDragPreview.keys(dragAccess.bbsPov$getCursorDragSlots(), guiType);
-               dragEncoded = GuiSlotDragPreview.encode(
-                  dragAccess.bbsPov$getHeldButtonType(), cursorStack == null ? 0 : cursorStack.getCount(), cursorStack, dragKeys
-               );
+            if (handler != null)
+            {
+                GuiSlotSchema schema = GuiSlotSchema.get(guiType);
+                if (schema != null && schema.slots != null)
+                {
+                    for (GuiSlotSchema.Slot slot : schema.slots)
+                    {
+                        if (slot.handlerIndex() >= 0 && slot.handlerIndex() < handler.slots.size())
+                        {
+                            ItemStack stack = handler.slots.get(slot.handlerIndex()).getStack();
+                            slots.put(slot.id(), stack == null ? ItemStack.EMPTY : stack.copy());
+                        }
+                    }
+                }
+                ItemStack cursorStack = handler.getCursorStack();
+                cursorItem = cursorStack == null ? ItemStack.EMPTY : cursorStack.copy();
+                HandledScreenPovAccess dragAccess = handled instanceof HandledScreenPovAccess screenDrag
+                    ? screenDrag
+                    : null;
+                dragging = dragAccess != null
+                    && dragAccess.bbsPov$isCursorDragging()
+                    && dragAccess.bbsPov$getCursorDragSlots() != null
+                    && dragAccess.bbsPov$getCursorDragSlots().size() > 1;
+                if (dragging)
+                {
+                    cursorItem = cursorItem.isEmpty()
+                        ? ItemStack.EMPTY
+                        : cursorItem.copyWithCount(Math.max(0, dragAccess.bbsPov$getDraggedStackRemainder()));
+                    dragKeys = GuiSlotDragPreview.keys(dragAccess.bbsPov$getCursorDragSlots(), guiType);
+                    dragEncoded = GuiSlotDragPreview.encode(
+                        dragAccess.bbsPov$getHeldButtonType(),
+                        cursorStack == null ? 0 : cursorStack.getCount(),
+                        cursorStack,
+                        dragKeys);
+                }
             }
-         }
-      }
+        }
 
-      GuiSnapshot snapshot = new GuiSnapshot(guiType, curTx, curTy, true, cursorItem, dragging, dragEncoded, slots, dragKeys);
-      return new GuiCapture(
-         snapshot,
-         "anvil".equals(guiType) ? anvilCache : null,
-         "creative_inventory".equals(guiType) ? creativeCache : null,
-         "loom".equals(guiType) ? loomCache : null,
-         "stonecutter".equals(guiType) ? stonecutterCache : null,
-         "enchanting_table".equals(guiType) ? enchantmentCache : null,
-         captureBeacon(screen, guiType),
-         GuiRecipeBook.supports(guiType) ? captureRecipeBook(screen, guiType) : null,
-         captureMerchant(screen, guiType),
-         captureBook(screen, guiType),
-         captureMount(screen, guiType),
-         captureGamemode(screen, guiType),
-         captureFurnace(screen, guiType),
-         captureBrewing(screen, guiType)
-      );
-   }
+        GuiSnapshot snapshot = new GuiSnapshot(
+            guiType, curTx, curTy, true, cursorItem, dragging, dragEncoded, slots, dragKeys);
+        return new GuiCapture(
+            snapshot,
+            "anvil".equals(guiType) ? anvilCache : null,
+            "creative_inventory".equals(guiType) ? creativeCache : null,
+            "loom".equals(guiType) ? loomCache : null,
+            "stonecutter".equals(guiType) ? stonecutterCache : null,
+            "enchanting_table".equals(guiType) ? enchantmentCache : null,
+            captureBeacon(screen, guiType),
+            GuiRecipeBook.supports(guiType) ? captureRecipeBook(screen, guiType) : null,
+            captureMerchant(screen, guiType),
+            captureBook(screen, guiType),
+            captureMount(screen, guiType),
+            captureGamemode(screen, guiType),
+            captureFurnace(screen, guiType),
+            captureBrewing(screen, guiType));
+    }
 
-   private static RecipeBookSnapshot captureRecipeBook(Screen screen, String guiType) {
-      RecipeBookSnapshot cached = recipeBookCache == null ? new RecipeBookSnapshot(false, "", false, 0, "", 0, false, false, 0, 0) : recipeBookCache;
-      boolean open = cached.open;
-      boolean showing = cached.showing;
-      MinecraftClient client = MinecraftClient.getInstance();
-      if (client.player != null) {
-         ClientRecipeBook book = client.player.getRecipeBook();
-         RecipeBookCategory category = GuiRecipeBook.category(guiType);
-         open = book.isGuiOpen(category);
-         showing = book.isFilteringCraftable(category);
-         if (screen instanceof HandledScreen<?> handled && handled.getScreenHandler() instanceof AbstractRecipeScreenHandler<?> recipeHandler) {
-            showing = book.isFilteringCraftable(recipeHandler);
-         }
-      }
+    /**
+     * Prefer live ClientRecipeBook / RecipeBookWidget state for open + craftable
+     * filter. The render mixin cache can still be the default false/false on the
+     * first recording tick before the widget has rendered.
+     */
+    private static RecipeBookSnapshot captureRecipeBook(Screen screen, String guiType)
+    {
+        RecipeBookSnapshot cached = recipeBookCache == null
+            ? new RecipeBookSnapshot(false, "", false, 0, "", 0, false, false, 0, 0)
+            : recipeBookCache;
 
-      if (screen instanceof RecipeBookProvider provider) {
-         RecipeBookWidget widget = provider.getRecipeBookWidget();
-         if (widget != null) {
-            open = widget.isOpen();
-         }
-      }
+        boolean open = cached.open;
+        boolean showing = cached.showing;
+        MinecraftClient client = MinecraftClient.getInstance();
 
-      RecipeBookSnapshot live = new RecipeBookSnapshot(
-         open,
-         cached.search,
-         showing,
-         cached.category,
-         cached.selected,
-         cached.page,
-         cached.buttonSelected,
-         cached.searchFocused,
-         cached.searchSelStart,
-         cached.searchSelEnd
-      );
-      recipeBookCache = live;
-      return live;
-   }
+        if (client.player != null)
+        {
+            ClientRecipeBook book = client.player.getRecipeBook();
+            RecipeBookCategory category = GuiRecipeBook.category(guiType);
+            open = book.isGuiOpen(category);
+            showing = book.isFilteringCraftable(category);
 
-   private static BeaconSnapshot captureBeacon(Screen screen, String guiType) {
-      if ("beacon".equals(guiType) && screen instanceof HandledScreen<?> handled && handled.getScreenHandler() instanceof BeaconScreenHandler beacon) {
-         StatusEffect primary = handled instanceof BeaconScreenPovAccess accessor ? accessor.bbsPov$getPrimaryEffect() : beacon.getPrimaryEffect();
-         StatusEffect secondary = handled instanceof BeaconScreenPovAccess accessorx ? accessorx.bbsPov$getSecondaryEffect() : beacon.getSecondaryEffect();
-         int secondaryIndex = secondary == StatusEffects.REGENERATION ? 1 : (secondary != null && secondary == primary ? 2 : 0);
-         return new BeaconSnapshot(beaconPrimaryIndex(primary), secondaryIndex, beacon.getProperties());
-      }
+            if (screen instanceof HandledScreen<?> handled
+                && handled.getScreenHandler() instanceof AbstractRecipeScreenHandler<?> recipeHandler)
+            {
+                showing = book.isFilteringCraftable(recipeHandler);
+            }
+        }
 
-      return null;
-   }
+        if (screen instanceof RecipeBookProvider provider)
+        {
+            RecipeBookWidget widget = provider.getRecipeBookWidget();
 
-   private static MerchantSnapshot captureMerchant(Screen screen, String guiType) {
-      if ("villager".equals(guiType) && screen instanceof MerchantScreen merchantScreen) {
-         MerchantScreenHandler merchantHandler = (MerchantScreenHandler)merchantScreen.getScreenHandler();
-         int scrollIndex = merchantScreen instanceof MerchantScreenPovAccess acc ? acc.bbsPov$getIndexStartOffset() : 0;
-         int selectedIndex = merchantScreen instanceof MerchantScreenPovAccess accx ? accx.bbsPov$getSelectedIndex() : 0;
-         TradeOfferList recipes = merchantHandler.getRecipes();
-         int level = merchantHandler.getLevelProgress();
-         int xp = merchantHandler.getExperience();
-         boolean canLevel = merchantHandler.isLeveled();
-         String title = merchantScreen.getTitle() != null ? merchantScreen.getTitle().getString() : "";
-         int profession = 1;
-         MinecraftClient client = MinecraftClient.getInstance();
-         if (client.targetedEntity instanceof VillagerEntity villager) {
-            profession = Registries.VILLAGER_PROFESSION.getRawId(villager.getVillagerData().getProfession());
-         }
+            if (widget != null)
+            {
+                open = widget.isOpen();
+            }
+        }
 
-         return MerchantSnapshot.fromOffers(recipes, profession, level, xp, selectedIndex, scrollIndex, title, canLevel);
-      } else {
-         return null;
-      }
-   }
+        RecipeBookSnapshot live = new RecipeBookSnapshot(
+            open,
+            cached.search,
+            showing,
+            cached.category,
+            cached.selected,
+            cached.page,
+            cached.buttonSelected,
+            cached.searchFocused,
+            cached.searchSelStart,
+            cached.searchSelEnd);
+        recipeBookCache = live;
+        return live;
+    }
 
-   private static BookSnapshot captureBook(Screen screen, String guiType) {
-      if (!"book".equals(guiType)) {
-         return null;
-      } else {
-         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-         String author = player != null ? player.getName().getString() : "";
-         if (screen instanceof BookEditScreenPovAccess edit) {
+    private static BeaconSnapshot captureBeacon(Screen screen, String guiType)
+    {
+        if (!"beacon".equals(guiType) || !(screen instanceof HandledScreen<?> handled)
+            || !(handled.getScreenHandler() instanceof BeaconScreenHandler beacon))
+        {
+            return null;
+        }
+        StatusEffect primary = handled instanceof BeaconScreenPovAccess accessor
+            ? accessor.bbsPov$getPrimaryEffect() : beacon.getPrimaryEffect();
+        StatusEffect secondary = handled instanceof BeaconScreenPovAccess accessor
+            ? accessor.bbsPov$getSecondaryEffect() : beacon.getSecondaryEffect();
+        int secondaryIndex = secondary == StatusEffects.REGENERATION
+            ? 1 : secondary != null && secondary == primary ? 2 : 0;
+        return new BeaconSnapshot(beaconPrimaryIndex(primary), secondaryIndex, beacon.getProperties());
+    }
+
+    private static MerchantSnapshot captureMerchant(Screen screen, String guiType)
+    {
+        if (!"villager".equals(guiType) || !(screen instanceof MerchantScreen merchantScreen))
+        {
+            return null;
+        }
+        var merchantHandler = merchantScreen.getScreenHandler();
+        int scrollIndex = merchantScreen instanceof MerchantScreenPovAccess acc
+            ? acc.bbsPov$getIndexStartOffset()
+            : 0;
+        int selectedIndex = merchantScreen instanceof MerchantScreenPovAccess acc
+            ? acc.bbsPov$getSelectedIndex()
+            : 0;
+        TradeOfferList recipes = merchantHandler.getRecipes();
+        int level = merchantHandler.getLevelProgress();
+        int xp = merchantHandler.getExperience();
+        boolean canLevel = merchantHandler.isLeveled();
+        String title = merchantScreen.getTitle() != null ? merchantScreen.getTitle().getString() : "";
+
+        int profession = 1;
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.targetedEntity instanceof net.minecraft.entity.passive.VillagerEntity villager)
+        {
+            profession = net.minecraft.registry.Registries.VILLAGER_PROFESSION.getRawId(
+                villager.getVillagerData().getProfession());
+        }
+        return MerchantSnapshot.fromOffers(
+            recipes, profession, level, xp, selectedIndex, scrollIndex, title, canLevel);
+    }
+
+    private static BookSnapshot captureBook(Screen screen, String guiType)
+    {
+        if (!"book".equals(guiType))
+        {
+            return null;
+        }
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        String author = player != null ? player.getName().getString() : "";
+
+        if (screen instanceof BookEditScreenPovAccess edit)
+        {
             boolean signing = edit.bbsPov$isSigning();
             SelectionManager selection = signing ? edit.bbsPov$getTitleSelection() : edit.bbsPov$getPageSelection();
             return new BookSnapshot(
-               true,
-               signing,
-               edit.bbsPov$getCurrentPage(),
-               BookSnapshot.pack(edit.bbsPov$getPages()),
-               edit.bbsPov$getTitle(),
-               author,
-               selection == null ? 0 : selection.getSelectionStart(),
-               selection == null ? 0 : selection.getSelectionEnd()
-            );
-         } else if (screen instanceof BookScreenPovAccess book) {
-            Contents contents = book.bbsPov$getContents();
+                true,
+                signing,
+                edit.bbsPov$getCurrentPage(),
+                BookSnapshot.pack(edit.bbsPov$getPages()),
+                edit.bbsPov$getTitle(),
+                author,
+                selection == null ? 0 : selection.getSelectionStart(),
+                selection == null ? 0 : selection.getSelectionEnd());
+        }
+
+        if (screen instanceof BookScreenPovAccess book)
+        {
+            BookScreen.Contents contents = book.bbsPov$getContents();
             List<String> pages = new ArrayList<>();
             int count = contents == null ? 0 : contents.getPageCount();
-
-            for (int i = 0; i < count; i++) {
-               StringVisitable visitable = contents.getPage(i);
-               if (visitable instanceof Text text) {
-                  pages.add(Serializer.toJson(text));
-               } else {
-                  pages.add(visitable == null ? "" : visitable.getString());
-               }
+            for (int i = 0; i < count; i++)
+            {
+                StringVisitable visitable = contents.getPage(i);
+                if (visitable instanceof Text text)
+                {
+                    pages.add(Text.Serializer.toJson(text));
+                }
+                else
+                {
+                    pages.add(visitable == null ? "" : visitable.getString());
+                }
             }
+            return new BookSnapshot(
+                false, false, book.bbsPov$getPageIndex(), BookSnapshot.pack(pages), "", author, 0, 0);
+        }
+        return null;
+    }
 
-            return new BookSnapshot(false, false, book.bbsPov$getPageIndex(), BookSnapshot.pack(pages), "", author, 0, 0);
-         } else {
+    private static MountSnapshot captureMount(Screen screen, String guiType)
+    {
+        if (!("horse".equals(guiType) || "donkey".equals(guiType))
+            || !(screen instanceof HandledScreen<?> handled))
+        {
             return null;
-         }
-      }
-   }
-
-   private static MountSnapshot captureMount(Screen screen, String guiType) {
-      if (("horse".equals(guiType) || "donkey".equals(guiType)) && screen instanceof HandledScreen<?> handled) {
-         AbstractHorseEntity mount = handled instanceof HorseScreenPovAccess horseScreen ? horseScreen.bbsPov$getEntity() : null;
-         int variant = 0;
-         boolean chest = false;
-         if ("horse".equals(guiType) && mount instanceof HorseEntity horse) {
+        }
+        net.minecraft.entity.passive.AbstractHorseEntity mount = handled instanceof HorseScreenPovAccess horseScreen
+            ? horseScreen.bbsPov$getEntity()
+            : null;
+        int variant = 0;
+        boolean chest = false;
+        if ("horse".equals(guiType) && mount instanceof net.minecraft.entity.passive.HorseEntity horse)
+        {
             variant = GuiPovActionClip.unpackHorseVariant(horse.getVariant().getId(), horse.getMarking().getId());
-         }
-
-         if ("donkey".equals(guiType) && mount instanceof AbstractDonkeyEntity donkey) {
+        }
+        if ("donkey".equals(guiType) && mount instanceof net.minecraft.entity.passive.AbstractDonkeyEntity donkey)
+        {
             chest = donkey.hasChest();
-         }
+        }
+        return new MountSnapshot(variant, chest);
+    }
 
-         return new MountSnapshot(variant, chest);
-      } else {
-         return null;
-      }
-   }
-
-   private static GamemodeSnapshot captureGamemode(Screen screen, String guiType) {
-      if (!"gamemode_switcher".equals(guiType)) {
-         return null;
-      } else {
-         int selected = 0;
-         if (screen instanceof GameModeSelectionScreenPovAccess acc) {
+    private static GamemodeSnapshot captureGamemode(Screen screen, String guiType)
+    {
+        if (!"gamemode_switcher".equals(guiType))
+        {
+            return null;
+        }
+        int selected = 0;
+        if (screen instanceof GameModeSelectionScreenPovAccess acc)
+        {
             Object modeObj = acc.bbsPov$getGameMode();
-            if (modeObj != null) {
-               String modeName = modeObj.toString();
-               if ("CREATIVE".equals(modeName)) {
-                  selected = 1;
-               } else if ("ADVENTURE".equals(modeName)) {
-                  selected = 2;
-               } else if ("SPECTATOR".equals(modeName)) {
-                  selected = 3;
-               }
+            if (modeObj != null)
+            {
+                String modeName = modeObj.toString();
+                if ("CREATIVE".equals(modeName)) selected = 1;
+                else if ("ADVENTURE".equals(modeName)) selected = 2;
+                else if ("SPECTATOR".equals(modeName)) selected = 3;
             }
-         } else if (MinecraftClient.getInstance().interactionManager != null) {
+        }
+        else if (MinecraftClient.getInstance().interactionManager != null)
+        {
             GameMode gm = MinecraftClient.getInstance().interactionManager.getCurrentGameMode();
-            if (gm == GameMode.CREATIVE) {
-               selected = 1;
-            } else if (gm == GameMode.ADVENTURE) {
-               selected = 2;
-            } else if (gm == GameMode.SPECTATOR) {
-               selected = 3;
-            }
-         }
+            if (gm == GameMode.CREATIVE) selected = 1;
+            else if (gm == GameMode.ADVENTURE) selected = 2;
+            else if (gm == GameMode.SPECTATOR) selected = 3;
+        }
+        return new GamemodeSnapshot(selected);
+    }
 
-         return new GamemodeSnapshot(selected);
-      }
-   }
+    private static FurnaceSnapshot captureFurnace(Screen screen, String guiType)
+    {
+        if (!GuiRecipeBook.isFurnace(guiType)
+            || !(screen instanceof HandledScreen<?> handled)
+            || !(handled.getScreenHandler() instanceof AbstractFurnaceScreenHandler furnace))
+        {
+            return null;
+        }
+        return new FurnaceSnapshot(
+            furnace.isBurning() ? furnace.getFuelProgress() : 0F,
+            furnace.getCookProgress());
+    }
 
-   private static FurnaceSnapshot captureFurnace(Screen screen, String guiType) {
-      if (GuiRecipeBook.isFurnace(guiType)
-         && screen instanceof HandledScreen<?> handled
-         && handled.getScreenHandler() instanceof AbstractFurnaceScreenHandler furnace) {
-         return new FurnaceSnapshot(furnace.isBurning() ? (float)furnace.getFuelProgress() : 0.0F, (float)furnace.getCookProgress());
-      }
+    private static BrewingSnapshot captureBrewing(Screen screen, String guiType)
+    {
+        if (!"brewing_stand".equals(guiType)
+            || !(screen instanceof HandledScreen<?> handled)
+            || !(handled.getScreenHandler() instanceof BrewingStandScreenHandler brewing))
+        {
+            return null;
+        }
+        int brewTime = brewing.getBrewTime();
+        return new BrewingSnapshot(
+            brewTime > 0 ? 1F - brewTime / 400F : 0F,
+            brewing.getFuel() / 20F,
+            brewTime > 0);
+    }
 
-      return null;
-   }
-
-   private static BrewingSnapshot captureBrewing(Screen screen, String guiType) {
-      if ("brewing_stand".equals(guiType)
-         && screen instanceof HandledScreen<?> handled
-         && handled.getScreenHandler() instanceof BrewingStandScreenHandler brewing) {
-         int var5 = brewing.getBrewTime();
-         return new BrewingSnapshot(var5 > 0 ? 1.0F - (float)var5 / 400.0F : 0.0F, (float)brewing.getFuel() / 20.0F, var5 > 0);
-      }
-
-      return null;
-   }
-
-   private static int beaconPrimaryIndex(StatusEffect effect) {
-      if (effect == StatusEffects.SPEED) {
-         return 1;
-      } else if (effect == StatusEffects.HASTE) {
-         return 2;
-      } else if (effect == StatusEffects.RESISTANCE) {
-         return 3;
-      } else if (effect == StatusEffects.JUMP_BOOST) {
-         return 4;
-      } else {
-         return effect == StatusEffects.STRENGTH ? 5 : 0;
-      }
-   }
+    private static int beaconPrimaryIndex(StatusEffect effect)
+    {
+        if (effect == StatusEffects.SPEED) return 1;
+        if (effect == StatusEffects.HASTE) return 2;
+        if (effect == StatusEffects.RESISTANCE) return 3;
+        if (effect == StatusEffects.JUMP_BOOST) return 4;
+        if (effect == StatusEffects.STRENGTH) return 5;
+        return 0;
+    }
 }

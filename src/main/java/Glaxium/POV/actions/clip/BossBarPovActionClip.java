@@ -3,126 +3,154 @@ package Glaxium.POV.actions.clip;
 import Glaxium.POV.actions.PovActionType;
 import Glaxium.POV.actions.bossbar.BossBarLooks;
 import Glaxium.POV.actions.bossbar.BossBarTypeEntry;
-import java.util.List;
 import mchorse.bbs_mod.utils.clips.Clip;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
 import mchorse.bbs_mod.utils.keyframes.KeyframeChannel;
 import mchorse.bbs_mod.utils.keyframes.factories.KeyframeFactories;
 
-public final class BossBarPovActionClip extends PovActionClip {
-   public final KeyframeChannel<String> state = this.channel("state", KeyframeFactories.STRING);
-   public final KeyframeChannel<String> name = this.channel("name", KeyframeFactories.STRING);
-   public final KeyframeChannel<Float> percent = this.channel("percent", KeyframeFactories.FLOAT);
-   public final KeyframeChannel<String> color = this.channel("color", KeyframeFactories.STRING);
-   public final KeyframeChannel<String> style = this.channel("style", KeyframeFactories.STRING);
+import java.util.List;
 
-   public BossBarPovActionClip() {
-      this.ensureDefaults();
-   }
+/** One vanilla-style boss bar: Dragon, Wither, or Raid. */
+public final class BossBarPovActionClip extends PovActionClip
+{
+    public final KeyframeChannel<String> state = this.channel("state", KeyframeFactories.STRING);
+    public final KeyframeChannel<String> name = this.channel("name", KeyframeFactories.STRING);
+    public final KeyframeChannel<Float> percent = this.channel("percent", KeyframeFactories.FLOAT);
+    public final KeyframeChannel<String> color = this.channel("color", KeyframeFactories.STRING);
+    public final KeyframeChannel<String> style = this.channel("style", KeyframeFactories.STRING);
 
-   @Override
-   public PovActionType getActionType() {
-      return PovActionType.BOSS_BARS;
-   }
+    public BossBarPovActionClip()
+    {
+        super();
+        this.ensureDefaults();
+    }
 
-   public String resolveType() {
-      BossBarTypeEntry entry = BossBarTypeEntry.findById(this.state.isEmpty() ? "" : (String)this.state.get(0).getValue());
-      return entry == null ? BossBarTypeEntry.DRAGON.id : entry.id;
-   }
+    @Override
+    public PovActionType getActionType()
+    {
+        return PovActionType.BOSS_BARS;
+    }
 
-   public void applyTypeDefaults(BossBarTypeEntry type) {
-      if (type == null) {
-         type = BossBarTypeEntry.DRAGON;
-      }
+    public String resolveType()
+    {
+        BossBarTypeEntry entry = BossBarTypeEntry.findById(
+            this.state.isEmpty() ? "" : this.state.get(0).getValue());
+        return entry == null ? BossBarTypeEntry.DRAGON.id : entry.id;
+    }
 
-      setConstant(this.state, type.id);
-      setConstant(this.name, type.defaultTitle);
-      setConstant(this.color, type.defaultColor);
-      setConstant(this.style, type.defaultStyle);
-      if (this.percent.isEmpty()) {
-         this.percent.insert(0.0F, 1.0F);
-      }
-   }
+    public void applyTypeDefaults(BossBarTypeEntry type)
+    {
+        if (type == null)
+        {
+            type = BossBarTypeEntry.DRAGON;
+        }
 
-   public void ensureDefaults() {
-      if (this.state.isEmpty()) {
-         this.applyTypeDefaults(BossBarTypeEntry.DRAGON);
-      }
+        setConstant(this.state, type.id);
+        setConstant(this.name, type.defaultTitle);
+        setConstant(this.color, type.defaultColor);
+        setConstant(this.style, type.defaultStyle);
+        if (this.percent.isEmpty())
+        {
+            this.percent.insert(0F, 1F);
+        }
+    }
 
-      if (this.name.isEmpty()) {
-         this.name.insert(0.0F, BossBarTypeEntry.DRAGON.defaultTitle);
-      }
+    public void ensureDefaults()
+    {
+        if (this.state.isEmpty())
+        {
+            this.applyTypeDefaults(BossBarTypeEntry.DRAGON);
+        }
+        if (this.name.isEmpty())
+        {
+            this.name.insert(0F, BossBarTypeEntry.DRAGON.defaultTitle);
+        }
+        if (this.percent.isEmpty())
+        {
+            this.percent.insert(0F, 1F);
+        }
+        if (this.color.isEmpty())
+        {
+            this.color.insert(0F, BossBarTypeEntry.DRAGON.defaultColor);
+        }
+        if (this.style.isEmpty())
+        {
+            this.style.insert(0F, BossBarTypeEntry.DRAGON.defaultStyle);
+        }
+    }
 
-      if (this.percent.isEmpty()) {
-         this.percent.insert(0.0F, 1.0F);
-      }
+    @Override
+    public void normalize()
+    {
+        super.normalize();
+        this.ensureDefaults();
+        clamp(this.percent, 0F, 1F);
+        for (Keyframe<String> keyframe : this.color.getKeyframes())
+        {
+            keyframe.setValue(BossBarLooks.COLORS[BossBarLooks.colorIndex(keyframe.getValue())]);
+        }
+        for (Keyframe<String> keyframe : this.style.getKeyframes())
+        {
+            keyframe.setValue(BossBarLooks.STYLES[BossBarLooks.styleIndex(keyframe.getValue())]);
+        }
+    }
 
-      if (this.color.isEmpty()) {
-         this.color.insert(0.0F, BossBarTypeEntry.DRAGON.defaultColor);
-      }
+    public void ensureBakingBounds()
+    {
+        float end = this.duration.get();
+        this.padChannel(this.state, end, true);
+        this.padChannel(this.name, end, true);
+        this.padChannel(this.percent, end, false);
+        this.padChannel(this.color, end, true);
+        this.padChannel(this.style, end, true);
+        linear(this.percent);
+        constant(this.state);
+        constant(this.name);
+        constant(this.color);
+        constant(this.style);
+    }
 
-      if (this.style.isEmpty()) {
-         this.style.insert(0.0F, BossBarTypeEntry.DRAGON.defaultStyle);
-      }
-   }
+    private static <T> void setConstant(KeyframeChannel<T> channel, T value)
+    {
+        if (channel.isEmpty())
+        {
+            channel.insert(0F, value);
+            return;
+        }
 
-   @Override
-   public void normalize() {
-      super.normalize();
-      this.ensureDefaults();
-      clamp(this.percent, 0.0F, 1.0F);
+        channel.get(0).setValue(value);
+    }
 
-      for (Keyframe<String> keyframe : this.color.getKeyframes()) {
-         keyframe.setValue(BossBarLooks.COLORS[BossBarLooks.colorIndex((String)keyframe.getValue())]);
-      }
+    private static <T> void padChannel(KeyframeChannel<T> channel, float end, boolean hold)
+    {
+        if (channel == null || channel.isEmpty() || end <= 0F)
+        {
+            return;
+        }
 
-      for (Keyframe<String> keyframe : this.style.getKeyframes()) {
-         keyframe.setValue(BossBarLooks.STYLES[BossBarLooks.styleIndex((String)keyframe.getValue())]);
-      }
-   }
+        List<? extends Keyframe<T>> keyframes = channel.getKeyframes();
+        Keyframe<T> first = keyframes.get(0);
+        Keyframe<T> last = keyframes.get(keyframes.size() - 1);
 
-   public void ensureBakingBounds() {
-      float end = (float)((Integer)this.duration.get()).intValue();
-      padChannel(this.state, end, true);
-      padChannel(this.name, end, true);
-      padChannel(this.percent, end, false);
-      padChannel(this.color, end, true);
-      padChannel(this.style, end, true);
-      linear(this.percent);
-      constant(this.state);
-      constant(this.name);
-      constant(this.color);
-      constant(this.style);
-   }
+        if (first.getTick() > 0F)
+        {
+            channel.insert(0F, first.getValue());
+        }
 
-   private static <T> void setConstant(KeyframeChannel<T> channel, T value) {
-      if (channel.isEmpty()) {
-         channel.insert(0.0F, value);
-      } else {
-         channel.get(0).setValue(value);
-      }
-   }
-
-   private static <T> void padChannel(KeyframeChannel<T> channel, float end, boolean hold) {
-      if (channel != null && !channel.isEmpty() && !(end <= 0.0F)) {
-         List<? extends Keyframe<T>> keyframes = channel.getKeyframes();
-         Keyframe<T> first = (Keyframe<T>)keyframes.get(0);
-         Keyframe<T> last = (Keyframe<T>)keyframes.get(keyframes.size() - 1);
-         if (first.getTick() > 0.0F) {
-            channel.insert(0.0F, first.getValue());
-         }
-
-         if (last.getTick() < end) {
+        if (last.getTick() < end)
+        {
             channel.insert(end, last.getValue());
-         }
+        }
 
-         if (hold) {
+        if (hold)
+        {
             constant(channel);
-         }
-      }
-   }
+        }
+    }
 
-   protected Clip create() {
-      return new BossBarPovActionClip();
-   }
+    @Override
+    protected Clip create()
+    {
+        return new BossBarPovActionClip();
+    }
 }

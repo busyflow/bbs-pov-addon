@@ -2,6 +2,8 @@ package Glaxium.POV.editor.section;
 
 import Glaxium.POV.editor.UIPovEditor;
 
-public interface PovEditorSection {
-   void fillSheets(UIPovEditor var1, boolean var2);
+/** One POV editor tab: HUD, Hand, BodyPart, or Actions. */
+public interface PovEditorSection
+{
+    void fillSheets(UIPovEditor editor, boolean resetView);
 }

@@ -1,0 +1,23 @@
+{
+  "bbs.config.pov.title": "POV",
+  "bbs.config.pov.tooltip": "Options related to First Person POV",
+  "bbs.config.pov.toggle_all": "All",
+  "bbs.config.pov.toggle_all-comment": "Enable or disable all POV baking options at once.",
+  "bbs.config.pov.bake_actions": "Bake GUI",
+  "bbs.config.pov.bake_actions-comment": "Record GUI actions, screens, menus, toasts, and status effects into replay clips.",
+  "bbs.config.pov.bake_camera_shake": "Bake Camera Shake",
+  "bbs.config.pov.bake_camera_shake-comment": "Record vanilla hurt-camera motion into Camera Shake action clips.",
+  "bbs.config.pov.bake_particles": "Bake Particles",
+  "bbs.config.pov.bake_particles-comment": "Record on-screen vanilla particles into Particle Effect clips.",
+  "bbs.config.pov.bake_boss_bars": "Bake Boss Bars",
+  "bbs.config.pov.bake_boss_bars-comment": "Record boss bars into Boss Bar action clips.",
+  "bbs.config.pov.bake_screen_effects": "Bake Screen Effects",
+  "bbs.config.pov.bake_screen_effects-comment": "Record live screen overlays and spyglass into Screen Effect action clips.",
+  "bbs.config.pov.cursor_texture": "Cursor Texture",
+  "bbs.config.pov.cursor_texture-comment": "Image used for the GUI cursor.",
+  "bbs.config.pov.cursor_crop": "Cursor Crop",
+  "bbs.config.pov.cursor_crop-comment": "Visible area of the cursor image.",
+  "bbs.config.pov.cursor_default_scale": "Cursor Scale",
+  "bbs.config.pov.cursor_default_scale-comment": "Cursor size multiplier.",
+  "bbs.ui.camera.clips.bbs_pov:pov": "POV"
+}

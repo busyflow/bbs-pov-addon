@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"package": "wemppy.bbs_pov.client.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"POVClipMixin",
+		"UIPOVClipMixin",
+		"UIPovHudRendererMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

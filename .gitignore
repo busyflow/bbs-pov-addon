@@ -1,0 +1,11 @@
+# Project exclude paths
+/.gradle/
+/.idea
+/build/
+/bin/
+/.idea/
+/run/
+/net/
+libs/bbs-2.7-1.20.4 source
+/.cursor/
+AGENTS.md

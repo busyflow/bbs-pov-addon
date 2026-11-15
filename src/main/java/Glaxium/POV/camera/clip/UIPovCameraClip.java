@@ -174,17 +174,6 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
 
             if (replay != null)
             {
-                if (this.clip.replayId.get() == null || this.clip.replayId.get().isEmpty())
-                {
-                    this.clip.replayId.set(replay.getId());
-                }
-
-                int resolvedIndex = PovCameraClips.indexOfReplay(film, replay);
-                if (resolvedIndex >= 0 && this.clip.selector.get() != resolvedIndex)
-                {
-                    this.clip.selector.set(resolvedIndex);
-                }
-
                 this.selector.label = IKey.constant(replay.getName());
                 return;
             }

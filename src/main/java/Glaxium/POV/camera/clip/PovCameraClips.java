@@ -157,7 +157,16 @@ public final class PovCameraClips
 
         int index = clip.selector.get();
 
-        return index >= 0 && index < replays.size() ? replays.get(index) : null;
+        if (index >= 0 && index < replays.size())
+        {
+            Replay fallback = replays.get(index);
+            if (fallback != null && fallback.enabled.get())
+            {
+                return fallback;
+            }
+        }
+
+        return null;
     }
 
     public static int indexOfReplay(Film film, Replay replay)

@@ -12,8 +12,8 @@ import mchorse.bbs_mod.ui.framework.elements.IUIElement;
 import mchorse.bbs_mod.ui.framework.elements.UIElement;
 import mchorse.bbs_mod.ui.framework.elements.buttons.UIButton;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
-import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
+import mchorse.bbs_mod.utils.keyframes.Keyframe;
 
 import Glaxium.POV.editor.UIPovEditor;
 import Glaxium.POV.integration.access.bbs.UIFilmPanelPovAccess;
@@ -27,11 +27,11 @@ public class UIModelKeyframeFactory extends UIKeyframeFactory<String>
     private final UIButton pickModel;
     private String currentModel;
 
-    public UIModelKeyframeFactory(UITrackValue<String> track, UIKeyframes editor)
+    public UIModelKeyframeFactory(Keyframe<String> keyframe, UIKeyframes editor)
     {
-        super(track, editor);
+        super(keyframe, editor);
 
-        this.currentModel = track.getValue();
+        this.currentModel = keyframe.getValue();
         if (this.currentModel == null)
         {
             this.currentModel = "";
@@ -124,7 +124,7 @@ public class UIModelKeyframeFactory extends UIKeyframeFactory<String>
     {
         super.update();
 
-        String val = this.track.getValue();
+        String val = this.keyframe.getValue();
         if (val != null && !val.equals(this.currentModel))
         {
             this.currentModel = val;

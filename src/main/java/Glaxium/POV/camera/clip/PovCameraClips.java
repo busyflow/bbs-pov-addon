@@ -142,6 +142,19 @@ public final class PovCameraClips
         }
 
         List<Replay> replays = film.replays.getList();
+        String replayId = clip.replayId.get();
+
+        if (replayId != null && !replayId.isEmpty())
+        {
+            for (Replay replay : replays)
+            {
+                if (replayId.equals(replay.getId()))
+                {
+                    return replay;
+                }
+            }
+        }
+
         int index = clip.selector.get();
 
         return index >= 0 && index < replays.size() ? replays.get(index) : null;
@@ -212,6 +225,7 @@ public final class PovCameraClips
         clip.duration.set(inferDuration(film));
         clip.layer.set(Math.max(0, film.camera.getTopLayer() + 1));
         clip.selector.set(selector);
+        clip.replayId.set(source.getId());
         clip.hands.set(true);
         clip.hud.set(true);
         clip.crosshair.set(true);

@@ -19,7 +19,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     modImplementation files("libs/${project.bbs_jar}")
-    modCompileOnly files("libs/iris-1.7.2+1.20.1.jar")
+    modCompileOnly fileTree(dir: 'run/mods', include: 'iris*.jar')
 }
 
 loom {
@@ -46,5 +46,3 @@ processResources {
         expand "version": project.version
     }
 }
-
-apply from: 'gradle/audit_mixins.gradle'

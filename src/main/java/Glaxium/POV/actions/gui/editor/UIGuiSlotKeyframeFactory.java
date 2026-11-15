@@ -11,29 +11,31 @@ import mchorse.bbs_mod.ui.film.UIFilmPanel;
 import mchorse.bbs_mod.ui.framework.elements.IUIElement;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
-import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
+import mchorse.bbs_mod.utils.keyframes.KeyframeChannel;
 
 /** Keyframe factory displaying standard controls (Tick, Duration, Easing) at top, followed by the slot grid. */
 public class UIGuiSlotKeyframeFactory extends UIKeyframeFactory<Boolean>
 {
     private final UIGuiSlotEditor slotEditor;
 
-    public UIGuiSlotKeyframeFactory(UITrackValue<Boolean> track, UIKeyframes editor)
+    public UIGuiSlotKeyframeFactory(Keyframe<Boolean> keyframe, UIKeyframes editor)
     {
-        super(track, editor);
+        super(keyframe, editor);
 
         // Hide all default keyframe settings (tick, duration, interp, etc.) so only the slots show
         this.scroll.removeAll();
 
-        UIKeyframeSheet sheet = track.sheet;
+        UIKeyframeSheet sheet = editor != null && editor.getGraph() != null
+            ? editor.getGraph().getSheet(keyframe)
+            : (editor != null && editor.getDopeSheet() != null ? editor.getDopeSheet().getSheet(keyframe) : null);
         String sheetId = sheet == null ? "" : sheet.id;
 
         UIFilmPanel filmPanel = PovReplaySettings.getFilmPanel();
         IUIClipsDelegate clipsDelegate = filmPanel != null ? filmPanel.cameraEditor : null;
 
-        mchorse.bbs_mod.settings.values.base.BaseValue parentChannel = sheet != null ? sheet.channel : null;
+        mchorse.bbs_mod.settings.values.base.BaseValue parentChannel = keyframe.getParent();
         GuiPovActionClip guiClip = null;
         if (parentChannel != null && parentChannel.getParent() instanceof GuiPovActionClip clip)
         {
@@ -43,11 +45,6 @@ public class UIGuiSlotKeyframeFactory extends UIKeyframeFactory<Boolean>
         {
             guiClip = clip;
         }
-
-        Keyframe<Boolean> keyframe = (track.sheet != null && track.sheet.selection != null)
-            ? (Keyframe<Boolean>) track.sheet.selection.getFirst()
-            : null;
-        int tick = keyframe != null ? (int) keyframe.getTick() : (int) editor.getTick();
 
         if ("crafting_grid".equals(sheetId) || "gui_slots".equals(sheetId))
         {
@@ -59,7 +56,7 @@ public class UIGuiSlotKeyframeFactory extends UIKeyframeFactory<Boolean>
                     : UIGuiSlotEditor.Mode.GUI;
 
                 this.slotEditor = new UIGuiSlotEditor(guiClip, clipsDelegate);
-                this.slotEditor.configure(guiId, mode, tick);
+                this.slotEditor.configure(guiId, mode, keyframe.getTick());
                 this.scroll.add((IUIElement) this.slotEditor);
             }
             else
@@ -88,7 +85,7 @@ public class UIGuiSlotKeyframeFactory extends UIKeyframeFactory<Boolean>
             if (hud != null && filmPanel != null)
             {
                 this.slotEditor = new UIGuiSlotEditor(null, null);
-                this.slotEditor.configure(hud.inventory, hud.inventoryAnchor, tick);
+                this.slotEditor.configure(hud.inventory, hud.inventoryAnchor, keyframe.getTick());
                 this.scroll.add((IUIElement) this.slotEditor);
             }
             else

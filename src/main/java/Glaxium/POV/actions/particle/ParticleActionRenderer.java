@@ -3,6 +3,7 @@ package Glaxium.POV.actions.particle;
 import Glaxium.POV.actions.RecordedPovActions;
 import Glaxium.POV.actions.clip.ParticleEffectPovActionClip;
 import Glaxium.POV.actions.clip.ScreenEffectPovActionClip;
+import Glaxium.POV.actions.particle.ParticleSpaces.ActorAnchor;
 import Glaxium.POV.actions.particle.recording.ParticleRecorder;
 import Glaxium.POV.editor.UIPovHandEditor;
 import Glaxium.POV.hand.RecordedHandData;
@@ -22,6 +23,7 @@ import net.minecraft.particle.ItemStackParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ public final class ParticleActionRenderer
 {
     private static final Random RANDOM = new Random();
     private static int lastPlayingFilmTick = Integer.MIN_VALUE;
+    private static long rainbowTick;
 
     private ParticleActionRenderer()
     {
@@ -108,6 +111,8 @@ public final class ParticleActionRenderer
             lastPlayingFilmTick = Integer.MIN_VALUE;
         }
 
+        rainbowTick++;
+
         List<Replay> replays = film.replays.getList();
 
         ParticleRecorder.suspendCapture();
@@ -130,11 +135,20 @@ public final class ParticleActionRenderer
                 }
 
                 IEntity entity = entities.get(replay.getId());
+                float replayTick = replay.getTick(cursor);
+                ActorAnchor actorAnchor = ParticleSpaces.resolveActorAnchor(entities, entity, replay, replayTick);
+                Matrix4f actorMatrix = actorAnchor != null ? actorAnchor.matrix : null;
                 Vec3d origin;
                 float width;
                 float height;
 
-                if (entity != null)
+                if (actorMatrix != null)
+                {
+                    origin = ParticleSpaces.matrixOrigin(actorMatrix);
+                    width = ParticleSpaces.width(entity);
+                    height = ParticleSpaces.height(entity);
+                }
+                else if (entity != null)
                 {
                     origin = ParticleSpaces.lerpPos(entity, 1F);
                     width = ParticleSpaces.width(entity);
@@ -157,9 +171,6 @@ public final class ParticleActionRenderer
                     continue;
                 }
 
-                float replayTick = replay.getTick(cursor);
-                boolean particleEmitted = false;
-
                 RecordedHandData handData = access.bbsPov$getHand();
                 if (handData != null)
                 {
@@ -168,8 +179,7 @@ public final class ParticleActionRenderer
                     boolean showParticles = handData.showUseParticles.interpolate(replayTick, true);
                     if (active != 0 && showParticles)
                     {
-                        emitEatingParticles(client, origin, width, height, entity, replay, replayTick, handData);
-                        particleEmitted = true;
+                        emitEatingParticles(client, actorAnchor, origin, height, entity, replay, replayTick, handData);
                     }
                 }
 
@@ -178,17 +188,13 @@ public final class ParticleActionRenderer
                     if (clip instanceof ParticleEffectPovActionClip particleClip
                         && particleClip.isActive(replayTick))
                     {
-                        if (!particleEmitted)
-                        {
-                            emit(client, origin, width, height, particleClip, entity, replay, replayTick);
-                            particleEmitted = true;
-                        }
+                        emit(client, actorAnchor, origin, width, height, particleClip, entity, replay, replayTick);
                     }
                     else if (clip instanceof ScreenEffectPovActionClip screenClip
                         && screenClip.isActive(replayTick)
                         && screenClip.hasEffect("totem"))
                     {
-                        emitTotem(client, origin, width, height, screenClip, replayTick - screenClip.tick.get());
+                        emitTotem(client, actorAnchor, origin, width, height, screenClip, replayTick - screenClip.tick.get());
                     }
                 }
             }
@@ -201,6 +207,7 @@ public final class ParticleActionRenderer
 
     private static void emitTotem(
         MinecraftClient client,
+        ActorAnchor actorAnchor,
         Vec3d origin,
         float width,
         float height,
@@ -229,19 +236,17 @@ public final class ParticleActionRenderer
 
             if (d * d + e * e + f * f <= 1.0D)
             {
-                double px = origin.x + (d / 4.0D) * (double) width;
-                double py = origin.y + (0.5D + e / 4.0D) * (double) height;
-                double pz = origin.z + (f / 4.0D) * (double) width;
+                Vec3d pos = ParticleSpaces.pointInTotemBurst(actorAnchor, origin, width, height, d, e, f);
 
-                client.particleManager.addParticle(ParticleTypes.TOTEM_OF_UNDYING, px, py, pz, d, e + 0.2D, f);
+                client.particleManager.addParticle(ParticleTypes.TOTEM_OF_UNDYING, pos.x, pos.y, pos.z, d, e + 0.2D, f);
             }
         }
     }
 
     private static void emitEatingParticles(
         MinecraftClient client,
+        ActorAnchor actorAnchor,
         Vec3d origin,
-        float width,
         float height,
         IEntity entity,
         Replay replay,
@@ -278,11 +283,13 @@ public final class ParticleActionRenderer
 
         ParticleEffect effect = new ItemStackParticleEffect(ParticleTypes.ITEM, itemToUse);
 
-        float yaw = entity != null ? entity.getHeadYaw() : (replay != null && replay.keyframes != null ? (float) replay.keyframes.yaw.interpolate(replayTick, 0.0).doubleValue() : 0F);
+        Matrix4f actorMatrix = actorAnchor != null ? actorAnchor.matrix : null;
+        float yaw = ParticleSpaces.resolveActorYaw(actorMatrix, entity, replay, replayTick);
         float pitch = entity != null ? entity.getPitch() : (replay != null && replay.keyframes != null ? (float) replay.keyframes.pitch.interpolate(replayTick, 0.0).doubleValue() : 0F);
 
         float radPitch = -pitch * 0.017453292F;
         float radYaw = -yaw * 0.017453292F;
+        Vec3d headBase = ParticleSpaces.pointAtActorHeadBase(actorAnchor, origin, height);
 
         int count = 1 + RANDOM.nextInt(3);
         for (int i = 0; i < count; i++)
@@ -296,13 +303,14 @@ public final class ParticleActionRenderer
                 .rotateX(radPitch)
                 .rotateY(radYaw);
 
-            Vec3d pos = origin.add(0.0D, (double) height * 0.85D, 0.0D).add(offset);
+            Vec3d pos = headBase.add(offset);
             client.particleManager.addParticle(effect, pos.x, pos.y, pos.z, vel.x, vel.y + 0.05D, vel.z);
         }
     }
 
     private static void emit(
         MinecraftClient client,
+        ActorAnchor actorAnchor,
         Vec3d origin,
         float width,
         float height,
@@ -311,7 +319,8 @@ public final class ParticleActionRenderer
         Replay replay,
         float replayTick)
     {
-        ParticleEffect effect = ParticleEffects.fromClip(clip);
+        Matrix4f actorMatrix = actorAnchor != null ? actorAnchor.matrix : null;
+        ParticleEffect effect = ParticleEffects.fromClip(clip, rainbowTick);
 
         if (effect == null)
         {
@@ -359,11 +368,12 @@ public final class ParticleActionRenderer
             }
             effect = new ItemStackParticleEffect(ParticleTypes.ITEM, itemToUse);
 
-            float yaw = entity != null ? entity.getHeadYaw() : (replay != null ? (float) replay.keyframes.yaw.interpolate(replayTick, 0.0).doubleValue() : 0F);
+            float yaw = ParticleSpaces.resolveActorYaw(actorMatrix, entity, replay, replayTick);
             float pitch = entity != null ? entity.getPitch() : (replay != null ? (float) replay.keyframes.pitch.interpolate(replayTick, 0.0).doubleValue() : 0F);
 
             float radPitch = -pitch * 0.017453292F;
             float radYaw = -yaw * 0.017453292F;
+            Vec3d headBase = ParticleSpaces.pointAtActorHeadBase(actorAnchor, origin, height);
 
             int count = 1 + RANDOM.nextInt(3);
             for (int i = 0; i < count; i++)
@@ -377,7 +387,7 @@ public final class ParticleActionRenderer
                     .rotateX(radPitch)
                     .rotateY(radYaw);
 
-                Vec3d pos = origin.add(0.0D, (double) height * 0.85D, 0.0D).add(offset);
+                Vec3d pos = headBase.add(offset);
                 client.particleManager.addParticle(effect, pos.x, pos.y, pos.z, vel.x, vel.y + 0.05D, vel.z);
             }
             return;
@@ -393,8 +403,8 @@ public final class ParticleActionRenderer
 
         if (effect.getType() == ParticleTypes.BLOCK)
         {
-            Vec3d pos = origin.add((RANDOM.nextDouble() - 0.5D) * width, 0.1D, (RANDOM.nextDouble() - 0.5D) * width);
-            float yaw = entity != null ? entity.getHeadYaw() : (replay != null && replay.keyframes != null ? (float) replay.keyframes.yaw.interpolate(replayTick, 0.0).doubleValue() : 0F);
+            Vec3d pos = ParticleSpaces.pointAtActorFeet(actorAnchor, origin, width, height, RANDOM);
+            float yaw = ParticleSpaces.resolveActorYaw(actorMatrix, entity, replay, replayTick);
             float radYaw = (float) Math.toRadians(yaw);
             double vx = Math.sin(radYaw) * 0.15D + (RANDOM.nextDouble() - 0.5D) * 0.1D;
             double vy = 0.15D + RANDOM.nextDouble() * 0.1D;
@@ -403,16 +413,24 @@ public final class ParticleActionRenderer
             return;
         }
 
-        Vec3d pos = ParticleSpaces.pointInActorAabb(origin, width, height, RANDOM);
+        Vec3d pos = ParticleSpaces.pointInActorBox(actorAnchor, origin, width, height, RANDOM);
         double vx;
         double vy;
         double vz;
 
         if (status)
         {
-            vx = clip.dustR.get();
-            vy = clip.dustG.get();
-            vz = clip.dustB.get();
+            float[] rgb = ParticleEffects.resolveColorRgb(clip, rainbowTick);
+
+            vx = rgb[0];
+            vy = rgb[1];
+            vz = rgb[2];
+
+            /* SpellParticle dampens horizontal drift 10x when both vx and vz are exact 0. */
+            if (vx == 0.0D && vz == 0.0D)
+            {
+                vx = 1.0E-4D;
+            }
         }
         else
         {

@@ -2,8 +2,8 @@ package Glaxium.POV.hud.editor;
 
 import mchorse.bbs_mod.ui.framework.elements.input.UITrackpad;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
-import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
+import mchorse.bbs_mod.utils.keyframes.Keyframe;
 
 import java.util.function.DoubleFunction;
 
@@ -17,21 +17,21 @@ public class UIConstrainedNumericKeyframeFactory<T extends Number> extends UIKey
     private final DoubleFunction<T> converter;
 
     public UIConstrainedNumericKeyframeFactory(
-        UITrackValue<T> track,
+        Keyframe<T> keyframe,
         UIKeyframes editor,
         double minimum,
         double maximum,
         boolean integer,
         DoubleFunction<T> converter)
     {
-        super(track, editor);
+        super(keyframe, editor);
 
         this.minimum = minimum;
         this.maximum = maximum;
         this.converter = converter;
         this.value = new UITrackpad(this::setConstrainedValue);
         this.value.limit(minimum, maximum, integer);
-        this.value.setValue(((Number) track.getValue()).doubleValue());
+        this.value.setValue(keyframe.getValue().doubleValue());
         this.scroll.add(this.value);
     }
 
@@ -44,7 +44,7 @@ public class UIConstrainedNumericKeyframeFactory<T extends Number> extends UIKey
     public void update()
     {
         super.update();
-        this.value.setValue(((Number) this.track.getValue()).doubleValue());
+        this.value.setValue(this.keyframe.getValue().doubleValue());
     }
 
     @Override

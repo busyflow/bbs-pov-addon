@@ -21,6 +21,8 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
     public UIToggle cursor;
     public UIToggle cameraShake;
     public UIToggle headLook;
+    public UIToggle headOnly;
+    public UIToggle followAnchor;
     public UIToggle hardcoreLook;
     public UIToggle blockOutline;
     public UIButton perspective;
@@ -42,15 +44,15 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
             if (panel != null)
             {
                 mchorse.bbs_mod.film.Film film = (mchorse.bbs_mod.film.Film) panel.getData();
-                java.util.List<mchorse.bbs_mod.film.replays.Replay> replays = film != null ? film.replays.getList() : java.util.List.of();
-                int currentIndex = this.clip.selector.get();
-                String currentId = currentIndex >= 0 && currentIndex < replays.size() ? replays.get(currentIndex).getId() : "";
+                mchorse.bbs_mod.film.replays.Replay currentReplay = PovCameraClips.resolveReplay(film, this.clip);
+                String currentId = currentReplay != null ? currentReplay.getId() : "";
 
                 UIAnchorKeyframeFactory.displayActors(
                     this.getContext(),
                     panel.getController().getEntities(),
                     currentId,
                     (selectedId) -> {
+                        java.util.List<mchorse.bbs_mod.film.replays.Replay> replays = film != null ? film.replays.getList() : java.util.List.of();
                         int foundIndex = -1;
                         for (int i = 0; i < replays.size(); i++)
                         {
@@ -61,7 +63,10 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
                             }
                         }
                         int finalIndex = foundIndex;
+                        String finalId = foundIndex >= 0 && selectedId != null ? selectedId : "";
+                        this.editor.editMultiple(this.clip.replayId, (value) -> value.set(finalId));
                         this.editor.editMultiple(this.clip.selector, (value) -> value.set(finalIndex));
+                        this.updateSelectorButton();
                     });
             }
         });
@@ -90,6 +95,14 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
         {
             this.editor.editMultiple(this.clip.headLook, (value) -> value.set(toggle.getValue()));
 
+            if (this.headOnly != null)
+            {
+                this.headOnly.setEnabled(toggle.getValue());
+            }
+            if (this.followAnchor != null)
+            {
+                this.followAnchor.setEnabled(toggle.getValue());
+            }
             if (this.hardcoreLook != null)
             {
                 this.hardcoreLook.setEnabled(toggle.getValue());
@@ -108,6 +121,14 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
             }
         });
         this.headLook.tooltip(IKey.constant("Use the replay's recorded head position and look direction for the camera"));
+
+        this.headOnly = new UIToggle(IKey.constant("Head Only"), (toggle) ->
+            this.editor.editMultiple(this.clip.headOnly, (value) -> value.set(toggle.getValue())));
+        this.headOnly.tooltip(IKey.constant("Only follow the head rotation/bobbing, keeping the camera position from the clip underneath (e.g. Tracker clip)"));
+
+        this.followAnchor = new UIToggle(IKey.constant("Follow Anchor"), (toggle) ->
+            this.editor.editMultiple(this.clip.followAnchor, (value) -> value.set(toggle.getValue())));
+        this.followAnchor.tooltip(IKey.constant("When the replay is attached to another entity or boat via an Anchor keyframe, follow the actual anchor position instead of raw coordinates"));
 
         this.hardcoreLook = new UIToggle(IKey.constant("Hardcore Look"), (toggle) ->
             this.editor.editMultiple(this.clip.hardcoreLook, (value) -> value.set(toggle.getValue())));
@@ -135,6 +156,41 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
             this.editor.editMultiple(this.clip.fov, (field) -> field.set(value.floatValue())));
         this.fov.limit(1D, 180D);
         this.fov.tooltip(IKey.constant("Camera field of view"));
+    }
+
+    private void updateSelectorButton()
+    {
+        if (this.selector == null)
+        {
+            return;
+        }
+
+        UIFilmPanel panel = this.getParent(UIFilmPanel.class);
+
+        if (panel != null && panel.getData() != null)
+        {
+            mchorse.bbs_mod.film.Film film = (mchorse.bbs_mod.film.Film) panel.getData();
+            mchorse.bbs_mod.film.replays.Replay replay = PovCameraClips.resolveReplay(film, this.clip);
+
+            if (replay != null)
+            {
+                if (this.clip.replayId.get() == null || this.clip.replayId.get().isEmpty())
+                {
+                    this.clip.replayId.set(replay.getId());
+                }
+
+                int resolvedIndex = PovCameraClips.indexOfReplay(film, replay);
+                if (resolvedIndex >= 0 && this.clip.selector.get() != resolvedIndex)
+                {
+                    this.clip.selector.set(resolvedIndex);
+                }
+
+                this.selector.label = IKey.constant(replay.getName());
+                return;
+            }
+        }
+
+        this.selector.label = IKey.constant("Replay Source");
     }
 
     private void updatePerspectiveButton()
@@ -165,6 +221,8 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
         this.panels.add(this.section(
             IKey.constant("Camera"),
             this.headLook,
+            this.headOnly,
+            this.followAnchor,
             this.hardcoreLook,
             this.blockOutline,
             this.perspective,
@@ -176,6 +234,7 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
     {
         super.fillData();
 
+        this.updateSelectorButton();
         this.hands.setValue(this.clip.hands.get());
         this.hud.setValue(this.clip.hud.get());
         this.crosshair.setValue(this.clip.crosshair.get());
@@ -184,7 +243,12 @@ public class UIPovCameraClip extends UIClip<PovCameraClip>
         this.cursor.setValue(this.clip.cursor.get());
         this.cameraShake.setValue(this.clip.cameraShake.get());
         this.headLook.setValue(this.clip.headLook.get());
+        this.headOnly.setValue(this.clip.headOnly.get());
+        this.headOnly.setEnabled(this.clip.headLook.get());
+        this.followAnchor.setValue(this.clip.followAnchor.get());
+        this.followAnchor.setEnabled(this.clip.headLook.get());
         this.hardcoreLook.setValue(this.clip.hardcoreLook.get());
+        this.hardcoreLook.setEnabled(this.clip.headLook.get());
         this.hardcoreLook.setEnabled(this.clip.headLook.get());
         this.blockOutline.setValue(this.clip.blockOutline.get());
         this.blockOutline.setEnabled(this.clip.headLook.get());

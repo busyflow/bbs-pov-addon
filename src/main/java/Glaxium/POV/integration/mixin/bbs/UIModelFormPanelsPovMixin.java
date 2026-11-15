@@ -3,9 +3,6 @@ package Glaxium.POV.integration.mixin.bbs;
 import Glaxium.POV.editor.UIPovHandEditor;
 import mchorse.bbs_mod.l10n.keys.IKey;
 import mchorse.bbs_mod.ui.forms.editors.forms.UIModelForm;
-import mchorse.bbs_mod.ui.forms.editors.panels.UIModelConstraintsFormPanel;
-import mchorse.bbs_mod.ui.forms.editors.panels.UIModelIKFormPanel;
-import mchorse.bbs_mod.ui.forms.editors.panels.UIModelPhysicsFormPanel;
 import mchorse.bbs_mod.ui.framework.elements.UIElement;
 import mchorse.bbs_mod.ui.framework.elements.buttons.UIIcon;
 import mchorse.bbs_mod.ui.utils.icons.Icon;
@@ -32,7 +29,9 @@ public abstract class UIModelFormPanelsPovMixin
     {
         if (UIPovHandEditor.isActive())
         {
-            if (panel instanceof UIModelIKFormPanel || panel instanceof UIModelPhysicsFormPanel || panel instanceof UIModelConstraintsFormPanel)
+            String name = panel.getClass().getSimpleName();
+
+            if (name.equals("UIModelIKFormPanel") || name.equals("UIModelPhysicsFormPanel") || name.equals("UIModelConstraintsFormPanel"))
             {
                 return null;
             }

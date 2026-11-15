@@ -73,7 +73,7 @@ public abstract class UIReplaysListPanelPovMixin extends UIElement implements UI
     }
 
     @Inject(method = "setBodyPartsReplay", at = @At("TAIL"))
-    private void bbsPov$updatePovBodyParts(Replay replay, mchorse.bbs_mod.film.replays.tracks.TimelineBodyPartSelection selection, CallbackInfo info)
+    private void bbsPov$updatePovBodyParts(Replay replay, String path, CallbackInfoReturnable<String> info)
     {
         if (this.bbsPov$povBodyParts == null)
         {

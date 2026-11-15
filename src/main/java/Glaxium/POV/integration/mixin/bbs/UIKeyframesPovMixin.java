@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 @Mixin(value = UIKeyframes.class, remap = false)
 public abstract class UIKeyframesPovMixin
 {
-    @Shadow private Runnable callback;
+    @Shadow private Consumer<Keyframe> callback;
     @Shadow private IUIKeyframeGraph currentGraph;
 
     @Unique
@@ -36,7 +36,7 @@ public abstract class UIKeyframesPovMixin
             {
                 if (this.callback != null)
                 {
-                    this.callback.run();
+                    this.callback.accept(null);
                 }
             }
             this.bbsPov$hadSelection = hasSelected;

@@ -219,7 +219,7 @@ public abstract class UIReplayPropertiesPovMixin implements UIReplayPropertiesPo
             if (this.filmPanel.replayEditor != null && this.filmPanel.replayEditor.replaysList != null)
             {
                 this.filmPanel.replayEditor.replaysList.replays.update();
-                this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(currentReplay, new mchorse.bbs_mod.film.replays.tracks.TimelineBodyPartSelection());
+                this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(currentReplay, "");
             }
         });
 

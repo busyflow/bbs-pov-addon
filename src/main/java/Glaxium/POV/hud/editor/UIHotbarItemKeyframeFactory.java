@@ -4,15 +4,25 @@ import mchorse.bbs_mod.ui.forms.editors.panels.widgets.UIItemStack;
 import mchorse.bbs_mod.ui.framework.elements.IUIElement;
 import mchorse.bbs_mod.ui.framework.elements.input.UITrackpad;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
-import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
-import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
+import mchorse.bbs_mod.utils.keyframes.Keyframe;
 
 import net.minecraft.item.ItemStack;
 
 /**
  * Replaces vanilla's own item-keyframe editor widget ({@code UIItemStackKeyframeFactory}) with
- * one that also has a count field.
+ * one that also has a count field. Vanilla's own {@code UIItemStack} widget (reused here for the
+ * item-type picker -- drag-and-drop, right-click paste/reset, hotbar quick-pick, all untouched)
+ * has no way to set the stack count at all, which is a real gap in BBS's own keyframe editing,
+ * not something specific to this addon -- so this fixes it generally rather than working around
+ * it just for Hotbar clips.
+ *
+ * <p>Registered via {@code UIKeyframeFactory.register(KeyframeFactories.ITEM_STACK, ...)} in
+ * PovAddon#onInitializeClient, replacing vanilla's registration for that same factory type --
+ * so this applies to every ItemStack keyframe in BBS's Film editor (Anchor's held-item keyframes,
+ * etc.), not just POV tracks. That's a deliberate, disclosed choice: the count field is a
+ * strict addition (nothing existing is removed or changed), so there's no reason to scope it down
+ * to just one clip type even if that's what prompted building it.
  */
 public class UIHotbarItemKeyframeFactory extends UIKeyframeFactory<ItemStack>
 {
@@ -20,11 +30,11 @@ public class UIHotbarItemKeyframeFactory extends UIKeyframeFactory<ItemStack>
     private final UITrackpad count;
     private ItemStack current;
 
-    public UIHotbarItemKeyframeFactory(UITrackValue<ItemStack> track, UIKeyframes editor)
+    public UIHotbarItemKeyframeFactory(Keyframe<ItemStack> keyframe, UIKeyframes editor)
     {
-        super(track, editor);
+        super(keyframe, editor);
 
-        ItemStack initial = track.getValue();
+        ItemStack initial = keyframe.getValue();
         this.current = initial == null ? ItemStack.EMPTY : initial.copy();
 
         this.itemPicker = new UIItemStack(this::onItemPicked);
@@ -34,8 +44,16 @@ public class UIHotbarItemKeyframeFactory extends UIKeyframeFactory<ItemStack>
         this.count.limit(1, 64, true);
         this.count.setValue(Math.max(1, this.current.getCount()));
 
-        UIKeyframeSheet sheet = track.sheet;
-        String id = sheet != null && sheet.id != null ? sheet.id : "";
+        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet sheet = null;
+        if (editor != null && editor.getGraph() != null)
+        {
+            sheet = editor.getGraph().getSheet(keyframe);
+        }
+        if (sheet == null && editor != null && editor.getDopeSheet() != null)
+        {
+            sheet = editor.getDopeSheet().getSheet(keyframe);
+        }
+        String id = sheet != null && sheet.id != null ? sheet.id : (keyframe.getParent() != null ? keyframe.getParent().getId() : "");
         boolean isBlockChannel = "suffocation_block".equals(id) || (id != null && id.endsWith("_block"));
 
         this.scroll.add((IUIElement) this.itemPicker);
@@ -49,8 +67,16 @@ public class UIHotbarItemKeyframeFactory extends UIKeyframeFactory<ItemStack>
     {
         this.current = picked == null || picked.isEmpty() ? ItemStack.EMPTY : picked.copy();
 
-        UIKeyframeSheet sheet = this.track.sheet;
-        String id = sheet != null && sheet.id != null ? sheet.id : "";
+        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet sheet = null;
+        if (this.editor != null && this.editor.getGraph() != null)
+        {
+            sheet = this.editor.getGraph().getSheet(this.keyframe);
+        }
+        if (sheet == null && this.editor != null && this.editor.getDopeSheet() != null)
+        {
+            sheet = this.editor.getDopeSheet().getSheet(this.keyframe);
+        }
+        String id = sheet != null && sheet.id != null ? sheet.id : (this.keyframe.getParent() != null ? this.keyframe.getParent().getId() : "");
         boolean isBlockChannel = "suffocation_block".equals(id) || (id != null && id.endsWith("_block"));
 
         if (!this.current.isEmpty() && !isBlockChannel)
@@ -77,16 +103,6 @@ public class UIHotbarItemKeyframeFactory extends UIKeyframeFactory<ItemStack>
     private static int clampCount(double value)
     {
         return Math.max(1, Math.min(64, (int) value));
-    }
-
-    @Override
-    public void update()
-    {
-        super.update();
-        ItemStack val = this.getDisplayValue();
-        this.current = val == null ? ItemStack.EMPTY : val.copy();
-        this.itemPicker.setStack(this.current);
-        this.count.setValue(Math.max(1, this.current.getCount()));
     }
 
     @Override

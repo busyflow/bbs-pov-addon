@@ -6,8 +6,8 @@ import mchorse.bbs_mod.ui.framework.UIContext;
 import mchorse.bbs_mod.ui.framework.elements.IUIElement;
 import mchorse.bbs_mod.ui.framework.elements.buttons.UIButton;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
-import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
+import mchorse.bbs_mod.utils.keyframes.Keyframe;
 
 /**
  * Keyframe factory for boss bar color and style channels.
@@ -25,12 +25,12 @@ public class UIBossBarLookKeyframeFactory extends UIKeyframeFactory<String>
     private final UIButton button;
     private String lastValue;
 
-    public UIBossBarLookKeyframeFactory(UITrackValue<String> track, UIKeyframes editor, Mode mode)
+    public UIBossBarLookKeyframeFactory(Keyframe<String> keyframe, UIKeyframes editor, Mode mode)
     {
-        super(track, editor);
+        super(keyframe, editor);
 
         this.mode = mode;
-        this.lastValue = track.getValue();
+        this.lastValue = keyframe.getValue();
 
         this.button = new UIButton(IKey.constant(this.getButtonLabel()), this::onButtonClicked);
         this.scroll.add((IUIElement) this.button);
@@ -38,7 +38,7 @@ public class UIBossBarLookKeyframeFactory extends UIKeyframeFactory<String>
 
     private String getButtonLabel()
     {
-        String val = this.track.getValue();
+        String val = this.keyframe.getValue();
         if (this.mode == Mode.COLOR)
         {
             return "Color: " + BossBarLooks.displayColor(val);
@@ -56,7 +56,7 @@ public class UIBossBarLookKeyframeFactory extends UIKeyframeFactory<String>
 
     private void onButtonClicked(UIButton button)
     {
-        String current = this.track.getValue();
+        String current = this.keyframe.getValue();
         String next = this.mode == Mode.COLOR
             ? BossBarLooks.nextColor(current)
             : BossBarLooks.nextStyle(current);
@@ -71,7 +71,7 @@ public class UIBossBarLookKeyframeFactory extends UIKeyframeFactory<String>
     {
         super.update();
 
-        String val = this.track.getValue();
+        String val = this.keyframe.getValue();
         if (val == null ? this.lastValue != null : !val.equals(this.lastValue))
         {
             this.lastValue = val;

@@ -3,8 +3,8 @@ package Glaxium.POV.hud.editor;
 import mchorse.bbs_mod.ui.framework.elements.IUIElement;
 import mchorse.bbs_mod.ui.framework.elements.UIElement;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
-import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UITransformKeyframeFactory;
+import mchorse.bbs_mod.utils.keyframes.Keyframe;
 import mchorse.bbs_mod.utils.pose.Transform;
 
 import java.util.List;
@@ -12,9 +12,9 @@ import java.util.List;
 /** BBS's native Transform keyframe panel reduced to the 2D controls used by a HUD. */
 public final class UIHotbarTransformKeyframeFactory extends UITransformKeyframeFactory
 {
-    public UIHotbarTransformKeyframeFactory(UITrackValue<Transform> track, UIKeyframes editor)
+    public UIHotbarTransformKeyframeFactory(Keyframe<Transform> keyframe, UIKeyframes editor)
     {
-        super(track, editor);
+        super(keyframe, editor);
 
         List<IUIElement> rows = List.copyOf(this.transform.getChildren());
 

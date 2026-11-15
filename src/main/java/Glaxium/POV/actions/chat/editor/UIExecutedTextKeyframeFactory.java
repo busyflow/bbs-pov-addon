@@ -6,9 +6,9 @@ import mchorse.bbs_mod.ui.framework.elements.buttons.UIButton;
 import mchorse.bbs_mod.ui.framework.elements.buttons.UIToggle;
 import mchorse.bbs_mod.ui.framework.elements.input.UIColor;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
-import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
 import mchorse.bbs_mod.ui.utils.UI;
+import mchorse.bbs_mod.utils.keyframes.Keyframe;
 
 /**
  * Keyframe editor factory for Executed Text channel.
@@ -75,11 +75,11 @@ public class UIExecutedTextKeyframeFactory extends UIKeyframeFactory<String>
         return rawText != null ? rawText : "";
     }
 
-    public UIExecutedTextKeyframeFactory(UITrackValue<String> track, UIKeyframes editor)
+    public UIExecutedTextKeyframeFactory(Keyframe<String> keyframe, UIKeyframes editor)
     {
-        super(track, editor);
+        super(keyframe, editor);
 
-        this.lastValue = track.getValue();
+        this.lastValue = keyframe.getValue();
         this.textarea = new UIFormattedTextarea((str) ->
         {
             this.updateKeyframeValue(str, this.showOnHud == null || this.showOnHud.getValue());
@@ -159,7 +159,7 @@ public class UIExecutedTextKeyframeFactory extends UIKeyframeFactory<String>
     {
         super.update();
 
-        String val = this.track.getValue();
+        String val = this.keyframe.getValue();
         if (val == null ? this.lastValue != null : !val.equals(this.lastValue))
         {
             this.lastValue = val;

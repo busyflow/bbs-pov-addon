@@ -6,17 +6,24 @@ import mchorse.bbs_mod.camera.clips.misc.TrackerFrame;
 import mchorse.bbs_mod.camera.data.Angle;
 import mchorse.bbs_mod.camera.data.Point;
 import mchorse.bbs_mod.camera.data.Position;
+import mchorse.bbs_mod.film.Film;
+import mchorse.bbs_mod.film.FilmMatrices;
 import mchorse.bbs_mod.film.replays.Replay;
 import mchorse.bbs_mod.forms.FormUtilsClient;
 import mchorse.bbs_mod.forms.entities.IEntity;
+import mchorse.bbs_mod.forms.entities.MCEntity;
 import mchorse.bbs_mod.forms.forms.Form;
 import mchorse.bbs_mod.forms.forms.ModelForm;
+import mchorse.bbs_mod.forms.forms.utils.Anchor;
 import mchorse.bbs_mod.forms.renderers.FormRenderer;
 import mchorse.bbs_mod.forms.renderers.ModelFormRenderer;
 import mchorse.bbs_mod.forms.renderers.utils.MatrixCache;
+import mchorse.bbs_mod.settings.values.core.ValueString;
 import mchorse.bbs_mod.settings.values.numeric.ValueBoolean;
 import mchorse.bbs_mod.settings.values.numeric.ValueFloat;
 import mchorse.bbs_mod.settings.values.numeric.ValueInt;
+import mchorse.bbs_mod.ui.film.UIFilmPanel;
+import mchorse.bbs_mod.utils.Pair;
 import mchorse.bbs_mod.utils.RayTracing;
 import mchorse.bbs_mod.utils.clips.Clip;
 import mchorse.bbs_mod.utils.clips.ClipContext;
@@ -25,7 +32,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix4f;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 
 import java.util.List;
 
@@ -47,6 +56,7 @@ public class PovCameraClip extends CameraClip
     };
 
     public final ValueInt selector = new ValueInt("selector", -1);
+    public final ValueString replayId = new ValueString("replay_id", "");
     public final ValueBoolean hands = new ValueBoolean("hands", true);
     public final ValueBoolean hud = new ValueBoolean("hud", true);
     public final ValueBoolean crosshair = new ValueBoolean("crosshair", true);
@@ -55,6 +65,8 @@ public class PovCameraClip extends CameraClip
     public final ValueBoolean cursor = new ValueBoolean("cursor", true);
     public final ValueBoolean cameraShake = new ValueBoolean("camera_shake", true);
     public final ValueBoolean headLook = new ValueBoolean("head_look", true);
+    public final ValueBoolean headOnly = new ValueBoolean("head_only", false);
+    public final ValueBoolean followAnchor = new ValueBoolean("follow_anchor", true);
     public final ValueBoolean hardcoreLook = new ValueBoolean("hardcore_look", false);
     public final ValueBoolean blockOutline = new ValueBoolean("block_outline", true);
     public final ValueInt perspective = new ValueInt("perspective", VIEW_FIRST_PERSON);
@@ -65,6 +77,7 @@ public class PovCameraClip extends CameraClip
         super();
 
         this.add(this.selector);
+        this.add(this.replayId);
         this.add(this.hands);
         this.add(this.hud);
         this.add(this.crosshair);
@@ -73,6 +86,8 @@ public class PovCameraClip extends CameraClip
         this.add(this.cursor);
         this.add(this.cameraShake);
         this.add(this.headLook);
+        this.add(this.headOnly);
+        this.add(this.followAnchor);
         this.add(this.hardcoreLook);
         this.add(this.blockOutline);
         this.add(this.perspective);
@@ -116,19 +131,18 @@ public class PovCameraClip extends CameraClip
             IEntity entity = null;
             Replay replay = null;
 
-            if (index >= 0 && cameraContext.entities != null)
+            if (cameraContext.entities != null)
             {
-                if (context.clips != null && context.clips.getParent() instanceof mchorse.bbs_mod.film.Film film)
+                if (context.clips != null && context.clips.getParent() instanceof Film film)
                 {
-                    java.util.List<mchorse.bbs_mod.film.replays.Replay> replays = film.replays.getList();
-                    if (index < replays.size())
+                    replay = PovCameraClips.resolveReplay(film, this);
+                    if (replay != null)
                     {
-                        replay = replays.get(index);
                         entity = cameraContext.entities.get(replay.getId());
                     }
                 }
 
-                if (entity == null)
+                if (entity == null && index >= 0)
                 {
                     int i = 0;
                     for (IEntity candidate : cameraContext.entities.values())
@@ -162,6 +176,54 @@ public class PovCameraClip extends CameraClip
                 float pitch = Lerps.lerp(entity.getPrevPitch(), entity.getPitch(), transition);
                 float yaw = headYaw + 180F;
                 float roll = 0F;
+
+                if (this.followAnchor.get() && cameraContext.entities != null)
+                {
+                    Anchor anchor = FilmMatrices.getAnchor(entity, replay);
+                    if (anchor != null)
+                    {
+                        Matrix4f entityMatrix = FilmMatrices.getMatrixForRenderWithRotation(entity, 0D, 0D, 0D, transition);
+                        Pair<Matrix4f, Float> total = FilmMatrices.getTotalMatrix(cameraContext.entities, anchor, entityMatrix, 0D, 0D, 0D, transition, 0);
+                        if (total.a != null)
+                        {
+                            Vector3f eyePos = new Vector3f(0F, (float) eyeHeight, 0F);
+                            total.a.transformPosition(eyePos);
+                            x = eyePos.x;
+                            y = eyePos.y;
+                            z = eyePos.z;
+
+                            if (!this.hardcoreLook.get())
+                            {
+                                Vector3f forward = new Vector3f(0F, 0F, 1F);
+                                total.a.transformDirection(forward);
+                                float anchorYaw = (float) Math.toDegrees(Math.atan2(-forward.x, forward.z));
+
+                                boolean isControllingThis = false;
+                                UIFilmPanel panel = Glaxium.POV.replay.PovReplaySettings.getFilmPanel();
+                                if (panel != null && panel.getController() != null && panel.getController().isControlling())
+                                {
+                                    IEntity controlled = panel.getController().getControlled();
+                                    if (controlled != null)
+                                    {
+                                        if (controlled == entity)
+                                        {
+                                            isControllingThis = true;
+                                        }
+                                        else if (controlled instanceof MCEntity mcControlled && entity instanceof MCEntity mcEntity)
+                                        {
+                                            isControllingThis = mcControlled.getMcEntity() == mcEntity.getMcEntity();
+                                        }
+                                    }
+                                }
+
+                                yaw = isControllingThis
+                                    ? headYaw + 180F
+                                    : headYaw + (anchor.inheritRotation ? anchorYaw : 0F) + 180F;
+                                headYaw = yaw - 180F;
+                            }
+                        }
+                    }
+                }
 
                 if (this.hardcoreLook.get())
                 {
@@ -197,6 +259,10 @@ public class PovCameraClip extends CameraClip
 
                 if (view == VIEW_THIRD_PERSON_BACK || view == VIEW_THIRD_PERSON_FRONT)
                 {
+                    double originX = this.headOnly.get() ? position.point.x : x;
+                    double originY = this.headOnly.get() ? position.point.y : y;
+                    double originZ = this.headOnly.get() ? position.point.z : z;
+
                     float radYaw = headYaw * ((float) Math.PI / 180F);
                     float radPitch = pitch * ((float) Math.PI / 180F);
 
@@ -217,7 +283,7 @@ public class PovCameraClip extends CameraClip
                         double dist = maxDistance;
                         if (mc.world != null)
                         {
-                            Vec3d eye = new Vec3d(x, y, z);
+                            Vec3d eye = new Vec3d(originX, originY, originZ);
                             Vec3d dir = new Vec3d(-fx, -fy, -fz);
                             BlockHitResult hit = RayTracing.rayTrace(mc.world, eye, dir, maxDistance);
 
@@ -227,7 +293,7 @@ public class PovCameraClip extends CameraClip
                             }
                         }
 
-                        position.point.set(x - dist * fx, y - dist * fy, z - dist * fz);
+                        position.point.set(originX - dist * fx, originY - dist * fy, originZ - dist * fz);
                         position.angle.yaw = yaw;
                         position.angle.pitch = pitch;
                     }
@@ -236,7 +302,7 @@ public class PovCameraClip extends CameraClip
                         double dist = maxDistance;
                         if (mc.world != null)
                         {
-                            Vec3d eye = new Vec3d(x, y, z);
+                            Vec3d eye = new Vec3d(originX, originY, originZ);
                             Vec3d dir = new Vec3d(fx, fy, fz);
                             BlockHitResult hit = RayTracing.rayTrace(mc.world, eye, dir, maxDistance);
 
@@ -246,14 +312,14 @@ public class PovCameraClip extends CameraClip
                             }
                         }
 
-                        double camX = x + dist * fx;
-                        double camY = y + dist * fy;
-                        double camZ = z + dist * fz;
+                        double camX = originX + dist * fx;
+                        double camY = originY + dist * fy;
+                        double camZ = originZ + dist * fz;
 
                         position.point.set(camX, camY, camZ);
                         if (dist > 0.05D)
                         {
-                            Angle look = Angle.angle(x - camX, y - camY, z - camZ);
+                            Angle look = Angle.angle(originX - camX, originY - camY, originZ - camZ);
                             position.angle.yaw = look.yaw;
                             position.angle.pitch = look.pitch;
                         }
@@ -266,7 +332,10 @@ public class PovCameraClip extends CameraClip
                 }
                 else
                 {
-                    position.point.set(x, y, z);
+                    if (!this.headOnly.get())
+                    {
+                        position.point.set(x, y, z);
+                    }
                     position.angle.yaw = yaw;
                     position.angle.pitch = pitch;
                 }

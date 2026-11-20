@@ -252,7 +252,7 @@ public abstract class UIKeyframeFactoryPovMixin
 
     @SuppressWarnings("unchecked")
     private static UIKeyframeFactory<Integer> integerPanel(
-        Keyframe track,
+        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue track,
         UIKeyframes editor,
         int minimum,
         int maximum)
@@ -268,7 +268,7 @@ public abstract class UIKeyframeFactoryPovMixin
 
     @SuppressWarnings("unchecked")
     private static UIKeyframeFactory<Double> doublePanel(
-        Keyframe track,
+        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue track,
         UIKeyframes editor,
         double minimum,
         double maximum)
@@ -284,7 +284,7 @@ public abstract class UIKeyframeFactoryPovMixin
 
     @SuppressWarnings("unchecked")
     private static UIKeyframeFactory<Float> floatPanel(
-        Keyframe track,
+        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue track,
         UIKeyframes editor,
         float minimum,
         float maximum)

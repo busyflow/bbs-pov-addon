@@ -33,15 +33,15 @@ public class UIPoseKeyframeFactoryPovMixin
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void bbsPov$filterHandBones(
-        Keyframe<Pose> keyframe,
+        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<Pose> track,
         UIKeyframes editor,
         CallbackInfo info)
     {
-        UIKeyframeSheet sheet = editor.getGraph().getSheet(keyframe);
+        UIKeyframeSheet sheet = track != null ? track.sheet : null;
 
         if (sheet != null && sheet.channel != null && "pov_hand_item_pose".equals(sheet.channel.getId()))
         {
-            this.poseEditor.setPose(keyframe.getValue(), "");
+            this.poseEditor.setPose(track.getValue(), "");
             this.poseEditor.fillGroups(PovItemPose.BONES, false);
             return;
         }

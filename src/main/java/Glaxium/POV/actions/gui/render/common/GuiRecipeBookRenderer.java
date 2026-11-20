@@ -426,9 +426,17 @@ public final class GuiRecipeBookRenderer
         }
         if (replayKeyframes != null && replayKeyframes.hotbar != null)
         {
-            for (int i = 0; i < Math.min(9, replayKeyframes.hotbar.size()); i++)
+            mchorse.bbs_mod.film.replays.Hotbar hb = replayKeyframes.getHotbar(globalTick);
+            if (hb != null)
             {
-                matcher.addUnenchantedInput(sampleSlotStack(replayKeyframes.hotbar.get(i), globalTick));
+                for (int i = 0; i < 9; i++)
+                {
+                    ItemStack st = hb.get(i);
+                    if (st != null && !st.isEmpty())
+                    {
+                        matcher.addUnenchantedInput(st);
+                    }
+                }
             }
         }
         for (GuiSlotSchema.Slot slot : schema.slots)

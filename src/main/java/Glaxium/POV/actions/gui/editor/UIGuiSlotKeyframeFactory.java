@@ -11,6 +11,7 @@ import mchorse.bbs_mod.ui.film.UIFilmPanel;
 import mchorse.bbs_mod.ui.framework.elements.IUIElement;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
 import mchorse.bbs_mod.utils.keyframes.KeyframeChannel;
@@ -20,16 +21,15 @@ public class UIGuiSlotKeyframeFactory extends UIKeyframeFactory<Boolean>
 {
     private final UIGuiSlotEditor slotEditor;
 
-    public UIGuiSlotKeyframeFactory(Keyframe<Boolean> keyframe, UIKeyframes editor)
+    public UIGuiSlotKeyframeFactory(UITrackValue<Boolean> track, UIKeyframes editor)
     {
-        super(keyframe, editor);
+        super(track, editor);
 
         // Hide all default keyframe settings (tick, duration, interp, etc.) so only the slots show
         this.scroll.removeAll();
 
-        UIKeyframeSheet sheet = editor != null && editor.getGraph() != null
-            ? editor.getGraph().getSheet(keyframe)
-            : (editor != null && editor.getDopeSheet() != null ? editor.getDopeSheet().getSheet(keyframe) : null);
+        Keyframe<Boolean> keyframe = this.getKeyframe();
+        UIKeyframeSheet sheet = track.sheet;
         String sheetId = sheet == null ? "" : sheet.id;
 
         UIFilmPanel filmPanel = PovReplaySettings.getFilmPanel();

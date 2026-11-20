@@ -27,11 +27,11 @@ public class UIModelKeyframeFactory extends UIKeyframeFactory<String>
     private final UIButton pickModel;
     private String currentModel;
 
-    public UIModelKeyframeFactory(Keyframe<String> keyframe, UIKeyframes editor)
+    public UIModelKeyframeFactory(mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<String> track, UIKeyframes editor)
     {
-        super(keyframe, editor);
+        super(track, editor);
 
-        this.currentModel = keyframe.getValue();
+        this.currentModel = this.getKeyframe() != null ? this.getKeyframe().getValue() : "";
         if (this.currentModel == null)
         {
             this.currentModel = "";
@@ -124,7 +124,7 @@ public class UIModelKeyframeFactory extends UIKeyframeFactory<String>
     {
         super.update();
 
-        String val = this.keyframe.getValue();
+        String val = this.getKeyframe() != null ? this.getKeyframe().getValue() : "";
         if (val != null && !val.equals(this.currentModel))
         {
             this.currentModel = val;

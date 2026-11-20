@@ -38,9 +38,10 @@ public final class HudSampler
         state.crosshair = data.crosshair.interpolate(tick, true);
         state.selectedSlot = clamp(replay.getSelectedSlot(tick), 0, ReplayKeyframes.HOTBAR_SIZE - 1);
 
+        mchorse.bbs_mod.film.replays.Hotbar hb = replay.getHotbar(tick);
         for (int i = 0; i < ReplayKeyframes.HOTBAR_SIZE; i++)
         {
-            state.items[i] = copyItem(replay.hotbar.get(i).interpolate(tick, ItemStack.EMPTY));
+            state.items[i] = copyItem(hb != null ? hb.get(i) : ItemStack.EMPTY);
         }
 
         state.offhandItem = copyItem(replay.offHand.interpolate(tick, ItemStack.EMPTY));

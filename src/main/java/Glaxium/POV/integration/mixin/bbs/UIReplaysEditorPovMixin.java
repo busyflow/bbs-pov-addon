@@ -82,17 +82,9 @@ public class UIReplaysEditorPovMixin
 
     private static boolean bbsPov$isPovOwnedReplaySheet(String id)
     {
-        if ("item_off_hand".equals(id) || "selected_slot".equals(id))
+        if ("item_off_hand".equals(id) || "selected_slot".equals(id) || "hotbar".equals(id))
         {
             return true;
-        }
-
-        for (int i = 0; i < ReplayKeyframes.HOTBAR_SIZE; i++)
-        {
-            if (ReplayKeyframes.hotbarChannelId(i).equals(id))
-            {
-                return true;
-            }
         }
 
         return false;

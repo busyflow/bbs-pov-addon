@@ -21,25 +21,25 @@ public abstract class UIKeyframeFactoryPovMixin
     @Inject(method = "createPanel", at = @At("HEAD"), cancellable = true)
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static void bbsPov$createLayoutPanel(
-        Keyframe keyframe,
+        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue track,
         UIKeyframes editor,
         CallbackInfoReturnable<UIKeyframeFactory> info)
     {
         UIKeyframeSheet sheet = null;
         if (editor != null && editor.getGraph() != null)
         {
-            sheet = editor.getGraph().getSheet(keyframe);
+            sheet = track.sheet;
         }
         if (sheet == null && editor != null && editor.getDopeSheet() != null)
         {
-            sheet = editor.getDopeSheet().getSheet(keyframe);
+            sheet = track.sheet;
         }
 
         if (sheet == null && editor != null && editor.getDopeSheet() != null)
         {
             for (UIKeyframeSheet s : editor.getDopeSheet().getSheets())
             {
-                if (s.channel == keyframe.getParent() || (s.channel != null && s.channel.getKeyframes().contains(keyframe)))
+                if (s.channel == (track.sheet != null ? track.sheet.channel : null) || (s.channel != null && s == track.sheet))
                 {
                     sheet = s;
                     break;
@@ -50,7 +50,7 @@ public abstract class UIKeyframeFactoryPovMixin
         {
             for (UIKeyframeSheet s : editor.getGraph().getSheets())
             {
-                if (s.channel == keyframe.getParent() || (s.channel != null && s.channel.getKeyframes().contains(keyframe)))
+                if (s.channel == (track.sheet != null ? track.sheet.channel : null) || (s.channel != null && s == track.sheet))
                 {
                     sheet = s;
                     break;
@@ -63,12 +63,12 @@ public abstract class UIKeyframeFactoryPovMixin
         {
             id = sheet.id;
         }
-        else if (keyframe.getParent() != null)
+        else if ((track.sheet != null ? track.sheet.channel : null) != null)
         {
-            id = keyframe.getParent().getId();
+            id = (track.sheet != null ? track.sheet.channel : null).getId();
         }
 
-        if (keyframe.getValue() instanceof Transform)
+        if (track.getValue() instanceof Transform)
         {
             boolean isLayout = (id != null && (id.contains("layout") || id.contains("cursor")))
                 || (sheet != null && sheet.title != null && sheet.title.get() != null && sheet.title.get().toLowerCase().contains("layout"));
@@ -76,28 +76,28 @@ public abstract class UIKeyframeFactoryPovMixin
             if (isLayout)
             {
                 info.setReturnValue(new UIHotbarTransformKeyframeFactory(
-                    (Keyframe<Transform>) keyframe,
+                    track.getValue() instanceof Transform ? (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<Transform>) (Object) track : null,
                     editor));
 
                 return;
             }
         }
 
-        if (keyframe.getValue() instanceof net.minecraft.item.ItemStack)
+        if (track.getValue() instanceof net.minecraft.item.ItemStack)
         {
             info.setReturnValue(new Glaxium.POV.hud.editor.UIHotbarItemKeyframeFactory(
-                (Keyframe<net.minecraft.item.ItemStack>) keyframe,
+                (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<net.minecraft.item.ItemStack>) (Object) track,
                 editor));
 
             return;
         }
 
-        if (keyframe.getValue() instanceof String str)
+        if (track.getValue() instanceof String str)
         {
             if ("bossbar_color".equals(id) || "color".equals(id))
             {
                 info.setReturnValue(new UIBossBarLookKeyframeFactory(
-                    (Keyframe<String>) keyframe,
+                    (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<String>) (Object) track,
                     editor,
                     UIBossBarLookKeyframeFactory.Mode.COLOR));
                 return;
@@ -105,7 +105,7 @@ public abstract class UIKeyframeFactoryPovMixin
             if ("bossbar_style".equals(id) || "style".equals(id))
             {
                 info.setReturnValue(new UIBossBarLookKeyframeFactory(
-                    (Keyframe<String>) keyframe,
+                    (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<String>) (Object) track,
                     editor,
                     UIBossBarLookKeyframeFactory.Mode.STYLE));
                 return;
@@ -113,14 +113,14 @@ public abstract class UIKeyframeFactoryPovMixin
             if ("executed_text".equals(id) || "execution_text".equals(id))
             {
                 info.setReturnValue(new Glaxium.POV.actions.chat.editor.UIExecutedTextKeyframeFactory(
-                    (Keyframe<String>) keyframe,
+                    (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<String>) (Object) track,
                     editor));
                 return;
             }
             if ("chat_text".equals(id))
             {
                 info.setReturnValue(new Glaxium.POV.actions.chat.editor.UIChatTextKeyframeFactory(
-                    (Keyframe<String>) keyframe,
+                    (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<String>) (Object) track,
                     editor));
                 return;
             }
@@ -134,7 +134,7 @@ public abstract class UIKeyframeFactoryPovMixin
         if ("crafting_grid".equals(id) || "inventory_slots".equals(id) || "hotbar_inventory_slots".equals(id))
         {
             info.setReturnValue(new Glaxium.POV.actions.gui.editor.UIGuiSlotKeyframeFactory(
-                (Keyframe<Boolean>) keyframe,
+                (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<Boolean>) (Object) track,
                 editor));
             return;
         }
@@ -143,7 +143,7 @@ public abstract class UIKeyframeFactoryPovMixin
         {
             mchorse.bbs_mod.ui.film.UIFilmPanel filmPanel = Glaxium.POV.replay.PovReplaySettings.getFilmPanel();
             GuiPovActionClip guiClip = null;
-            if (keyframe.getParent() != null && keyframe.getParent().getParent() instanceof GuiPovActionClip clip)
+            if ((track.sheet != null ? track.sheet.channel : null) != null && (track.sheet != null ? track.sheet.channel : null).getParent() instanceof GuiPovActionClip clip)
             {
                 guiClip = clip;
             }
@@ -164,66 +164,66 @@ public abstract class UIKeyframeFactoryPovMixin
             }
 
             info.setReturnValue(new Glaxium.POV.actions.gui.editor.UIGuiSlotKeyframeFactory(
-                (Keyframe<Boolean>) keyframe,
+                (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<Boolean>) (Object) track,
                 editor));
             return;
         }
 
         if ("gui_opacity".equals(id) || "bg_opacity".equals(id))
         {
-            info.setReturnValue(floatPanel(keyframe, editor, 0F, 1F));
+            info.setReturnValue(floatPanel(track, editor, 0F, 1F));
         }
         else if ("selected_slot".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 8));
+            info.setReturnValue(integerPanel(track, editor, 0, 8));
         }
         else if ("hotbar_heart_type".equals(id) || "heart_type".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 4));
+            info.setReturnValue(integerPanel(track, editor, 0, 4));
         }
         else if ("hotbar_armor".equals(id) || "hotbar_hunger".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 20));
+            info.setReturnValue(integerPanel(track, editor, 0, 20));
         }
         else if ("hotbar_air".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 300));
+            info.setReturnValue(integerPanel(track, editor, 0, 300));
         }
         else if ("hotbar_experience_level".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 9999));
+            info.setReturnValue(integerPanel(track, editor, 0, 9999));
         }
         else if ("hotbar_experience".equals(id))
         {
-            info.setReturnValue(doublePanel(keyframe, editor, 0D, 1D));
+            info.setReturnValue(doublePanel(track, editor, 0D, 1D));
         }
         else if ("pov_hand_active_hand".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 2));
+            info.setReturnValue(integerPanel(track, editor, 0, 2));
         }
         else if ("book_page".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 99));
+            info.setReturnValue(integerPanel(track, editor, 0, 99));
         }
         else if ("horse_variant".equals(id))
         {
             info.setReturnValue(integerPanel(
-                keyframe,
+                track,
                 editor,
                 0,
                 Glaxium.POV.actions.clip.GuiPovActionClip.HORSE_VARIANT_COUNT - 1));
         }
         else if ("beacon_primary".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 5));
+            info.setReturnValue(integerPanel(track, editor, 0, 5));
         }
         else if ("beacon_level".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 4));
+            info.setReturnValue(integerPanel(track, editor, 0, 4));
         }
         else if ("beacon_secondary".equals(id))
         {
-            info.setReturnValue(integerPanel(keyframe, editor, 0, 2));
+            info.setReturnValue(integerPanel(track, editor, 0, 2));
         }
         else if ("pov_hand_right_swing_progress".equals(id)
             || "right_swing_progress".equals(id)
@@ -232,19 +232,19 @@ public abstract class UIKeyframeFactoryPovMixin
             || "pov_hand_main_equip".equals(id)
             || "pov_hand_off_equip".equals(id))
         {
-            info.setReturnValue(floatPanel(keyframe, editor, 0F, 1F));
+            info.setReturnValue(floatPanel(track, editor, 0F, 1F));
         }
-        else if ("bossbar_color".equals(id) || ("color".equals(id) && keyframe.getValue() instanceof String))
+        else if ("bossbar_color".equals(id) || ("color".equals(id) && track.getValue() instanceof String))
         {
             info.setReturnValue(new UIBossBarLookKeyframeFactory(
-                (Keyframe<String>) keyframe,
+                (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<String>) (Object) track,
                 editor,
                 UIBossBarLookKeyframeFactory.Mode.COLOR));
         }
-        else if ("bossbar_style".equals(id) || ("style".equals(id) && keyframe.getValue() instanceof String))
+        else if ("bossbar_style".equals(id) || ("style".equals(id) && track.getValue() instanceof String))
         {
             info.setReturnValue(new UIBossBarLookKeyframeFactory(
-                (Keyframe<String>) keyframe,
+                (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<String>) (Object) track,
                 editor,
                 UIBossBarLookKeyframeFactory.Mode.STYLE));
         }
@@ -252,13 +252,13 @@ public abstract class UIKeyframeFactoryPovMixin
 
     @SuppressWarnings("unchecked")
     private static UIKeyframeFactory<Integer> integerPanel(
-        Keyframe keyframe,
+        Keyframe track,
         UIKeyframes editor,
         int minimum,
         int maximum)
     {
         return new UIConstrainedNumericKeyframeFactory<Integer>(
-            (Keyframe<Integer>) keyframe,
+            (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<Integer>) (Object) track,
             editor,
             minimum,
             maximum,
@@ -268,13 +268,13 @@ public abstract class UIKeyframeFactoryPovMixin
 
     @SuppressWarnings("unchecked")
     private static UIKeyframeFactory<Double> doublePanel(
-        Keyframe keyframe,
+        Keyframe track,
         UIKeyframes editor,
         double minimum,
         double maximum)
     {
         return new UIConstrainedNumericKeyframeFactory<Double>(
-            (Keyframe<Double>) keyframe,
+            (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<Double>) (Object) track,
             editor,
             minimum,
             maximum,
@@ -284,13 +284,13 @@ public abstract class UIKeyframeFactoryPovMixin
 
     @SuppressWarnings("unchecked")
     private static UIKeyframeFactory<Float> floatPanel(
-        Keyframe keyframe,
+        Keyframe track,
         UIKeyframes editor,
         float minimum,
         float maximum)
     {
         return new UIConstrainedNumericKeyframeFactory<Float>(
-            (Keyframe<Float>) keyframe,
+            (mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<Float>) (Object) track,
             editor,
             minimum,
             maximum,

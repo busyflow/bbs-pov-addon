@@ -35,13 +35,14 @@ public class UIHotbarIntegerKeyframeFactory extends UIKeyframeFactory<Integer>
     private UITrackpad value;
     private UIBezierHandles handles;
 
-    public UIHotbarIntegerKeyframeFactory(Keyframe<Integer> keyframe, UIKeyframes editor)
+    public UIHotbarIntegerKeyframeFactory(mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<Integer> track, UIKeyframes editor)
     {
-        super(keyframe, editor);
+        super(track, editor);
 
+        Keyframe<Integer> keyframe = this.getKeyframe();
         this.value = new UITrackpad(this::setValue);
         this.value.integer();
-        this.value.setValue(keyframe.getValue());
+        this.value.setValue(keyframe != null ? keyframe.getValue() : 0);
         this.handles = new UIBezierHandles(keyframe);
 
         this.scroll.add(this.value, this.handles.createColumn());
@@ -52,7 +53,10 @@ public class UIHotbarIntegerKeyframeFactory extends UIKeyframeFactory<Integer>
     {
         super.update();
 
-        this.value.setValue(this.keyframe.getValue());
+        if (this.getKeyframe() != null)
+        {
+            this.value.setValue(this.getKeyframe().getValue());
+        }
         this.handles.update();
     }
 }

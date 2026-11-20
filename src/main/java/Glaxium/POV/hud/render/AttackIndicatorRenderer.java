@@ -117,7 +117,8 @@ public final class AttackIndicatorRenderer
         }
 
         int slot = MathHelper.clamp(replay.getSelectedSlot(tick), 0, ReplayKeyframes.HOTBAR_SIZE - 1);
-        ItemStack main = replay.hotbar.get(slot).interpolate(tick, ItemStack.EMPTY);
+        mchorse.bbs_mod.film.replays.Hotbar hb = replay.getHotbar(tick);
+        ItemStack main = hb != null ? hb.get(slot) : ItemStack.EMPTY;
         float period = cooldownPeriod(main);
         int lookback = Math.max(2, (int) Math.ceil(period) + 1);
 
@@ -153,8 +154,10 @@ public final class AttackIndicatorRenderer
             return true;
         }
 
-        ItemStack main = replay.hotbar.get(slot).interpolate(tick, ItemStack.EMPTY);
-        ItemStack previousMain = replay.hotbar.get(previousSlot).interpolate(previousTick, ItemStack.EMPTY);
+        mchorse.bbs_mod.film.replays.Hotbar hb = replay.getHotbar(tick);
+        ItemStack main = hb != null ? hb.get(slot) : ItemStack.EMPTY;
+        mchorse.bbs_mod.film.replays.Hotbar prevHb = replay.getHotbar(previousTick);
+        ItemStack previousMain = prevHb != null ? prevHb.get(previousSlot) : ItemStack.EMPTY;
         if (!ItemStack.areItemsEqual(main, previousMain))
         {
             return true;

@@ -75,11 +75,11 @@ public class UIExecutedTextKeyframeFactory extends UIKeyframeFactory<String>
         return rawText != null ? rawText : "";
     }
 
-    public UIExecutedTextKeyframeFactory(Keyframe<String> keyframe, UIKeyframes editor)
+    public UIExecutedTextKeyframeFactory(mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<String> track, UIKeyframes editor)
     {
-        super(keyframe, editor);
+        super(track, editor);
 
-        this.lastValue = keyframe.getValue();
+        this.lastValue = this.getKeyframe() != null ? this.getKeyframe().getValue() : "";
         this.textarea = new UIFormattedTextarea((str) ->
         {
             this.updateKeyframeValue(str, this.showOnHud == null || this.showOnHud.getValue());
@@ -159,7 +159,7 @@ public class UIExecutedTextKeyframeFactory extends UIKeyframeFactory<String>
     {
         super.update();
 
-        String val = this.keyframe.getValue();
+        String val = this.getKeyframe() != null ? this.getKeyframe().getValue() : "";
         if (val == null ? this.lastValue != null : !val.equals(this.lastValue))
         {
             this.lastValue = val;

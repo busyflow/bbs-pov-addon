@@ -12,9 +12,9 @@ import java.util.List;
 /** BBS's native Transform keyframe panel reduced to the 2D controls used by a HUD. */
 public final class UIHotbarTransformKeyframeFactory extends UITransformKeyframeFactory
 {
-    public UIHotbarTransformKeyframeFactory(Keyframe<Transform> keyframe, UIKeyframes editor)
+    public UIHotbarTransformKeyframeFactory(mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<Transform> track, UIKeyframes editor)
     {
-        super(keyframe, editor);
+        super(track, editor);
 
         List<IUIElement> rows = List.copyOf(this.transform.getChildren());
 

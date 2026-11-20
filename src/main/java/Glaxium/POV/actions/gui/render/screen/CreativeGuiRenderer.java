@@ -425,8 +425,8 @@ public final class CreativeGuiRenderer implements GuiRenderer, GuiScreenChrome
             ItemStack stack = ItemStack.EMPTY;
             if (replayKeyframes != null)
             {
-                KeyframeChannel<ItemStack> ch = replayKeyframes.hotbar.get(i);
-                stack = (ch != null && !ch.isEmpty()) ? ch.interpolate(globalTick, ItemStack.EMPTY) : ItemStack.EMPTY;
+                mchorse.bbs_mod.film.replays.Hotbar hb = replayKeyframes.getHotbar(globalTick);
+                stack = hb != null ? hb.get(i) : ItemStack.EMPTY;
             }
             else if (LiveGuiPreviewRenderer.isRenderingLive() && MinecraftClient.getInstance().player != null)
             {

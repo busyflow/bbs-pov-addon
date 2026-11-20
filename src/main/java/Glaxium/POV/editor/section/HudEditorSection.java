@@ -102,10 +102,7 @@ public final class HudEditorSection implements PovEditorSection
         color = editor.addSheet("Cursor Item", hud.cursorItem, Icons.BLOCK, color);
         color = editor.addSheet("Selected Slot", replay.keyframes.selectedSlot, Icons.POINTER, color);
 
-        for (int i = 0; i < replay.keyframes.hotbar.size(); i++)
-        {
-            color = editor.addSheet("Slot " + (i + 1), replay.keyframes.hotbar.get(i), Icons.HOTBAR, color);
-        }
+        color = editor.addSheet("Hotbar", replay.keyframes.hotbar, Icons.HOTBAR, color);
 
         color = editor.addSheet("Inventory Slots", hud.inventoryAnchor, Icons.KEY_CAP, color, () -> true);
         color = editor.addSheet("Offhand", replay.keyframes.offHand, Icons.LIMB, color);

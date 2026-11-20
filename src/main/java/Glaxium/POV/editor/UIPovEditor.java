@@ -206,7 +206,7 @@ public final class UIPovEditor extends UIElement
             }
             if (this.filmPanel.replayEditor.replaysList != null)
             {
-                this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(this.replay, path);
+                this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(this.replay, null);
                 this.filmPanel.replayEditor.replaysList.bodyParts.setCurrentPath(path);
                 this.filmPanel.replayEditor.replaysList.resize();
             }
@@ -1182,7 +1182,7 @@ public final class UIPovEditor extends UIElement
             this.bodyPartSignature = signature;
             if (this.filmPanel != null && this.filmPanel.replayEditor != null && this.filmPanel.replayEditor.replaysList != null)
             {
-                this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(this.replay, this.selectedBodyPart);
+                this.filmPanel.replayEditor.replaysList.setBodyPartsReplay(this.replay, null);
                 this.filmPanel.replayEditor.replaysList.resize();
             }
             if (this.section == Section.BODY_PART)

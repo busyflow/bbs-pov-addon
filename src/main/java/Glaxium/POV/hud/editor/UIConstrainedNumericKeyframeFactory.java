@@ -17,21 +17,21 @@ public class UIConstrainedNumericKeyframeFactory<T extends Number> extends UIKey
     private final DoubleFunction<T> converter;
 
     public UIConstrainedNumericKeyframeFactory(
-        Keyframe<T> keyframe,
+        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<T> track,
         UIKeyframes editor,
         double minimum,
         double maximum,
         boolean integer,
         DoubleFunction<T> converter)
     {
-        super(keyframe, editor);
+        super(track, editor);
 
         this.minimum = minimum;
         this.maximum = maximum;
         this.converter = converter;
         this.value = new UITrackpad(this::setConstrainedValue);
         this.value.limit(minimum, maximum, integer);
-        this.value.setValue(keyframe.getValue().doubleValue());
+        this.value.setValue(this.getKeyframe() != null ? this.getKeyframe().getValue().doubleValue() : 0.0);
         this.scroll.add(this.value);
     }
 
@@ -44,7 +44,10 @@ public class UIConstrainedNumericKeyframeFactory<T extends Number> extends UIKey
     public void update()
     {
         super.update();
-        this.value.setValue(this.keyframe.getValue().doubleValue());
+        if (this.getKeyframe() != null)
+        {
+            this.value.setValue(this.getKeyframe().getValue().doubleValue());
+        }
     }
 
     @Override

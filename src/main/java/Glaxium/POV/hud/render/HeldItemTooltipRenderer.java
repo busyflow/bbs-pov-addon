@@ -158,7 +158,8 @@ public final class HeldItemTooltipRenderer
             }
 
             int thenSlot = MathHelper.clamp(replay.getSelectedSlot(thenTick), 0, ReplayKeyframes.HOTBAR_SIZE - 1);
-            ItemStack then = replay.hotbar.get(thenSlot).interpolate(thenTick, ItemStack.EMPTY);
+            mchorse.bbs_mod.film.replays.Hotbar thenHb = replay.getHotbar(thenTick);
+            ItemStack then = thenHb != null ? thenHb.get(thenSlot) : ItemStack.EMPTY;
             if (!sameHeldName(then, now))
             {
                 return Math.max(0, max - i + 1);

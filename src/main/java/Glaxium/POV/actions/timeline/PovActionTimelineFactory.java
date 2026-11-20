@@ -24,7 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /** Factory consumed directly by BBS's native Action Clips timeline. */
-public final class PovActionTimelineFactory implements IFactory<Clip, ClipFactoryData>
+public final class PovActionTimelineFactory extends mchorse.bbs_mod.utils.clips.ClipFactory
 {
     private final Map<Link, PovActionType> types = new LinkedHashMap<>();
     private final Map<PovActionType, Link> links = new EnumMap<>(PovActionType.class);

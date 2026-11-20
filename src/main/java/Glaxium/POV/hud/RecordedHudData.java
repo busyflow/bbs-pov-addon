@@ -88,12 +88,9 @@ public final class RecordedHudData
      * when they are opened in the POV editor. */
     public void ensureNativeSlotDefaults(ReplayKeyframes replay)
     {
-        for (KeyframeChannel<ItemStack> slot : replay.hotbar)
+        if (replay.hotbar.isEmpty())
         {
-            if (slot.isEmpty())
-            {
-                slot.insert(0F, ItemStack.EMPTY);
-            }
+            replay.hotbar.insert(0F, new mchorse.bbs_mod.film.replays.Hotbar());
         }
 
         for (KeyframeChannel<ItemStack> slot : this.inventory)
@@ -323,10 +320,7 @@ public final class RecordedHudData
     {
         float last = Math.max(lastTick(replay.selectedSlot), lastTick(replay.offHand));
 
-        for (KeyframeChannel<?> slot : replay.hotbar)
-        {
-            last = Math.max(last, lastTick(slot));
-        }
+        last = Math.max(last, lastTick(replay.hotbar));
 
         for (KeyframeChannel<?> slot : this.inventory)
         {
@@ -390,9 +384,10 @@ public final class RecordedHudData
         int start = Math.max(0, startTick);
         int end = Math.max(start, endTick);
 
-        for (KeyframeChannel<ItemStack> slot : replay.hotbar)
+        if (replay.hotbar != null && !replay.hotbar.isEmpty())
         {
-            addBoundaryKeyframes(slot, start, end);
+            replay.hotbar.insert(start, replay.getHotbar(start).copy());
+            replay.hotbar.insert(end, replay.getHotbar(end).copy());
         }
 
         for (KeyframeChannel<ItemStack> slot : this.inventory)

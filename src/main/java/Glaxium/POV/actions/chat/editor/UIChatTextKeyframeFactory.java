@@ -3,10 +3,10 @@ package Glaxium.POV.actions.chat.editor;
 import mchorse.bbs_mod.l10n.keys.IKey;
 import mchorse.bbs_mod.ui.framework.UIContext;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframes;
+import mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue;
 import mchorse.bbs_mod.ui.framework.elements.input.keyframes.factories.UIKeyframeFactory;
 import mchorse.bbs_mod.ui.framework.elements.input.text.UITextarea;
 import mchorse.bbs_mod.ui.utils.UI;
-import mchorse.bbs_mod.utils.keyframes.Keyframe;
 
 /** Keyframe inspector for Chat Text with a 4x tall scrollable text area. */
 public class UIChatTextKeyframeFactory extends UIKeyframeFactory<String>
@@ -14,11 +14,11 @@ public class UIChatTextKeyframeFactory extends UIKeyframeFactory<String>
     public UIFormattedTextarea textarea;
     private String lastValue;
 
-    public UIChatTextKeyframeFactory(Keyframe<String> keyframe, UIKeyframes editor)
+    public UIChatTextKeyframeFactory(UITrackValue<String> track, UIKeyframes editor)
     {
-        super(keyframe, editor);
+        super(track, editor);
 
-        this.lastValue = keyframe.getValue();
+        this.lastValue = this.getKeyframe() != null ? this.getKeyframe().getValue() : "";
         this.textarea = new UIFormattedTextarea((str) ->
         {
             this.setValue(str);
@@ -38,7 +38,7 @@ public class UIChatTextKeyframeFactory extends UIKeyframeFactory<String>
     {
         super.update();
 
-        String val = this.keyframe.getValue();
+        String val = this.getKeyframe() != null ? this.getKeyframe().getValue() : "";
         if (val == null ? this.lastValue != null : !val.equals(this.lastValue))
         {
             this.lastValue = val;

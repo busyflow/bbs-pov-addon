@@ -30,11 +30,12 @@ public class UIHotbarItemKeyframeFactory extends UIKeyframeFactory<ItemStack>
     private final UITrackpad count;
     private ItemStack current;
 
-    public UIHotbarItemKeyframeFactory(Keyframe<ItemStack> keyframe, UIKeyframes editor)
+    public UIHotbarItemKeyframeFactory(mchorse.bbs_mod.ui.framework.elements.input.keyframes.UITrackValue<ItemStack> track, UIKeyframes editor)
     {
-        super(keyframe, editor);
+        super(track, editor);
 
-        ItemStack initial = keyframe.getValue();
+        Keyframe<ItemStack> keyframe = this.getKeyframe();
+        ItemStack initial = keyframe != null ? keyframe.getValue() : ItemStack.EMPTY;
         this.current = initial == null ? ItemStack.EMPTY : initial.copy();
 
         this.itemPicker = new UIItemStack(this::onItemPicked);
@@ -67,16 +68,9 @@ public class UIHotbarItemKeyframeFactory extends UIKeyframeFactory<ItemStack>
     {
         this.current = picked == null || picked.isEmpty() ? ItemStack.EMPTY : picked.copy();
 
-        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet sheet = null;
-        if (this.editor != null && this.editor.getGraph() != null)
-        {
-            sheet = this.editor.getGraph().getSheet(this.keyframe);
-        }
-        if (sheet == null && this.editor != null && this.editor.getDopeSheet() != null)
-        {
-            sheet = this.editor.getDopeSheet().getSheet(this.keyframe);
-        }
-        String id = sheet != null && sheet.id != null ? sheet.id : (this.keyframe.getParent() != null ? this.keyframe.getParent().getId() : "");
+        Keyframe<ItemStack> kf = this.getKeyframe();
+        mchorse.bbs_mod.ui.framework.elements.input.keyframes.UIKeyframeSheet sheet = this.track != null ? this.track.sheet : null;
+        String id = sheet != null && sheet.id != null ? sheet.id : (kf != null && kf.getParent() != null ? kf.getParent().getId() : "");
         boolean isBlockChannel = "suffocation_block".equals(id) || (id != null && id.endsWith("_block"));
 
         if (!this.current.isEmpty() && !isBlockChannel)

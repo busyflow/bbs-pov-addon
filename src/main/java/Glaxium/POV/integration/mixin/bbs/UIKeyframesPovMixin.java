@@ -20,26 +20,4 @@ import java.util.function.Consumer;
 @Mixin(value = UIKeyframes.class, remap = false)
 public abstract class UIKeyframesPovMixin
 {
-    @Shadow private Consumer<Keyframe> callback;
-    @Shadow private IUIKeyframeGraph currentGraph;
-
-    @Unique
-    private boolean bbsPov$hadSelection;
-
-    @Inject(method = "render", at = @At("HEAD"))
-    private void bbsPov$autoCloseEditorOnDeselect(UIContext context, CallbackInfo info)
-    {
-        if (this.currentGraph != null)
-        {
-            boolean hasSelected = this.currentGraph.getSelected() != null;
-            if (!hasSelected && this.bbsPov$hadSelection)
-            {
-                if (this.callback != null)
-                {
-                    this.callback.accept(null);
-                }
-            }
-            this.bbsPov$hadSelection = hasSelected;
-        }
-    }
 }

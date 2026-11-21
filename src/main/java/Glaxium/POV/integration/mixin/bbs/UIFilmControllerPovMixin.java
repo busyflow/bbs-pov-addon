@@ -204,21 +204,14 @@ public class UIFilmControllerPovMixin
         }
     }
 
-    @Redirect(
-        method = "renderFrame",
-        at = @At(
-            value = "INVOKE",
-            target = "Lmchorse/bbs_mod/film/Recorder;renderCameraPreview"))
-    private void bbsPov$hideRecordingCameraPreview(
-        Position position,
-        net.minecraft.client.render.Camera camera,
-        MatrixStack matrices)
+    @Inject(method = "renderCameraFrustum", at = @At("HEAD"), cancellable = true, require = 0)
+    private void bbsPov$hideRecordingCameraPreview(CallbackInfo info)
     {
         UIFilmController controller = (UIFilmController) (Object) this;
 
-        if (controller.getPovMode() != PovCameraMode.POV)
+        if (controller.getPovMode() == PovCameraMode.POV)
         {
-            Recorder.renderCameraPreview(position, camera, matrices);
+            info.cancel();
         }
     }
 

@@ -133,7 +133,7 @@ public final class PovPlaybackContext
             exportBaseCursor = normalCursor;
         }
 
-        int frameRate = Math.max(1, mchorse.bbs_mod.client.BBSRendering.getVideoFrameRate());
+        int frameRate = Math.max(1, mchorse.bbs_mod.BBSSettings.videoFrameRate != null ? mchorse.bbs_mod.BBSSettings.videoFrameRate.get() : 60);
 
         return exportBaseCursor + (frame - exportBaseFrame) * (20F / frameRate);
     }

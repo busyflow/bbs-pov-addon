@@ -20,6 +20,7 @@ public abstract class UIModelFormPanelsPovMixin
     @SuppressWarnings("unchecked")
     @Redirect(
         method = "<init>",
+        require = 0,
         at = @At(
             value = "INVOKE",
             target = "Lmchorse/bbs_mod/ui/forms/editors/forms/UIModelForm;registerPanel(Lmchorse/bbs_mod/ui/framework/elements/UIElement;Lmchorse/bbs_mod/l10n/keys/IKey;Lmchorse/bbs_mod/ui/utils/icons/Icon;)Lmchorse/bbs_mod/ui/framework/elements/buttons/UIIcon;"

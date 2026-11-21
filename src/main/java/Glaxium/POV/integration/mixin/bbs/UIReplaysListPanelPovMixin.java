@@ -43,7 +43,7 @@ public abstract class UIReplaysListPanelPovMixin extends UIElement implements UI
     @Unique private boolean bbsPov$povActive;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void bbsPov$init(UIFilmPanel panel, Consumer<List<Replay>> callback, Consumer<Form> formConsumer, Consumer<String> partConsumer, CallbackInfo info)
+    private void bbsPov$init(UIFilmPanel panel, Consumer<List<Replay>> callback, Consumer<Form> formConsumer, Consumer<List<UIForms.FormEntry>> partConsumer, CallbackInfo info)
     {
         this.bbsPov$povBodyParts = new UIForms(list ->
         {
@@ -73,7 +73,7 @@ public abstract class UIReplaysListPanelPovMixin extends UIElement implements UI
     }
 
     @Inject(method = "setBodyPartsReplay", at = @At("TAIL"))
-    private void bbsPov$updatePovBodyParts(Replay replay, String path, CallbackInfoReturnable<String> info)
+    private void bbsPov$updatePovBodyParts(Replay replay, mchorse.bbs_mod.film.replays.tracks.TimelineBodyPartSelection selection, CallbackInfo info)
     {
         if (this.bbsPov$povBodyParts == null)
         {
